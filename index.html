@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AssetTrack - Sistem Pelacakan Aset</title>
+
+  <!-- Library Barcode -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+  <!-- Library QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f5f9;
+      color: #172033;
+      line-height: 1.5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: white;
+      padding: 22px 16px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: white;
+      color: #1d4ed8;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .logo h1 {
+      font-size: 24px;
+    }
+
+    .logo p {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px 14px 50px;
+    }
+
+    /* DASHBOARD */
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .stat-title {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 5px;
+    }
+
+    .stat-number {
+      font-size: 30px;
+      font-weight: bold;
+      color: #1d4ed8;
+    }
+
+    /* PANEL */
+
+    .panel {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .panel-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    /* FORM */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 9px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #172033;
+    }
+
+    .btn-success {
+      background: #16a34a;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    /* SEARCH */
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .search-box input {
+      flex: 1;
+    }
+
+    /* TABLE */
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      text-align: left;
+      padding: 12px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .asset-code {
+      font-weight: bold;
+      color: #1d4ed8;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .badge-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-maintenance {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-inactive {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons button {
+      padding: 7px 9px;
+      font-size: 11px;
+    }
+
+    /* BARCODE */
+
+    .barcode-preview {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .barcode-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin-top: 12px;
+    }
+
+    .qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .barcode-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .barcode-label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #475569;
+    }
+
+    #barcodeCanvas {
+      max-width: 100%;
+    }
+
+    /* MODAL */
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      padding: 22px;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .close-btn {
+      background: #f1f5f9;
+      color: #334155;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      font-size: 20px;
+    }
+
+    /* LABEL CETAK */
+
+    .print-label {
+      width: 100%;
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border: 2px solid #111827;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .print-label h2 {
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+
+    .print-label .organization {
+      font-size: 12px;
+      color: #475569;
+      margin-bottom: 15px;
+    }
+
+    .print-label .vehicle-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .print-details {
+      text-align: left;
+      margin: 12px 0;
+      font-size: 13px;
+    }
+
+    .print-details div {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px dotted #cbd5e1;
+      padding: 4px 0;
+    }
+
+    .print-details strong {
+      color: #334155;
+    }
+
+    /* EMPTY */
+
+    .empty {
+      text-align: center;
+      padding: 35px 15px;
+      color: #64748b;
+    }
+
+    .empty-icon {
+      font-size: 45px;
+      margin-bottom: 10px;
+    }
+
+    /* NOTIFICATION */
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #0f172a;
+      color: white;
+      padding: 13px 17px;
+      border-radius: 10px;
+      z-index: 3000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+      .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 500px) {
+      header {
+        padding: 18px 12px;
+      }
+
+      .logo h1 {
+        font-size: 20px;
+      }
+
+      main {
+        padding: 15px 10px 40px;
+      }
+
+      .panel {
+        padding: 15px;
+      }
+
+      .dashboard {
+        gap: 8px;
+      }
+
+      .stat-card {
+        padding: 14px;
+      }
+
+      .stat-number {
+        font-size: 24px;
+      }
+
+      .search-box {
+        flex-direction: column;
+      }
+
+      .button-row button {
+        width: 100%;
+      }
+
+      .barcode-container {
+        gap: 15px;
+      }
+    }
+
+    /* PRINT */
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      #printArea,
+      #printArea * {
+        visibility: visible;
+      }
+
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+
+      .modal {
+        display: block !important;
+        position: static;
+        background: white;
+      }
+
+      .modal-content {
+        max-width: none;
+        box-shadow: none;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🚗</div>
+      <div>
+        <h1>AssetTrack</h1>
+        <p>Sistem Pelacakan & Manajemen Aset</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+
+  <section class="dashboard">
+
+    <div class="stat-card">
+      <div class="stat-title">Total Aset</div>
+      <div class="stat-number" id="totalAssets">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Aktif</div>
+      <div class="stat-number" id="activeAssets">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Perawatan</div>
+      <div class="stat-number" id="maintenanceAssets">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-title">Tidak Aktif</div>
+      <div class="stat-number" id="inactiveAssets">0</div>
+    </div>
+
+  </section>
+
+
+  <!-- FORM TAMBAH ASET -->
+
+  <section class="panel">
+
+    <div class="panel-title">
+      ➕ Tambah Aset Kendaraan
+    </div>
+
+    <form id="assetForm">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="assetName">Nama Kendaraan *</label>
+          <input
+            type="text"
+            id="assetName"
+            placeholder="Contoh: Toyota Avanza"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="assetCode">Kode Aset *</label>
+          <input
+            type="text"
+            id="assetCode"
+            placeholder="Contoh: AST-MBL-001"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="plateNumber">Nomor Polisi</label>
+          <input
+            type="text"
+            id="plateNumber"
+            placeholder="Contoh: B 1234 XYZ"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="brand">Merek</label>
+          <input
+            type="text"
+            id="brand"
+            placeholder="Toyota / Honda / Mitsubishi"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="model">Model / Tipe</label>
+          <input
+            type="text"
+            id="model"
+            placeholder="Avanza 1.5 G"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="year">Tahun</label>
+          <input
+            type="number"
+            id="year"
+            placeholder="2024"
+            min="1900"
+            max="2100"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="location">Lokasi Aset</label>
+          <input
+            type="text"
+            id="location"
+            placeholder="Contoh: Kantor Pusat"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="responsible">Penanggung Jawab</label>
+          <input
+            type="text"
+            id="responsible"
+            placeholder="Nama pengguna/pengemudi"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="Aktif">Aktif</option>
+            <option value="Perawatan">Perawatan</option>
+            <option value="Tidak Aktif">Tidak Aktif</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="purchaseDate">Tanggal Perolehan</label>
+          <input
+            type="date"
+            id="purchaseDate"
+          >
+        </div>
+
+        <div class="form-group full">
+          <label for="notes">Catatan</label>
+          <textarea
+            id="notes"
+            placeholder="Catatan tambahan mengenai aset..."
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="button-row">
+
+        <button
+          type="submit"
+          class="btn-primary"
+        >
+          💾 Simpan Aset
+        </button>
+
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick="resetForm()"
+        >
+          ↩ Reset
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+
+  <!-- PREVIEW BARCODE -->
+
+  <section class="panel">
+
+    <div class="panel-title">
+      📷 Barcode Aset
+    </div>
+
+    <p style="font-size:13px;color:#64748b;">
+      Pilih aset dari tabel di bawah untuk melihat QR Code dan Barcode Code 128.
+    </p>
+
+    <div
+      id="barcodePreview"
+      class="barcode-preview"
+      style="display:none;"
+    >
+
+      <h3 id="barcodeAssetName">
+        -
+      </h3>
+
+      <p
+        id="barcodeAssetCode"
+        style="font-size:13px;color:#64748b;"
+      >
+        -
+      </p>
+
+      <div class="barcode-container">
+
+        <div class="qr-box">
+          <div class="barcode-label">
+            QR CODE
+          </div>
+
+          <div id="qrcode"></div>
+        </div>
+
+        <div class="barcode-box">
+
+          <div class="barcode-label">
+            BARCODE CODE 128
+          </div>
+
+          <svg id="barcodeCanvas"></svg>
+
+        </div>
+
+      </div>
+
+      <div class="button-row" style="justify-content:center;">
+
+        <button
+          class="btn-primary"
+          onclick="printSelectedAsset()"
+        >
+          🖨️ Cetak Label
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- DAFTAR ASET -->
+
+  <section class="panel">
+
+    <div class="panel-title">
+      📋 Daftar Aset
+    </div>
+
+    <div class="search-box">
+
+      <input
+        type="search"
+        id="searchInput"
+        placeholder="🔎 Cari kode aset, kendaraan, nomor polisi, lokasi..."
+        oninput="renderAssets()"
+      >
+
+      <button
+        class="btn-secondary"
+        onclick="clearSearch()"
+      >
+        Bersihkan
+      </button>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Kode Aset</th>
+            <th>Kendaraan</th>
+            <th>No. Polisi</th>
+            <th>Lokasi</th>
+            <th>Penanggung Jawab</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody id="assetTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- MODAL CETAK -->
+
+<div
+  id="printModal"
+  class="modal"
+>
+
+  <div class="modal-content">
+
+    <div class="modal-header no-print">
+
+      <h2>
+        🖨️ Label Aset
+      </h2>
+
+      <button
+        class="close-btn"
+        onclick="closePrintModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div id="printArea">
+
+      <div class="print-label">
+
+        <h2>
+          ASSETTRACK
+        </h2>
+
+        <div class="organization">
+          LABEL IDENTITAS ASET KENDARAAN
+        </div>
+
+        <div class="vehicle-name" id="printVehicleName">
+          -
+        </div>
+
+        <div class="print-details">
+
+          <div>
+            <strong>Kode Aset</strong>
+            <span id="printCode">-</span>
+          </div>
+
+          <div>
+            <strong>No. Polisi</strong>
+            <span id="printPlate">-</span>
+          </div>
+
+          <div>
+            <strong>Merek</strong>
+            <span id="printBrand">-</span>
+          </div>
+
+          <div>
+            <strong>Model</strong>
+            <span id="printModel">-</span>
+          </div>
+
+          <div>
+            <strong>Tahun</strong>
+            <span id="printYear">-</span>
+          </div>
+
+          <div>
+            <strong>Lokasi</strong>
+            <span id="printLocation">-</span>
+          </div>
+
+          <div>
+            <strong>Penanggung Jawab</strong>
+            <span id="printResponsible">-</span>
+          </div>
+
+        </div>
+
+        <div
+          id="printQRCode"
+          style="display:flex;justify-content:center;margin:15px 0;"
+        ></div>
+
+        <svg
+          id="printBarcode"
+          style="max-width:100%;"
+        ></svg>
+
+        <div
+          style="
+            font-size:10px;
+            color:#64748b;
+            margin-top:10px;
+          "
+        >
+          Scan QR Code untuk melihat informasi aset.
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      class="button-row no-print"
+      style="justify-content:center;"
+    >
+
+      <button
+        class="btn-primary"
+        onclick="window.print()"
+      >
+        🖨️ Print
+      </button>
+
+      <button
+        class="btn-secondary"
+        onclick="closePrintModal()"
+      >
+        Tutup
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+  id="toast"
+  class="toast"
+>
+  Berhasil
+</div>
+
+
+<script>
+
+  /*
+   * ==========================================================
+   * ASSETTRACK
+   * Sistem Pelacakan dan Manajemen Aset
+   * ==========================================================
+   */
+
+  const STORAGE_KEY = "assettrack_assets_v1";
+
+  let assets = [];
+
+  let selectedAssetId = null;
+
+
+  /*
+   * LOAD DATA
+   */
+
+  function loadAssets() {
+
+    try {
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+
+      if (saved) {
+
+        assets = JSON.parse(saved);
+
+      } else {
+
+        assets = [];
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      assets = [];
+
+    }
+
+    renderAssets();
+    updateDashboard();
+
+  }
+
+
+  /*
+   * SAVE DATA
+   */
+
+  function saveAssets() {
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(assets)
+    );
+
+  }
+
+
+  /*
+   * GENERATE ID
+   */
+
+  function generateId() {
+
+    return Date.now().toString(36)
+      + Math.random().toString(36).substring(2);
+
+  }
+
+
+  /*
+   * FORM SUBMIT
+   */
+
+  document
+    .getElementById("assetForm")
+    .addEventListener("submit", function(event) {
+
+      event.preventDefault();
+
+      const assetName =
+        document.getElementById("assetName").value.trim();
+
+      const assetCode =
+        document.getElementById("assetCode").value.trim();
+
+      if (!assetName || !assetCode) {
+
+        showToast("Nama kendaraan dan kode aset wajib diisi.");
+
+        return;
+
+      }
+
+
+      /*
+       * Cek kode aset duplikat
+       */
+
+      const duplicate =
+        assets.some(function(asset) {
+
+          return (
+            asset.code.toLowerCase() ===
+            assetCode.toLowerCase()
+          );
+
+        });
+
+      if (duplicate) {
+
+        showToast("Kode aset sudah digunakan.");
+
+        return;
+
+      }
+
+
+      const asset = {
+
+        id: generateId(),
+
+        name: assetName,
+
+        code: assetCode,
+
+        plate:
+          document.getElementById("plateNumber").value.trim(),
+
+        brand:
+          document.getElementById("brand").value.trim(),
+
+        model:
+          document.getElementById("model").value.trim(),
+
+        year:
+          document.getElementById("year").value.trim(),
+
+        location:
+          document.getElementById("location").value.trim(),
+
+        responsible:
+          document.getElementById("responsible").value.trim(),
+
+        status:
+          document.getElementById("status").value,
+
+        purchaseDate:
+          document.getElementById("purchaseDate").value,
+
+        notes:
+          document.getElementById("notes").value.trim(),
+
+        createdAt:
+          new Date().toISOString()
+
+      };
+
+
+      assets.push(asset);
+
+      saveAssets();
+
+      renderAssets();
+
+      updateDashboard();
+
+      showToast("Aset berhasil disimpan.");
+
+      resetForm();
+
+    });
+
+
+  /*
+   * RESET FORM
+   */
+
+  function resetForm() {
+
+    document
+      .getElementById("assetForm")
+      .reset();
+
+  }
+
+
+  /*
+   * RENDER ASSETS
+   */
+
+  function renderAssets() {
+
+    const tbody =
+      document.getElementById("assetTableBody");
+
+    const search =
+      document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
+
+
+    let filtered = assets.filter(function(asset) {
+
+      const text = [
+
+        asset.code,
+
+        asset.name,
+
+        asset.plate,
+
+        asset.brand,
+
+        asset.model,
+
+        asset.location,
+
+        asset.responsible,
+
+        asset.status
+
+      ]
+      .join(" ")
+      .toLowerCase();
+
+      return text.includes(search);
+
+    });
+
+
+    tbody.innerHTML = "";
+
+
+    if (filtered.length === 0) {
+
+      tbody.innerHTML = `
+
+        <tr>
+
+          <td colspan="7">
+
+            <div class="empty">
+
+              <div class="empty-icon">
+                📦
+              </div>
+
+              <div>
+                Belum ada aset yang ditemukan.
+              </div>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      `;
+
+      return;
+
+    }
+
+
+    filtered.forEach(function(asset) {
+
+      const tr =
+        document.createElement("tr");
+
+
+      let badgeClass =
+        "badge-active";
+
+      if (asset.status === "Perawatan") {
+
+        badgeClass =
+          "badge-maintenance";
+
+      }
+
+      if (asset.status === "Tidak Aktif") {
+
+        badgeClass =
+          "badge-inactive";
+
+      }
+
+
+      tr.innerHTML = `
+
+        <td>
+          <span class="asset-code">
+            ${escapeHtml(asset.code)}
+          </span>
+        </td>
+
+        <td>
+          <strong>
+            ${escapeHtml(asset.name)}
+          </strong>
+          <br>
+          <small style="color:#64748b;">
+            ${escapeHtml(asset.brand || "")}
+            ${escapeHtml(asset.model || "")}
+          </small>
+        </td>
+
+        <td>
+          ${escapeHtml(asset.plate || "-")}
+        </td>
+
+        <td>
+          ${escapeHtml(asset.location || "-")}
+        </td>
+
+        <td>
+          ${escapeHtml(asset.responsible || "-")}
+        </td>
+
+        <td>
+
+          <span class="badge ${badgeClass}">
+            ${escapeHtml(asset.status)}
+          </span>
+
+        </td>
+
+        <td>
+
+          <div class="action-buttons">
+
+            <button
+              class="btn-primary"
+              onclick="showBarcode('${asset.id}')"
+            >
+              📷 Barcode
+            </button>
+
+            <button
+              class="btn-warning"
+              onclick="editAsset('${asset.id}')"
+            >
+              ✏️ Edit
+            </button>
+
+            <button
+              class="btn-danger"
+              onclick="deleteAsset('${asset.id}')"
+            >
+              🗑️ Hapus
+            </button>
+
+          </div>
+
+        </td>
+
+      `;
+
+
+      tbody.appendChild(tr);
+
+    });
+
+  }
+
+
+  /*
+   * UPDATE DASHBOARD
+   */
+
+  function updateDashboard() {
+
+    document.getElementById("totalAssets")
+      .textContent = assets.length;
+
+
+    document.getElementById("activeAssets")
+      .textContent =
+      assets.filter(function(asset) {
+
+        return asset.status === "Aktif";
+
+      }).length;
+
+
+    document.getElementById("maintenanceAssets")
+      .textContent =
+      assets.filter(function(asset) {
+
+        return asset.status === "Perawatan";
+
+      }).length;
+
+
+    document.getElementById("inactiveAssets")
+      .textContent =
+      assets.filter(function(asset) {
+
+        return asset.status === "Tidak Aktif";
+
+      }).length;
+
+  }
+
+
+  /*
+   * SHOW BARCODE
+   */
+
+  function showBarcode(id) {
+
+    const asset =
+      assets.find(function(item) {
+
+        return item.id === id;
+
+      });
+
+
+    if (!asset) {
+
+      showToast("Aset tidak ditemukan.");
+
+      return;
+
+    }
+
+
+    selectedAssetId = id;
+
+
+    document.getElementById("barcodePreview")
+      .style.display = "block";
+
+
+    document.getElementById("barcodeAssetName")
+      .textContent = asset.name;
+
+
+    document.getElementById("barcodeAssetCode")
+      .textContent =
+      "Kode Aset: " + asset.code;
+
+
+    /*
+     * QR CODE
+     */
+
+    const qrContainer =
+      document.getElementById("qrcode");
+
+    qrContainer.innerHTML = "";
+
+
+    const qrData = JSON.stringify({
+
+      system: "AssetTrack",
+
+      id: asset.id,
+
+      kode_aset: asset.code,
+
+      nama: asset.name,
+
+      nomor_polisi: asset.plate,
+
+      merek: asset.brand,
+
+      model: asset.model,
+
+      tahun: asset.year,
+
+      lokasi: asset.location,
+
+      penanggung_jawab: asset.responsible,
+
+      status: asset.status
+
+    });
+
+
+    new QRCode(qrContainer, {
+
+      text: qrData,
+
+      width: 180,
+
+      height: 180,
+
+      colorDark: "#111827",
+
+      colorLight: "#ffffff",
+
+      correctLevel: QRCode.CorrectLevel.H
+
+    });
+
+
+    /*
+     * BARCODE CODE 128
+     */
+
+    JsBarcode(
+      "#barcodeCanvas",
+      asset.code,
+      {
+
+        format: "CODE128",
+
+        width: 2,
+
+        height: 80,
+
+        displayValue: true,
+
+        fontSize: 16,
+
+        margin: 10,
+
+        textMargin: 5
+
+      }
+
+    );
+
+
+    /*
+     * Scroll ke preview
+     */
+
+    document.getElementById("barcodePreview")
+      .scrollIntoView({
+
+        behavior: "smooth",
+
+        block: "center"
+
+      });
+
+  }
+
+
+  /*
+   * PRINT ASSET
+   */
+
+  function printSelectedAsset() {
+
+    if (!selectedAssetId) {
+
+      showToast("Pilih aset terlebih dahulu.");
+
+      return;
+
+    }
+
+
+    const asset =
+      assets.find(function(item) {
+
+        return item.id === selectedAssetId;
+
+      });
+
+
+    if (!asset) return;
+
+
+    document.getElementById("printVehicleName")
+      .textContent = asset.name;
+
+
+    document.getElementById("printCode")
+      .textContent = asset.code;
+
+
+    document.getElementById("printPlate")
+      .textContent = asset.plate || "-";
+
+
+    document.getElementById("printBrand")
+      .textContent = asset.brand || "-";
+
+
+    document.getElementById("printModel")
+      .textContent = asset.model || "-";
+
+
+    document.getElementById("printYear")
+      .textContent = asset.year || "-";
+
+
+    document.getElementById("printLocation")
+      .textContent = asset.location || "-";
+
+
+    document.getElementById("printResponsible")
+      .textContent = asset.responsible || "-";
+
+
+    /*
+     * QR PRINT
+     */
+
+    const printQR =
+      document.getElementById("printQRCode");
+
+    printQR.innerHTML = "";
+
+
+    const qrData = JSON.stringify({
+
+      system: "AssetTrack",
+
+      id: asset.id,
+
+      kode_aset: asset.code,
+
+      nama: asset.name,
+
+      nomor_polisi: asset.plate,
+
+      lokasi: asset.location,
+
+      status: asset.status
+
+    });
+
+
+    new QRCode(printQR, {
+
+      text: qrData,
+
+      width: 170,
+
+      height: 170,
+
+      correctLevel: QRCode.CorrectLevel.H
+
+    });
+
+
+    /*
+     * BARCODE PRINT
+     */
+
+    JsBarcode(
+      "#printBarcode",
+      asset.code,
+      {
+
+        format: "CODE128",
+
+        width: 2,
+
+        height: 70,
+
+        displayValue: true,
+
+        fontSize: 15,
+
+        margin: 5
+
+      }
+
+    );
+
+
+    document
+      .getElementById("printModal")
+      .classList.add("show");
+
+  }
+
+
+  /*
+   * CLOSE PRINT MODAL
+   */
+
+  function closePrintModal() {
+
+    document
+      .getElementById("printModal")
+      .classList.remove("show");
+
+  }
+
+
+  /*
+   * DELETE
+   */
+
+  function deleteAsset(id) {
+
+    const asset =
+      assets.find(function(item) {
+
+        return item.id === id;
+
+      });
+
+
+    if (!asset) return;
+
+
+    const confirmDelete =
+      confirm(
+        "Hapus aset " +
+        asset.name +
+        " (" +
+        asset.code +
+        ")?"
+      );
+
+
+    if (!confirmDelete) return;
+
+
+    assets =
+      assets.filter(function(item) {
+
+        return item.id !== id;
+
+      });
+
+
+    saveAssets();
+
+    renderAssets();
+
+    updateDashboard();
+
+
+    if (selectedAssetId === id) {
+
+      selectedAssetId = null;
+
+      document.getElementById("barcodePreview")
+        .style.display = "none";
+
+    }
+
+
+    showToast("Aset berhasil dihapus.");
+
+  }
+
+
+  /*
+   * EDIT
+   */
+
+  function editAsset(id) {
+
+    const asset =
+      assets.find(function(item) {
+
+        return item.id === id;
+
+      });
+
+
+    if (!asset) return;
+
+
+    document.getElementById("assetName")
+      .value = asset.name;
+
+
+    document.getElementById("assetCode")
+      .value = asset.code;
+
+
+    document.getElementById("plateNumber")
+      .value = asset.plate || "";
+
+
+    document.getElementById("brand")
+      .value = asset.brand || "";
+
+
+    document.getElementById("model")
+      .value = asset.model || "";
+
+
+    document.getElementById("year")
+      .value = asset.year || "";
+
+
+    document.getElementById("location")
+      .value = asset.location || "";
+
+
+    document.getElementById("responsible")
+      .value = asset.responsible || "";
+
+
+    document.getElementById("status")
+      .value = asset.status || "Aktif";
+
+
+    document.getElementById("purchaseDate")
+      .value = asset.purchaseDate || "";
+
+
+    document.getElementById("notes")
+      .value = asset.notes || "";
+
+
+    /*
+     * Hapus aset lama.
+     * Setelah itu user menyimpan kembali sebagai data baru.
+     */
+
+    assets =
+      assets.filter(function(item) {
+
+        return item.id !== id;
+
+      });
+
+
+    saveAssets();
+
+    renderAssets();
+
+    updateDashboard();
+
+
+    window.scrollTo({
+
+      top: 0,
+
+      behavior: "smooth"
+
+    });
+
+
+    showToast(
+      "Data dimuat ke formulir. Silakan simpan kembali."
+    );
+
+  }
+
+
+  /*
+   * SEARCH CLEAR
+   */
+
+  function clearSearch() {
+
+    document.getElementById("searchInput")
+      .value = "";
+
+    renderAssets();
+
+  }
+
+
+  /*
+   * TOAST
+   */
+
+  function showToast(message) {
+
+    const toast =
+      document.getElementById("toast");
+
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+
+    setTimeout(function() {
+
+      toast.classList.remove("show");
+
+    }, 2500);
+
+  }
+
+
+  /*
+   * HTML SECURITY
+   */
+
+  function escapeHtml(value) {
+
+    if (value === null || value === undefined) {
+
+      return "";
+
+    }
+
+
+    return String(value)
+
+      .replace(/&/g, "&amp;")
+
+      .replace(/</g, "&lt;")
+
+      .replace(/>/g, "&gt;")
+
+      .replace(/"/g, "&quot;")
+
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  /*
+   * CLOSE MODAL WHEN CLICK OUTSIDE
+   */
+
+  document
+    .getElementById("printModal")
+    .addEventListener("click", function(event) {
+
+      if (event.target === this) {
+
+        closePrintModal();
+
+      }
+
+    });
+
+
+  /*
+   * INITIALIZE
+   */
+
+  loadAssets();
+
+</script>
+
+</body>
+  </html>
