@@ -1065,8 +1065,8 @@ function openAssetFromURL() {
   const code = assetCode.trim().toUpperCase();
 
   const asset = assets.find(function(item) {
-    return String(item.kode_aset || "").toUpperCase() === code;
-  });
+     return String(item.code || item.kode_aset || "").toUpperCase() === code;
+});
 
   if (!asset) {
     showToast("Aset " + code + " tidak ditemukan.");
