@@ -1052,7 +1052,45 @@
     updateDashboard();
 
   }
+// ==========================================
+// BUKA ASET DARI URL QR / BARCODE
+// Contoh: ?asset=AST2-01
+// ==========================================
+function openAssetFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const assetCode = params.get("asset");
 
+  if (!assetCode) return;
+
+  const code = assetCode.trim().toUpperCase();
+
+  const asset = assets.find(function(item) {
+    return String(item.kode_aset || "").toUpperCase() === code;
+  });
+
+  if (!asset) {
+    showToast("Aset " + code + " tidak ditemukan.");
+    return;
+  }
+
+  selectedAssetId = asset.id;
+
+  renderAssets();
+  updateDashboard();
+
+  setTimeout(function() {
+    const assetRow = document.querySelector(
+      '[data-asset-id="' + asset.id + '"]'
+    );
+
+    if (assetRow) {
+      assetRow.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
+  }, 300);
+}
 
   /*
    * SAVE DATA
@@ -1980,7 +2018,7 @@
    */
 
   loadAssets();
-
+openAssetFromURL();
 </script>
 
 </body>
