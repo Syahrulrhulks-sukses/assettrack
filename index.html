@@ -1169,17 +1169,51 @@
       };
 
 
-      assets.push(asset);
+     fetch(API_URL, {
+  method: "POST",
+  body: JSON.stringify({
+    action: "saveAsset",
 
-      saveAssets();
+    asset: asset
+  })
+})
+.then(function(response) {
+  return response.json();
+})
+.then(function(result) {
 
-      renderAssets();
+  if (result.success) {
 
-      updateDashboard();
+    assets.push(asset);
 
-      showToast("Aset berhasil disimpan.");
+    saveAssets();
 
-      resetForm();
+    renderAssets();
+
+    updateDashboard();
+
+    showToast("Aset berhasil disimpan ke Google Sheets.");
+
+    resetForm();
+
+  } else {
+
+    showToast(
+      result.message || "Gagal menyimpan aset."
+    );
+
+  }
+
+})
+.catch(function(error) {
+
+  console.error(error);
+
+  showToast(
+    "Gagal terhubung ke Google Sheets."
+  );
+
+});
 
     });
 
