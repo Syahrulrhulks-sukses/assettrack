@@ -558,6 +558,24 @@
         display: none !important;
       }
     }
+
+    /* PEMERIKSAAN ARMADA */
+    .inspection-panel { background: white; border-radius: 16px; padding: 22px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .inspection-hero { background: linear-gradient(135deg, #0f172a, #1d4ed8); color: white; border-radius: 14px; padding: 20px; margin-bottom: 18px; }
+    .inspection-hero h2 { font-size: 22px; margin-bottom: 6px; }
+    .inspection-hero p { opacity: 0.9; font-size: 13px; }
+    .asset-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+    .asset-summary-card { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 11px; }
+    .asset-summary-card small { display: block; opacity: 0.75; font-size: 11px; margin-bottom: 3px; }
+    .asset-summary-card strong { font-size: 14px; }
+    .inspection-section-title { font-size: 16px; font-weight: bold; margin: 22px 0 12px; color: #172033; }
+    .inspection-status { padding: 12px 14px; border-radius: 10px; background: #eff6ff; color: #1e40af; font-size: 13px; margin-bottom: 15px; }
+    .inspection-status.success { background: #dcfce7; color: #166534; }
+    .inspection-status.error { background: #fee2e2; color: #991b1b; }
+    .inspection-readonly { background: #f8fafc; color: #475569; }
+    .inspection-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    .inspection-actions button { flex: 1; min-width: 180px; }
+    @media (max-width: 700px) { .asset-summary { grid-template-columns: 1fr; } .inspection-panel { padding: 15px; } }
   </style>
 </head>
 
@@ -577,9 +595,57 @@
 
 <main>
 
+  <!-- PEMERIKSAAN ARMADA DARI QR -->
+  <section id="inspectionSection" class="inspection-panel" style="display:none;">
+    <div class="inspection-hero">
+      <h2>🚗 Pemeriksaan Armada</h2>
+      <p>Form ini dibuka dari QR Code kendaraan AssetTrack.</p>
+      <div class="asset-summary">
+        <div class="asset-summary-card"><small>Kode Aset</small><strong id="inspectionKode">-</strong></div>
+        <div class="asset-summary-card"><small>Kendaraan</small><strong id="inspectionKendaraan">-</strong></div>
+        <div class="asset-summary-card"><small>No. Polisi</small><strong id="inspectionPolisi">-</strong></div>
+      </div>
+    </div>
+    <div id="inspectionStatus" class="inspection-status">Mengambil data kendaraan dari Google Spreadsheet...</div>
+    <form id="inspectionForm">
+      <div class="inspection-section-title">👤 Data Pemeriksa</div>
+      <div class="form-grid">
+        <div class="form-group"><label for="inspectionDriver">Nama Driver / Pemeriksa *</label><select id="inspectionDriver" required><option value="">Memuat daftar driver...</option></select></div>
+        <div class="form-group"><label for="inspectionTime">Waktu Pemeriksaan</label><input type="text" id="inspectionTime" class="inspection-readonly" readonly></div>
+      </div>
+      <div class="inspection-section-title">🔧 Pemeriksaan Mesin & Kelistrikan</div>
+      <div class="form-grid">
+        <div class="form-group"><label for="oliMesin">Oli Mesin</label><select id="oliMesin" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="oliPowerSteering">Oli Power Steering</label><select id="oliPowerSteering" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="taliKipasVbelt">Tali Kipas / V-Belt</label><select id="taliKipasVbelt" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="aki">Aki</label><select id="aki" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+      </div>
+      <div class="inspection-section-title">🛞 Pemeriksaan Ban & Perlengkapan</div>
+      <div class="form-grid">
+        <div class="form-group"><label for="banKiriDepan">Ban Kiri Depan</label><select id="banKiriDepan" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="banKananDepan">Ban Kanan Depan</label><select id="banKananDepan" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="banKiriBelakang">Ban Kiri Belakang</label><select id="banKiriBelakang" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="banKananBelakang">Ban Kanan Belakang</label><select id="banKananBelakang" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="banSerep">Ban Serep</label><select id="banSerep" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="kunciRodaDongkrak">Kunci Roda & Dongkrak</label><select id="kunciRodaDongkrak" class="inspection-item"><option value="">-- Pilih --</option><option value="Ada / Baik">Ada / Baik</option><option value="Ada / Perlu Perhatian">Ada / Perlu Perhatian</option><option value="Tidak Ada">Tidak Ada</option></select></div>
+      </div>
+      <div class="inspection-section-title">🛑 Pemeriksaan Kendali & Keselamatan</div>
+      <div class="form-grid">
+        <div class="form-group"><label for="rem">Rem</label><select id="rem" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="kopling">Kopling</label><select id="kopling" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="setir">Setir</label><select id="setir" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+        <div class="form-group"><label for="klakson">Klakson</label><select id="klakson" class="inspection-item"><option value="">-- Pilih --</option><option value="Baik">Baik</option><option value="Perlu Perhatian">Perlu Perhatian</option><option value="Rusak">Rusak</option></select></div>
+      </div>
+      <div class="inspection-actions">
+        <button type="submit" class="btn-success" id="saveInspectionButton">💾 Simpan Pemeriksaan</button>
+        <button type="button" class="btn-secondary" onclick="backToAssetTrack()">← Kembali ke AssetTrack</button>
+      </div>
+    </form>
+  </section>
+
   <!-- DASHBOARD -->
 
-  <section class="dashboard">
+  <section class="dashboard admin-only">
 
     <div class="stat-card">
       <div class="stat-title">Total Aset</div>
@@ -606,7 +672,7 @@
 
   <!-- FORM TAMBAH ASET -->
 
-  <section class="panel">
+  <section class="panel admin-only">
 
     <div class="panel-title">
       ➕ Tambah Aset Kendaraan
@@ -745,7 +811,7 @@
 
   <!-- PREVIEW BARCODE -->
 
-  <section class="panel">
+  <section class="panel admin-only">
 
     <div class="panel-title">
       📷 Barcode Aset
@@ -812,7 +878,7 @@
 
   <!-- DAFTAR ASET -->
 
-  <section class="panel">
+  <section class="panel admin-only">
 
     <div class="panel-title">
       📋 Daftar Aset
@@ -959,7 +1025,7 @@
             margin-top:10px;
           "
         >
-          Scan QR Code untuk melihat informasi aset.
+          Scan QR Code untuk membuka Form Pemeriksaan Armada.
         </div>
 
       </div>
@@ -1056,40 +1122,33 @@
 // BUKA ASET DARI URL QR / BARCODE
 // Contoh: ?asset=AST2-01
 // ==========================================
-function openAssetFromURL() {
+async function openAssetFromURL() {
   const params = new URLSearchParams(window.location.search);
   const assetCode = params.get("asset");
-
   if (!assetCode) return;
 
   const code = assetCode.trim().toUpperCase();
+  setInspectionMode(true);
+  setInspectionStatus("Mengambil data kendaraan dari Google Spreadsheet...");
+  setInspectionTime();
+  loadDrivers();
 
-  const asset = assets.find(function(item) {
-     return String(item.code || item.kode_aset || "").toUpperCase() === code;
-});
-
-  if (!asset) {
-    showToast("Aset " + code + " tidak ditemukan.");
-    return;
-  }
-
-  selectedAssetId = asset.id;
-
-  renderAssets();
-  updateDashboard();
-
-  setTimeout(function() {
-    const assetRow = document.querySelector(
-      '[data-asset-id="' + asset.id + '"]'
-    );
-
-    if (assetRow) {
-      assetRow.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
+  try {
+    const response = await fetch(API_URL + "?action=asset&kode=" + encodeURIComponent(code));
+    const result = await response.json();
+    if (!result.success || !result.asset) {
+      setInspectionStatus(result.message || "Data kendaraan tidak ditemukan.", "error");
+      return;
     }
-  }, 300);
+    selectedInspectionAsset = result.asset;
+    document.getElementById("inspectionKode").textContent = result.asset.kodeAset || code;
+    document.getElementById("inspectionKendaraan").textContent = result.asset.kendaraan || "-";
+    document.getElementById("inspectionPolisi").textContent = result.asset.nomorPolisi || "-";
+    setInspectionStatus("Data kendaraan ditemukan. Silakan lakukan pemeriksaan.", "success");
+  } catch (error) {
+    console.error(error);
+    setInspectionStatus("Gagal mengambil data kendaraan. Periksa koneksi internet.", "error");
+  }
 }
 
   /*
@@ -1206,15 +1265,24 @@ function openAssetFromURL() {
 
       };
 
-
      fetch(API_URL, {
-  method: "POST",
-  body: JSON.stringify({
-    action: "saveAsset",
-
-    asset: asset
-  })
-})
+       method: "POST",
+       headers: { "Content-Type": "text/plain;charset=utf-8" },
+       body: JSON.stringify({
+         action: "saveAsset",
+         code: asset.code,
+         name: asset.name,
+         plate: asset.plate,
+         brand: asset.brand,
+         model: asset.model,
+         year: asset.year,
+         location: asset.location,
+         responsible: asset.responsible,
+         status: asset.status,
+         purchaseDate: asset.purchaseDate,
+         notes: asset.notes
+       })
+     })
 .then(function(response) {
   return response.json();
 })
@@ -1539,31 +1607,7 @@ function openAssetFromURL() {
     qrContainer.innerHTML = "";
 
 
-    const qrData = JSON.stringify({
-
-      system: "AssetTrack",
-
-      id: asset.id,
-
-      kode_aset: asset.code,
-
-      nama: asset.name,
-
-      nomor_polisi: asset.plate,
-
-      merek: asset.brand,
-
-      model: asset.model,
-
-      tahun: asset.year,
-
-      lokasi: asset.location,
-
-      penanggung_jawab: asset.responsible,
-
-      status: asset.status
-
-    });
+    const qrData = buildAssetScanURL(asset.code);
 
 
     new QRCode(qrContainer, {
@@ -1695,23 +1739,7 @@ function openAssetFromURL() {
     printQR.innerHTML = "";
 
 
-    const qrData = JSON.stringify({
-
-      system: "AssetTrack",
-
-      id: asset.id,
-
-      kode_aset: asset.code,
-
-      nama: asset.name,
-
-      nomor_polisi: asset.plate,
-
-      lokasi: asset.location,
-
-      status: asset.status
-
-    });
+    const qrData = buildAssetScanURL(asset.code);
 
 
     new QRCode(printQR, {
@@ -1997,6 +2025,124 @@ function openAssetFromURL() {
 
 
   /*
+   * ==========================================================
+   * PEMERIKSAAN ARMADA / QR SCAN
+   * ==========================================================
+   */
+
+  let selectedInspectionAsset = null;
+
+  function buildAssetScanURL(code) {
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("asset", code);
+    return url.toString();
+  }
+
+  function setInspectionMode(active) {
+    const section = document.getElementById("inspectionSection");
+    if (!section) return;
+    section.style.display = active ? "block" : "none";
+    document.querySelectorAll(".admin-only").forEach(function(el) {
+      el.style.display = active ? "none" : "";
+    });
+  }
+
+  function setInspectionStatus(message, type) {
+    const box = document.getElementById("inspectionStatus");
+    if (!box) return;
+    box.textContent = message;
+    box.className = "inspection-status";
+    if (type) box.classList.add(type);
+  }
+
+  function setInspectionTime() {
+    const input = document.getElementById("inspectionTime");
+    if (!input) return;
+    input.value = new Date().toLocaleString("id-ID", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  }
+
+  async function loadDrivers() {
+    const select = document.getElementById("inspectionDriver");
+    if (!select) return;
+    try {
+      const response = await fetch(API_URL + "?action=drivers");
+      const result = await response.json();
+      select.innerHTML = '<option value="">-- Pilih Driver / Pemeriksa --</option>';
+      if (result.success && Array.isArray(result.drivers)) {
+        result.drivers.forEach(function(name) {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          select.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      select.innerHTML = '<option value="">Daftar driver gagal dimuat</option>';
+    }
+  }
+
+  document.getElementById("inspectionForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    if (!selectedInspectionAsset) {
+      setInspectionStatus("Data kendaraan belum tersedia.", "error");
+      return;
+    }
+    const driver = document.getElementById("inspectionDriver").value.trim();
+    if (!driver) {
+      setInspectionStatus("Nama driver / pemeriksa wajib dipilih.", "error");
+      return;
+    }
+    const button = document.getElementById("saveInspectionButton");
+    button.disabled = true;
+    button.textContent = "⏳ Menyimpan...";
+    const data = {
+      action: "saveInspection",
+      kodeAset: selectedInspectionAsset.kodeAset,
+      namaDriver: driver,
+      waktuPemeriksaan: new Date().toISOString(),
+      oliMesin: document.getElementById("oliMesin").value,
+      oliPowerSteering: document.getElementById("oliPowerSteering").value,
+      taliKipasVbelt: document.getElementById("taliKipasVbelt").value,
+      aki: document.getElementById("aki").value,
+      banKiriDepan: document.getElementById("banKiriDepan").value,
+      banKiriBelakang: document.getElementById("banKiriBelakang").value,
+      banKananDepan: document.getElementById("banKananDepan").value,
+      banKananBelakang: document.getElementById("banKananBelakang").value,
+      banSerep: document.getElementById("banSerep").value,
+      kunciRodaDongkrak: document.getElementById("kunciRodaDongkrak").value,
+      rem: document.getElementById("rem").value,
+      kopling: document.getElementById("kopling").value,
+      setir: document.getElementById("setir").value,
+      klakson: document.getElementById("klakson").value
+    };
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.message || "Pemeriksaan gagal disimpan.");
+      setInspectionStatus("Pemeriksaan berhasil disimpan ke Laporan_Web.", "success");
+      document.getElementById("inspectionForm").reset();
+      setInspectionTime();
+    } catch (error) {
+      console.error(error);
+      setInspectionStatus(error.message || "Gagal menyimpan pemeriksaan.", "error");
+    } finally {
+      button.disabled = false;
+      button.textContent = "💾 Simpan Pemeriksaan";
+    }
+  });
+
+  function backToAssetTrack() {
+    window.location.href = window.location.origin + window.location.pathname;
+  }
+
+  /*
    * CLOSE MODAL WHEN CLICK OUTSIDE
    */
 
@@ -2018,7 +2164,7 @@ function openAssetFromURL() {
    */
 
   loadAssets();
-openAssetFromURL();
+  openAssetFromURL();
 </script>
 
 </body>
