@@ -1954,6 +1954,7 @@ const API_URL =
 const state = {
 
   user:null,
+  loginToken:null,
 
   loginPhoto:{
     driverLogin:null,
@@ -2091,30 +2092,40 @@ function toast(message,type='info'){
 
 function switchLogin(type){
 
+  // Setiap perpindahan role dimulai dari keadaan login yang benar-benar bersih.
+  stopCamera('driverLogin');
+  stopCamera('adminLogin');
+  state.loginPhoto.driverLogin=null;
+  state.loginPhoto.adminLogin=null;
+  state.loginToken=null;
+
   const driverTab=document.getElementById('driverTab');
   const adminTab=document.getElementById('adminTab');
-
   const driverPanel=document.getElementById('driverLoginPanel');
   const adminPanel=document.getElementById('adminLoginPanel');
 
-  if(type==='driver'){
+  document.getElementById('loginDriverId').value='';
+  document.getElementById('loginAdminId').value='';
+  document.getElementById('loginAdminName').value='';
+  document.getElementById('loginAdminPin').value='';
+  document.getElementById('loginStatus').textContent='';
 
+  ['driverLoginPreview','adminLoginPreview'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.removeAttribute('src'); el.style.display='none'; }
+  });
+
+  if(type==='driver'){
     driverTab.classList.add('active');
     adminTab.classList.remove('active');
-
     driverPanel.classList.remove('hidden');
     adminPanel.classList.add('hidden');
-
   }else{
-
     driverTab.classList.remove('active');
     adminTab.classList.add('active');
-
     driverPanel.classList.add('hidden');
     adminPanel.classList.remove('hidden');
-
   }
-
 }
 
 
@@ -2253,6 +2264,19 @@ function capturePhoto(type){
 }
 
 
+function normalizeStatus(value){
+  return String(value ?? '')
+    .replace(/\u00a0/g,' ')
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g,' ')
+    .replace(/\s+/g,' ');
+}
+
+function isDriverActive(value){
+  return ['aktif','active','1','true','ya'].includes(normalizeStatus(value));
+}
+
 /* =========================================================
    DRIVER LOGIN
 ========================================================= */
@@ -2273,6 +2297,17 @@ async function loginDriver(){
         'error'
       );
 
+      return;
+    }
+
+    const selectedDriver=state.drivers.find(d=>
+      String(d.id || d.driverId || '').trim().toUpperCase()===driverId.toUpperCase()
+    );
+
+    if(selectedDriver && !isDriverActive(selectedDriver.status)){
+      const status=selectedDriver.status || 'kosong';
+      setLoginStatus('Driver tidak aktif. Status saat ini: '+status+'.',true);
+      toast('Driver tidak aktif. Status saat ini: '+status+'.','error');
       return;
     }
 
@@ -2337,151 +2372,66 @@ async function loginDriver(){
 ========================================================= */
 
 async function loginAdmin(){
-
   try{
+    state.user=null;
+    state.loginToken=null;
 
-    const id=document
-      .getElementById('loginAdminId')
-      .value
-      .trim();
+    const id=document.getElementById('loginAdminId').value.trim();
+    const name=document.getElementById('loginAdminName').value.trim();
+    const pin=document.getElementById('loginAdminPin').value.trim();
 
-    const name=document
-      .getElementById('loginAdminName')
-      .value
-      .trim();
+    if(!id){ toast('Admin ID wajib diisi.','error'); return; }
+    if(!name){ toast('Nama Admin wajib diisi.','error'); return; }
+    if(!/^\d{6}$/.test(pin)){ toast('PIN harus 6 digit angka.','error'); return; }
 
-    const pin=document
-      .getElementById('loginAdminPin')
-      .value
-      .trim();
-
-    if(!id){
-
-      toast(
-        'Admin ID wajib diisi.',
-        'error'
-      );
-
-      return;
-    }
-
-    if(!name){
-
-      toast(
-        'Nama Admin wajib diisi.',
-        'error'
-      );
-
-      return;
-    }
-
-    if(!/^\d{6}$/.test(pin)){
-
-      toast(
-        'PIN harus 6 digit angka.',
-        'error'
-      );
-
-      return;
-    }
-
-    /*
-      LANGKAH 1:
-      Verifikasi ID + Nama + PIN
-    */
-
-    setLoginStatus(
-      'Memverifikasi ID, Nama Admin, dan PIN...'
-    );
+    setLoginStatus('Memverifikasi ID, Nama Admin, dan PIN...');
 
     const login=await apiPost({
-
       action:'adminLogin',
-
       adminId:id,
-
       namaAdmin:name,
-
       pin:pin
-
     });
 
-    /*
-      LANGKAH 2:
-      FOTO KAMERA WAJIB
-    */
+    state.loginToken=login.loginToken || null;
+    if(!state.loginToken){
+      throw new Error('Token sesi login Admin tidak diterima server.');
+    }
 
     if(!state.loginPhoto.adminLogin){
-
-      toast(
-        'ID, Nama, dan PIN benar. Sekarang foto kamera wajib diambil.',
-        'info'
-      );
-
-      setLoginStatus(
-        'Data login benar. Ambil foto menggunakan kamera untuk melanjutkan.'
-      );
-
+      setLoginStatus('ID, Nama, dan PIN benar. Ambil foto kamera untuk melanjutkan.');
+      toast('ID, Nama, dan PIN benar. Sekarang ambil foto kamera.','info');
       return;
     }
 
-    /*
-      LANGKAH 3:
-      Kirim foto ke Code.gs
-    */
-
-    setLoginStatus(
-      'Memverifikasi foto login...'
-    );
+    setLoginStatus('Memverifikasi foto login...');
 
     const photoLogin=await apiPost({
-
       action:'adminPhotoLogin',
-
       adminId:login.admin.adminId,
-
       namaAdmin:login.admin.namaAdmin,
-
+      loginToken:state.loginToken,
       data:state.loginPhoto.adminLogin,
-
       mimeType:'image/jpeg'
-
     });
 
     state.user={
       ...photoLogin.admin,
-
-      role:photoLogin.admin.role ||
-        login.admin.role ||
-        'ADMIN',
-
+      role:String(photoLogin.admin.role || login.admin.role || 'ADMIN').toUpperCase(),
       loginPhoto:photoLogin.loginPhoto
-
     };
+    state.loginToken=null;
 
     stopCamera('adminLogin');
-
     await enterApplication();
-
-    toast(
-      'Login Admin berhasil.',
-      'success'
-    );
+    toast('Login Admin berhasil.','success');
 
   }catch(error){
-
-    setLoginStatus(
-      error.message,
-      true
-    );
-
-    toast(
-      error.message,
-      'error'
-    );
-
+    state.user=null;
+    state.loginToken=null;
+    setLoginStatus(error.message,true);
+    toast(error.message,'error');
   }
-
 }
 
 
@@ -2507,66 +2457,82 @@ function setLoginStatus(message,error=false){
 
 async function enterApplication(){
 
-  document.getElementById(
-    'loginPage'
-  ).style.display='none';
-
-  document.getElementById(
-    'appPage'
-  ).style.display='block';
-
   const user=state.user;
-
-  document.getElementById(
-    'currentUserName'
-  ).textContent=
-    user.name ||
-    user.namaAdmin ||
-    user.namaDriver ||
-    '-';
-
-  document.getElementById(
-    'currentUserRole'
-  ).textContent=
-    user.role ||
-    'USER';
-
-  const initial=(
-    user.name ||
-    user.namaAdmin ||
-    user.namaDriver ||
-    'A'
-  ).charAt(0).toUpperCase();
-
-  document.getElementById(
-    'userAvatar'
-  ).textContent=initial;
-
-  const isAdmin=
-    user.role==='ADMIN' ||
-    user.role==='SUPER_ADMIN';
-
-  document.getElementById(
-    'adminNavigation'
-  ).style.display=
-    isAdmin ? 'block' : 'none';
-
-  if(!isAdmin){
-
-    document.querySelector(
-      '[data-page="admins"]'
-    )?.classList.add('hidden');
-
-    document.querySelector(
-      '[data-page="settings"]'
-    )?.classList.add('hidden');
-
+  if(!user || !user.role){
+    resetToLogin(false);
+    return;
   }
 
+  const role=String(user.role).trim().toUpperCase();
+  const isAdmin=role==='ADMIN' || role==='SUPER_ADMIN';
+  const isSuperAdmin=role==='SUPER_ADMIN';
+
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('appPage').style.display='block';
+
+  document.getElementById('currentUserName').textContent=
+    user.name || user.namaAdmin || user.namaDriver || '-';
+  document.getElementById('currentUserRole').textContent=role;
+
+  const initial=(
+    user.name || user.namaAdmin || user.namaDriver || 'A'
+  ).charAt(0).toUpperCase();
+  document.getElementById('userAvatar').textContent=initial;
+
+  const adminNavigation=document.getElementById('adminNavigation');
+  if(adminNavigation) adminNavigation.style.display=isAdmin ? 'block' : 'none';
+
+  document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
+  document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!isSuperAdmin);
+
   await refreshAll();
-
   showPage('dashboard');
+}
 
+function clearApplicationState(){
+  state.user=null;
+  state.loginToken=null;
+  state.loginPhoto={driverLogin:null,adminLogin:null};
+  state.selectedAsset=null;
+  state.assets=[];
+  state.drivers=[];
+  state.admins=[];
+  state.inspections=[];
+  state.km=[];
+  state.corrections=[];
+  state.audit=[];
+}
+
+function resetLoginForm(){
+  ['loginDriverId','loginAdminId','loginAdminName','loginAdminPin'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+
+  ['driverLoginPreview','adminLoginPreview'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.removeAttribute('src'); el.style.display='none'; }
+  });
+
+  const status=document.getElementById('loginStatus');
+  if(status){ status.textContent=''; status.style.color=''; }
+}
+
+function resetToLogin(showToast=true){
+  stopCamera('driverLogin');
+  stopCamera('adminLogin');
+  clearApplicationState();
+  resetLoginForm();
+
+  document.getElementById('appPage').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+
+  document.getElementById('driverTab')?.classList.add('active');
+  document.getElementById('adminTab')?.classList.remove('active');
+  document.getElementById('driverLoginPanel')?.classList.remove('hidden');
+  document.getElementById('adminLoginPanel')?.classList.add('hidden');
+
+  if(showToast) toast('Anda telah keluar dari AssetTrack.','info');
 }
 
 
@@ -2575,38 +2541,7 @@ async function enterApplication(){
 ========================================================= */
 
 function logout(){
-
-  stopCamera('driverLogin');
-  stopCamera('adminLogin');
-
-  state.user=null;
-
-  state.loginPhoto={
-    driverLogin:null,
-    adminLogin:null
-  };
-
-  document.getElementById(
-    'appPage'
-  ).style.display='none';
-
-  document.getElementById(
-    'loginPage'
-  ).style.display='flex';
-
-  document.getElementById(
-    'loginAdminPin'
-  ).value='';
-
-  document.getElementById(
-    'loginStatus'
-  ).textContent='';
-
-  toast(
-    'Anda telah keluar dari AssetTrack.',
-    'info'
-  );
-
+  resetToLogin(true);
 }
 
 
@@ -2626,6 +2561,21 @@ function toggleSidebar(){
 
 
 function showPage(page){
+
+  if(!state.user){
+    resetToLogin(false);
+    return;
+  }
+
+  const role=String(state.user.role || '').toUpperCase();
+  if(page==='admins' && !['ADMIN','SUPER_ADMIN'].includes(role)){
+    toast('Halaman Admin hanya dapat diakses oleh Admin.','error');
+    return;
+  }
+  if(page==='settings' && role!=='SUPER_ADMIN'){
+    toast('Pengaturan hanya dapat diakses oleh Super Admin.','error');
+    return;
+  }
 
   document
     .querySelectorAll('.page')
@@ -2694,71 +2644,66 @@ function showPage(page){
 ========================================================= */
 
 async function refreshAll(){
+  if(!state.user || !state.user.role) return;
 
   try{
+    const role=String(state.user.role).toUpperCase();
+    const isAdmin=['ADMIN','SUPER_ADMIN'].includes(role);
 
-    const [
-      assets,
-      drivers,
-      admins,
-      inspections,
-      km,
-      corrections,
-      audit
-    ]=await Promise.all([
-
+    const [assets,drivers,inspections]=await Promise.all([
       apiGet('assets'),
       apiGet('drivers'),
-      apiGet('admins'),
-      apiGet('inspections'),
-      apiGet('km'),
-      apiGet('corrections'),
-      apiGet('audit')
-
+      apiGet('inspections')
     ]);
 
     state.assets=assets.assets || [];
     state.drivers=drivers.drivers || [];
-    state.admins=admins.admins || [];
     state.inspections=inspections.rows || [];
-    state.km=km.rows || [];
-    state.corrections=corrections.rows || [];
-    state.audit=audit.rows || [];
+
+    if(isAdmin){
+      const [admins,km,corrections,audit]=await Promise.all([
+        apiGet('admins'),
+        apiGet('km'),
+        apiGet('corrections'),
+        apiGet('audit')
+      ]);
+      state.admins=admins.admins || [];
+      state.km=km.rows || [];
+      state.corrections=corrections.rows || [];
+      state.audit=audit.rows || [];
+    }else{
+      state.admins=[];
+      state.km=[];
+      state.corrections=[];
+      state.audit=[];
+    }
 
     updateDashboard();
-
     populateAssetSelects();
     populateDriverSelect();
-
     renderAssets();
     renderDrivers();
-    renderKM();
-    renderCorrections();
     renderInspections();
-    renderAudit();
-    renderAdmins();
 
-    document.getElementById(
-      'systemStatus'
-    ).innerHTML=
+    if(isAdmin){
+      renderKM();
+      renderCorrections();
+      renderAudit();
+      renderAdmins();
+    }else{
+      const adminBody=document.getElementById('adminBody');
+      if(adminBody) adminBody.innerHTML='';
+    }
+
+    document.getElementById('systemStatus').innerHTML=
       '<span class="badge green">ONLINE</span> '+
       'AssetTrack berhasil terhubung dengan Google Apps Script.';
 
   }catch(error){
-
-    document.getElementById(
-      'systemStatus'
-    ).innerHTML=
-      '<span class="badge red">ERROR</span> '+
-      escapeHtml(error.message);
-
-    toast(
-      'Gagal mengambil data: '+error.message,
-      'error'
-    );
-
+    document.getElementById('systemStatus').innerHTML=
+      '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
+    toast('Gagal mengambil data: '+error.message,'error');
   }
-
 }
 
 
@@ -2775,9 +2720,7 @@ function updateDashboard(){
   document.getElementById(
     'statDrivers'
   ).textContent=
-    state.drivers.filter(
-      d=>String(d.status).toLowerCase()==='aktif'
-    ).length;
+    state.drivers.filter(d=>isDriverActive(d.status)).length;
 
   document.getElementById(
     'statInspections'
@@ -5335,6 +5278,12 @@ function renderAdmins(){
 
   if(!body)return;
 
+  const role=String(state.user?.role || '').toUpperCase();
+  if(!['ADMIN','SUPER_ADMIN'].includes(role)){
+    body.innerHTML='';
+    return;
+  }
+
   body.innerHTML='';
 
   state.admins.forEach(admin=>{
@@ -5878,6 +5827,15 @@ function escapeJs(value){
 document.addEventListener(
   'DOMContentLoaded',
   ()=>{
+
+    clearApplicationState();
+    resetLoginForm();
+    document.getElementById('appPage').style.display='none';
+    document.getElementById('loginPage').style.display='flex';
+    document.getElementById('driverTab')?.classList.add('active');
+    document.getElementById('adminTab')?.classList.remove('active');
+    document.getElementById('driverLoginPanel')?.classList.remove('hidden');
+    document.getElementById('adminLoginPanel')?.classList.add('hidden');
 
     buildInspectionOptions();
 
