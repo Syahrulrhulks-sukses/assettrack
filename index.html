@@ -45,6 +45,27 @@ textarea{
   font-family:inherit;
 }
 
+.secret-input{
+  position:relative;
+}
+
+.secret-input input{
+  width:100%;
+  padding-right:44px;
+}
+
+.secret-toggle{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  border:0;
+  background:transparent;
+  padding:6px;
+  font-size:16px;
+  cursor:pointer;
+}
+
 button{
   cursor:pointer;
 }
@@ -863,20 +884,38 @@ tr:hover td{
 
       <div class="form-group">
         <label>Admin ID</label>
-        <input
-          id="loginAdminId"
-          type="text"
-          placeholder="Masukkan Admin ID"
-          autocomplete="off">
+        <div class="secret-input">
+          <input
+            id="loginAdminId"
+            type="password"
+            placeholder="Otomatis"
+            autocomplete="username">
+          <button
+            type="button"
+            class="secret-toggle"
+            title="Lihat/Koreksi Admin ID"
+            onclick="toggleAdminIdentity('loginAdminId',this)">
+            👁️
+          </button>
+        </div>
       </div>
 
       <div class="form-group">
         <label>Nama Admin</label>
-        <input
-          id="loginAdminName"
-          type="text"
-          placeholder="Masukkan Nama Admin"
-          autocomplete="off">
+        <div class="secret-input">
+          <input
+            id="loginAdminName"
+            type="password"
+            placeholder="Otomatis"
+            autocomplete="name">
+          <button
+            type="button"
+            class="secret-toggle"
+            title="Lihat/Koreksi Nama Admin"
+            onclick="toggleAdminIdentity('loginAdminName',this)">
+            👁️
+          </button>
+        </div>
       </div>
 
       <div class="form-group">
@@ -2095,6 +2134,26 @@ function toast(message,type='info'){
    LOGIN TAB
 ========================================================= */
 
+function restoreAdminLoginIdentity(){
+  const id=document.getElementById('loginAdminId');
+  const name=document.getElementById('loginAdminName');
+  if(!id || !name)return;
+
+  const savedId=localStorage.getItem('assettrack_admin_id') || '';
+  const savedName=localStorage.getItem('assettrack_admin_name') || '';
+
+  if(savedId && !id.value) id.value=savedId;
+  if(savedName && !name.value) name.value=savedName;
+}
+
+function toggleAdminIdentity(fieldId,button){
+  const field=document.getElementById(fieldId);
+  if(!field)return;
+  const visible=field.type==='text';
+  field.type=visible?'password':'text';
+  if(button)button.textContent=visible?'👁️':'🙈';
+}
+
 function switchLogin(type){
 
   // Setiap perpindahan role dimulai dari keadaan login yang benar-benar bersih.
@@ -2128,6 +2187,7 @@ function switchLogin(type){
     driverPanel.classList.remove('hidden');
     adminPanel.classList.add('hidden');
   }else{
+    restoreAdminLoginIdentity();
     driverTab.classList.remove('active');
     adminTab.classList.add('active');
     driverPanel.classList.add('hidden');
@@ -2558,15 +2618,18 @@ async function loginAdmin(){
     state.user=null;
     state.loginToken=null;
 
+    restoreAdminLoginIdentity();
+
     const id=document.getElementById('loginAdminId').value.trim();
     const name=document.getElementById('loginAdminName').value.trim();
     const pin=document.getElementById('loginAdminPin').value.trim();
 
-    if(!id){ toast('Admin ID wajib diisi.','error'); return; }
-    if(!name){ toast('Nama Admin wajib diisi.','error'); return; }
-    if(!/^\d{6}$/.test(pin)){ toast('PIN harus 6 digit angka.','error'); return; }
+    if(!/^\d{6}$/.test(pin)){
+      toast('PIN harus 6 digit angka.','error');
+      return;
+    }
 
-    setLoginStatus('Memverifikasi ID, Nama Admin, dan PIN...');
+    setLoginStatus('Memverifikasi Admin dan PIN...');
 
     const login=await apiPost({
       action:'adminLogin',
@@ -2580,20 +2643,57 @@ async function loginAdmin(){
       throw new Error('Token sesi login Admin tidak diterima server.');
     }
 
+    // Server dapat memilih Super Admin aktif secara otomatis bila ID/Nama tersembunyi kosong.
+    // Simpan identitas yang benar agar login berikutnya otomatis terisi tetapi tetap tersembunyi.
+    const resolvedId=String(login.admin.adminId || login.admin.id || id || '').trim();
+    const resolvedName=String(login.admin.namaAdmin || login.admin.name || name || '').trim();
+
+    document.getElementById('loginAdminId').value=resolvedId;
+    document.getElementById('loginAdminName').value=resolvedName;
+    localStorage.setItem('assettrack_admin_id',resolvedId);
+    localStorage.setItem('assettrack_admin_name',resolvedName);
+
     if(!state.loginPhoto.adminLogin){
-      setLoginStatus('ID, Nama, dan PIN benar. Ambil foto kamera untuk melanjutkan.');
-      toast('ID, Nama, dan PIN benar. Sekarang ambil foto kamera.','info');
+      setLoginStatus(
+        login.admin.faceDescriptor
+          ? 'ID, Nama, dan PIN benar. Ambil foto kamera untuk verifikasi wajah.'
+          : 'Login pertama: ambil foto wajah yang jelas untuk membuat data foto awal.'
+      );
+      toast(
+        login.admin.faceDescriptor
+          ? 'ID, Nama, dan PIN benar. Sekarang ambil foto kamera.'
+          : 'Belum ada foto referensi. Ambil foto wajah untuk pendaftaran awal.',
+        'info'
+      );
       return;
     }
 
-    setLoginStatus('Memverifikasi foto login...');
+    setLoginStatus('Membaca dan memverifikasi wajah Admin...');
+
+    const liveDescriptor=await getFaceDescriptorFromDataUrl(
+      state.loginPhoto.adminLogin
+    );
+
+    if(login.admin.faceDescriptor){
+      const distance=faceDistance(
+        liveDescriptor,
+        login.admin.faceDescriptor
+      );
+
+      if(distance>FACE_MATCH_THRESHOLD){
+        throw new Error(
+          'Verifikasi wajah gagal. Wajah tidak cocok dengan Admin yang terdaftar.'
+        );
+      }
+    }
 
     const photoLogin=await apiPost({
       action:'adminPhotoLogin',
-      adminId:login.admin.adminId,
-      namaAdmin:login.admin.namaAdmin,
+      adminId:resolvedId,
+      namaAdmin:resolvedName,
       loginToken:state.loginToken,
       data:state.loginPhoto.adminLogin,
+      faceDescriptor:Array.from(liveDescriptor),
       mimeType:'image/jpeg'
     });
 
@@ -2606,7 +2706,13 @@ async function loginAdmin(){
 
     stopCamera('adminLogin');
     await enterApplication();
-    toast('Login Admin berhasil.','success');
+
+    toast(
+      photoLogin.faceVerification?.mode==='INITIAL_REGISTERED'
+        ? 'Login berhasil. Foto wajah awal berhasil didaftarkan.'
+        : 'Login Admin berhasil dengan verifikasi wajah.',
+      'success'
+    );
 
   }catch(error){
     state.user=null;
@@ -2615,7 +2721,6 @@ async function loginAdmin(){
     toast(error.message,'error');
   }
 }
-
 
 function setLoginStatus(message,error=false){
 
@@ -2707,6 +2812,8 @@ function resetLoginForm(){
     const el=document.getElementById(id);
     if(el){ el.removeAttribute('src'); el.style.display='none'; }
   });
+
+  restoreAdminLoginIdentity();
 
   const status=document.getElementById('loginStatus');
   if(status){ status.textContent=''; status.style.color=''; }
@@ -5929,6 +6036,7 @@ document.addEventListener(
     buildInspectionOptions();
 
     buildMediaFields();
+    restoreAdminLoginIdentity();
 
     document.getElementById(
       'inspectionTime'
