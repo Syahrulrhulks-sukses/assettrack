@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AssetTrack — Manajemen & Pemeriksaan Armada</title>
+<meta name="assettrack-version" content="SYNC-PINK-050919">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
@@ -16,7 +17,7 @@
   <div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Sistem Manajemen & Pemeriksaan Armada</small></div></div>
   <div class="tabs"><button class="tab active" id="driverTab" onclick="switchLogin('driver')">🚗 Driver</button><button class="tab" id="adminTab" onclick="switchLogin('admin')">👑 Admin</button></div>
   <div id="driverLoginBox"><div class="grid" style="margin-top:12px"><div class="field"><label>Driver ID</label><select id="loginDriver"><option>Memuat...</option></select></div><div class="field"><label>Status Wajah</label><input id="loginFaceStatus" readonly value="Pilih driver"></div></div><div class="small" style="margin-top:8px;color:#8a3a5c">Pilih Driver ID, aktifkan kamera, lalu masuk untuk melanjutkan pemeriksaan kendaraan.</div><div class="camera-wrap" style="margin-top:12px"><video id="loginVideo" class="camera" autoplay muted playsinline></video><div class="actions" style="justify-content:center;margin-top:9px"><button class="btn-primary" onclick="startCamera('loginVideo')">📷 Kamera</button><button class="btn-ok" onclick="loginDriver()">🔐 Masuk Driver</button></div><div id="faceMessage" class="small" style="margin-top:8px">Pilih Driver ID lalu aktifkan kamera.</div></div></div>
-  <div id="adminLoginBox" class="hidden"><div class="grid" style="margin-top:12px"><div class="field"><label>Admin ID</label><input id="adminId" value="ADM-001"></div><div class="field"><label>Nama Admin</label><input id="adminName" value="Syahrul"></div><div class="field full"><label>PIN</label><input id="adminPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 digit PIN"></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="loginAdmin()">👑 Masuk Admin</button></div><div class="small" style="margin-top:10px"></div></div>
+  <div id="adminLoginBox" class="hidden"><div class="notice">Super Admin: <b>050919</b> / <b>Syahrul01</b>. PIN awal: <b>123456</b> (kecuali sudah diganti).</div><div class="grid" style="margin-top:12px"><div class="field"><label>Admin ID</label><input id="adminId" value="050919"></div><div class="field"><label>Nama Admin</label><input id="adminName" value="Syahrul01"></div><div class="field full"><label>PIN</label><input id="adminPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 digit PIN"></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="loginAdmin()">👑 Masuk Admin</button></div><div class="small" style="margin-top:10px"></div></div>
 </div></div>
 <div id="appView" class="hidden"><header class="top"><div class="wrap topbar"><div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Manajemen, Barcode, KM & Pemeriksaan Armada</small></div></div><div class="top-actions"><span id="sessionPill" class="userpill">-</span><button class="btn-bad" onclick="logout()">Keluar</button></div></div></header>
 <main class="wrap main">
