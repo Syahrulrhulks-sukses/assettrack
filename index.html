@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AssetTrack — Manajemen & Pemeriksaan Armada</title>
-<meta name="assettrack-version" content="SYNC-PINK-FINAL">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
@@ -17,8 +16,28 @@
   <div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Sistem Manajemen & Pemeriksaan Armada</small></div></div>
   <div class="tabs"><button class="tab active" id="driverTab" onclick="switchLogin('driver')">🚗 Driver</button><button class="tab" id="adminTab" onclick="switchLogin('admin')">👑 Admin</button></div>
   <div id="driverLoginBox"><div class="grid" style="margin-top:12px"><div class="field"><label>Driver ID</label><select id="loginDriver"><option>Memuat...</option></select></div><div class="field"><label>Status Wajah</label><input id="loginFaceStatus" readonly value="Pilih driver"></div></div><div class="small" style="margin-top:8px;color:#8a3a5c">Pilih Driver ID, aktifkan kamera, lalu masuk untuk melanjutkan pemeriksaan kendaraan.</div><div class="camera-wrap" style="margin-top:12px"><video id="loginVideo" class="camera" autoplay muted playsinline></video><div class="actions" style="justify-content:center;margin-top:9px"><button class="btn-primary" onclick="startCamera('loginVideo')">📷 Kamera</button><button class="btn-ok" onclick="loginDriver()">🔐 Masuk Driver</button></div><div id="faceMessage" class="small" style="margin-top:8px">Pilih Driver ID lalu aktifkan kamera.</div></div></div>
-  <div id="adminLoginBox" class="hidden"><div class="grid" style="margin-top:12px"><div class="field"><label>Admin ID</label><input id="adminId" autocomplete="username"></div><div class="field"><label>Nama Admin</label><input id="adminName" autocomplete="name"></div><div class="field full"><label>PIN</label><input id="adminPin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password"></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="loginAdmin()">👑 Masuk Admin</button></div></div>
-</div></div>
+  <div id="adminLoginBox" class="hidden">
+  <div class="grid" style="margin-top:12px">
+    <div class="field"><label>Admin ID</label><input id="adminId" autocomplete="username"></div>
+    <div class="field"><label>Nama Admin</label><input id="adminName" autocomplete="name"></div>
+    <div class="field full"><label>PIN</label><input id="adminPin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="6 digit PIN"></div>
+  </div>
+  <div class="actions" style="margin-top:12px">
+    <button class="btn-primary" id="adminCredentialBtn" onclick="checkAdminCredentials()">👑 Lanjut ke Kamera</button>
+  </div>
+
+  <div id="adminCameraBox" class="hidden" style="margin-top:14px">
+    <div class="notice">Data login benar. Arahkan wajah ke kamera, lalu ambil foto untuk melanjutkan.</div>
+    <div class="camera-wrap" style="margin-top:10px">
+      <video id="adminLoginVideo" class="camera" autoplay muted playsinline></video>
+    </div>
+    <div class="actions" style="justify-content:center;margin-top:10px">
+      <button class="btn-primary" onclick="startCamera('adminLoginVideo')">📷 Aktifkan Kamera</button>
+      <button class="btn-ok" onclick="completeAdminLogin()">🔐 Ambil Foto & Masuk</button>
+    </div>
+    <div id="adminFaceMessage" class="small" style="margin-top:8px">Kamera belum aktif.</div>
+  </div>
+</div>
 <div id="appView" class="hidden"><header class="top"><div class="wrap topbar"><div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Manajemen, Barcode, KM & Pemeriksaan Armada</small></div></div><div class="top-actions"><span id="sessionPill" class="userpill">-</span><button class="btn-bad" onclick="logout()">Keluar</button></div></div></header>
 <main class="wrap main">
 <section class="stats"><div class="stat"><small>Total Aset</small><b id="statAssets">0</b></div><div class="stat"><small>Aset Aktif</small><b id="statActive">0</b></div><div class="stat"><small>Perawatan</small><b id="statMaint">0</b></div><div class="stat"><small>Driver Aktif</small><b id="statDrivers">0</b></div><div class="stat"><small>Pemeriksaan</small><b id="statInspections">0</b></div></section>
@@ -40,11 +59,11 @@
 <div id="correctionModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><h2>✏️ Ajukan Koreksi</h2><button class="btn-soft" onclick="closeModal('correctionModal')">Tutup</button></div><div id="correctionInfo" class="notice"></div><div class="grid" style="margin-top:12px"><div class="field full"><label>Kolom yang dikoreksi</label><select id="correctionColumn"></select></div><div class="field"><label>Nilai Lama</label><input id="correctionOld" readonly></div><div class="field"><label>Nilai Baru</label><input id="correctionNew"></div><div class="field full"><label>Alasan</label><textarea id="correctionReason"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="submitCorrection()">Kirim Koreksi</button></div></div></div>
 <div id="toast" class="toast"></div>
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycbzPYdi1F9-Jz-73sv4PnbZmD9H64gdgyk6bnHz4LyvPlKrhJyY6RbczQWFFkQtGDAQCOw/exec';
+const API_URL='https://script.google.com/macros/s/AKfycby29V9fghZIGV0P1ic3MVwb7811hF9MhRUNqf7Z5p7fZJgJ3LyJ-AIsZRhi-IaRnB96GA/exec';
 const CONDITIONS=[['oliMesin','Oli Mesin'],['oliPowerSteering','Oli Power Steering'],['taliKipasVbelt','Tali Kipas / V-Belt'],['aki','Aki'],['banKiriDepan','Ban Kiri Depan'],['banKiriBelakang','Ban Kiri Belakang'],['banKananDepan','Ban Kanan Depan'],['banKananBelakang','Ban Kanan Belakang'],['banSerep','Ban Serep'],['kunciRodaDongkrak','Kunci Roda & Dongkrak'],['rem','Rem'],['kopling','Kopling'],['setir','Setir'],['klakson','Klakson'],['sabukPengaman','Sabuk Pengaman']];
 const PHOTO_CONFIG={body:['Foto Body Mobil','body'],radiator:['Foto Radiator','radiator'],reservoirRadiator:['Foto Reservoir Radiator','reservoirRadiator'],minyakRem:['Foto Minyak Rem','minyakRem'],stikOli:['Foto Stik Oli','stikOli'],banKiriDepan:['Foto Ban Kiri Depan','banKiriDepan'],banKiriBelakang:['Foto Ban Kiri Belakang','banKiriBelakang'],banKananDepan:['Foto Ban Kanan Depan','banKananDepan'],banKananBelakang:['Foto Ban Kanan Belakang','banKananBelakang'],banSerep:['Foto Ban Serep','banSerep'],kunciRodaDongkrak:['Foto Kunci Roda & Dongkrak','kunciRodaDongkrak'],interiorBox:['Foto Interior Box','interiorBox'],sisiDalamBak:['Foto Sisi Dalam Bak','sisiDalamBak'],kmStart:['Foto KM Start','kmStart'],kmSebelumIsiBensin:['Foto KM Sebelum Isi Bensin','kmSebelumIsiBensin'],kmSesudahIsiBensin:['Foto KM Sesudah Isi Bensin','kmSesudahIsiBensin'],kmFinishAkhir:['Foto KM Finish Akhir','kmFinishAkhir']};
 const VIDEO_CONFIG={lampuUtama:['Video Lampu Utama','lampuUtama'],lampuRem:['Video Lampu Rem','lampuRem'],lampuSein:['Video Lampu Sein','lampuSein'],bodyLecet:['Video Body Mobil Lecet','bodyLecet'],interior:['Video Interior','interior'],kerusakanUrgent:['Video Kerusakan yang Urgent','kerusakanUrgent']};
-let state={assets:[],drivers:[],admins:[],inspections:[],km:[],corrections:[],audit:[],session:null,currentAsset:null,stream:null,faceDriverId:null};
+let state={assets:[],drivers:[],admins:[],inspections:[],km:[],corrections:[],audit:[],session:null,currentAsset:null,stream:null,faceDriverId:null,pendingAdmin:null};
 let correctionInspectionId=null;
 const $=id=>document.getElementById(id),val=id=>$(id)?.value??'',esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),4500)}
@@ -64,18 +83,45 @@ function driverIsActive(d){const s=driverStatusOf(d).toLowerCase().replace(/[ _-
 function driverFaceOf(d){return String(d?.faceStatus??d?.['Face Status']??'Belum Terdaftar').trim()}
 function normalizeDrivers(rows){return (Array.isArray(rows)?rows:[]).map(d=>typeof d==='string'?{driverId:d,name:d,status:'Aktif',faceStatus:'Belum Terdaftar'}:{...d,driverId:driverIdOf(d),name:driverNameOf(d),status:driverStatusOf(d),faceStatus:driverFaceOf(d)}).filter(d=>d.driverId||d.name)}
 function populateDriverLogin(){const s=$('loginDriver');const rows=state.drivers.filter(d=>driverIdOf(d)||driverNameOf(d));s.innerHTML='<option value="">Pilih Driver</option>'+rows.map(d=>{const id=driverIdOf(d),name=driverNameOf(d)||id,status=driverStatusOf(d);return `<option value="${esc(id)}">${esc(id)} — ${esc(name)}${driverIsActive(d)?'':' — '+esc(status)}</option>`}).join('');s.onchange=()=>{const d=state.drivers.find(x=>driverIdOf(x)===s.value);$('loginFaceStatus').value=d?driverFaceOf(d):'Pilih driver';if(d)$('faceMessage').textContent=`Driver ${driverNameOf(d)||driverIdOf(d)} dipilih. Aktifkan kamera lalu masuk.`}}
-async function loginAdmin(){const id=val('adminId').trim(),name=val('adminName').trim(),pin=val('adminPin').trim();if(!id||!name||!pin)return toast('Semua data login wajib diisi.');try{const r=await api('adminLogin',{adminId:id,namaAdmin:name,pin},'POST');state.session={...r.admin};enterApp()}catch(e){toast(e.message)}}
+async function checkAdminCredentials(){
+  const id=val('adminId').trim(), name=val('adminName').trim(), pin=val('adminPin').trim();
+  if(!id||!name||!pin)return toast('Admin ID, Nama Admin dan PIN wajib.');
+  try{
+    const r=await api('adminLogin',{adminId:id,namaAdmin:name,pin},'POST');
+    state.pendingAdmin={...r.admin};
+    $('adminCameraBox').classList.remove('hidden');
+    $('adminFaceMessage').textContent='Data login benar. Aktifkan kamera untuk mengambil foto.';
+    await startCamera('adminLoginVideo');
+  }catch(e){toast(e.message)}
+}
+async function completeAdminLogin(){
+  if(!state.pendingAdmin)return toast('Validasi ID, Nama Admin, dan PIN terlebih dahulu.');
+  if(!state.stream)await startCamera('adminLoginVideo');
+  try{
+    const data=captureFrame('adminLoginVideo');
+    const r=await api('adminPhotoLogin',{
+      adminId:state.pendingAdmin.adminId||state.pendingAdmin.id,
+      namaAdmin:state.pendingAdmin.name||state.pendingAdmin.namaAdmin,
+      data:data
+    },'POST');
+    state.session={...r.admin};
+    state.pendingAdmin=null;
+    stopCamera();
+    enterApp();
+  }catch(e){
+    $('adminFaceMessage').textContent=e.message;
+    toast(e.message);
+  }
+}
 async function loginDriver(){const id=val('loginDriver');if(!id)return toast('Pilih Driver ID.');try{if(!state.stream)await startCamera('loginVideo');const data=captureFrame('loginVideo');const r=await api('driverLogin',{driverId:id,data},'POST');state.session={...r.driver};enterApp()}catch(e){$('faceMessage').textContent=e.message;toast(e.message)}}
-function getDeepLinkAssetCode(){const p=new URLSearchParams(location.search);return String(p.get('asset')||p.get('kode')||'').trim().toUpperCase();}
-function tryOpenDeepLinkInspection(){const code=getDeepLinkAssetCode();if(!code||!isDriver())return;const a=state.assets.find(x=>String(x.code||'').toUpperCase()===code);if(a){state.currentAsset=a;setTimeout(()=>startInspection(a),250);$('driverNotice').classList.remove('hidden');$('driverNotice').textContent=`QR/Barcode ${a.code} terdeteksi. Form pemeriksaan kendaraan dibuka.`;}else{toast('Kode aset dari QR/Barcode tidak ditemukan: '+code)}}
-function enterApp(){$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');const role=String(state.session?.role||'').toUpperCase();$('sessionPill').textContent=`${state.session?.name||state.session?.namaAdmin||''} • ${role}`;$('welcome').textContent=`Selamat datang, ${state.session?.name||state.session?.namaAdmin||''}.`;$('adminPanel').classList.toggle('hidden',!['ADMIN','SUPER_ADMIN'].includes(role));$('driverHistoryPanel').classList.toggle('hidden',role!=='DRIVER');$('driverNotice').classList.toggle('hidden',role!=='DRIVER');stopCamera();refreshAll().then(tryOpenDeepLinkInspection).catch(()=>{});}
-function logout(){state.session=null;state.currentAsset=null;stopCamera();$('appView').classList.add('hidden');$('loginView').classList.remove('hidden');switchLogin('driver')}
+function enterApp(){$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');const role=String(state.session?.role||'').toUpperCase();$('sessionPill').textContent=`${state.session?.name||state.session?.namaAdmin||''} • ${role}`;$('welcome').textContent=`Selamat datang, ${state.session?.name||state.session?.namaAdmin||''}.`;$('adminPanel').classList.toggle('hidden',!['ADMIN','SUPER_ADMIN'].includes(role));$('driverHistoryPanel').classList.toggle('hidden',role!=='DRIVER');$('driverNotice').classList.toggle('hidden',role!=='DRIVER');stopCamera();refreshAll()}
+function logout(){state.session=null;state.pendingAdmin=null;state.currentAsset=null;stopCamera();$('appView').classList.add('hidden');$('loginView').classList.remove('hidden');$('adminCameraBox').classList.add('hidden');switchLogin('driver')}
 function isAdmin(){return['ADMIN','SUPER_ADMIN'].includes(String(state.session?.role||'').toUpperCase())}function isSuper(){return String(state.session?.role||'').toUpperCase()==='SUPER_ADMIN'}function isDriver(){return String(state.session?.role||'').toUpperCase()==='DRIVER'}
 async function refreshAll(){try{const a=await api('assets');state.assets=a.assets||[];renderStats();renderAssetList();const d=await api('drivers');state.drivers=normalizeDrivers(d.drivers);populateDriverLogin();if(isAdmin()){state.admins=(await api('admins')).admins||[];state.inspections=(await api('inspections')).rows||[];state.km=(await api('km')).rows||[];state.corrections=(await api('corrections')).rows||[];state.audit=(await api('audit')).rows||[];renderAssetsAdmin();renderDrivers();renderAdmins();renderInspections();renderKM();renderCorrections();renderAudit()}else if(isDriver()){state.inspections=(await api('inspections')).rows||[];renderDriverHistory()}$('statInspections').textContent=state.inspections.length}catch(e){toast(e.message)}}
 function renderStats(){$('statAssets').textContent=state.assets.length;$('statActive').textContent=state.assets.filter(a=>String(a.status).toLowerCase()==='aktif').length;$('statMaint').textContent=state.assets.filter(a=>String(a.status).toLowerCase().includes('perawatan')).length;$('statDrivers').textContent=state.drivers.filter(d=>driverStatusOf(d).toLowerCase()==='aktif').length;$('statInspections').textContent=state.inspections.length}
 function renderAssetList(){const q=val('assetSearch').toLowerCase();const list=state.assets.filter(a=>!q||[a.code,a.name,a.plate,a.location,a.brand,a.model].some(v=>String(v||'').toLowerCase().includes(q)));$('assetSelect').innerHTML='<option value="">Pilih kendaraan</option>'+list.map(a=>`<option value="${esc(a.code)}">${esc(a.code)} — ${esc(a.name)}</option>`).join('');$('publicAssetRows').innerHTML=list.map(a=>`<tr><td><b>${esc(a.code)}</b></td><td>${esc(a.name)}</td><td>${esc(a.plate)}</td><td>${esc(a.brand)}</td><td>${esc(a.model)}</td><td>${esc(a.year)}</td><td>${esc(a.location)}</td><td>${badge(a.status)}</td><td><div class="actions"><button class="btn-primary" onclick="selectAsset('${esc(a.code)}')">Pilih</button><button class="btn-ok" onclick="startInspectionByCode('${esc(a.code)}')">Periksa</button></div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Tidak ada aset.</td></tr>'}
 function selectAsset(code){$('assetSelect').value=code;showAssetCode()}function getSelectedAsset(){return state.assets.find(a=>a.code===val('assetSelect'))||null}function showAssetCode(){const a=getSelectedAsset();if(!a){$('assetCodeArea').classList.add('hidden');return}state.currentAsset=a;makeCodes()}
-function makeCodes(){const a=getSelectedAsset()||state.currentAsset;if(!a)return toast('Pilih kendaraan.');$('assetCodeArea').classList.remove('hidden');$('qr').innerHTML='';new QRCode($('qr'),{text:location.origin+location.pathname+'?asset='+encodeURIComponent(a.code),width:150,height:150});try{JsBarcode('#barcode',a.code,{format:'CODE128',displayValue:true,width:2,height:65,margin:8})}catch(e){toast(e.message)}}
+function makeCodes(){const a=getSelectedAsset()||state.currentAsset;if(!a)return toast('Pilih kendaraan.');$('assetCodeArea').classList.remove('hidden');$('qr').innerHTML='';new QRCode($('qr'),{text:location.origin+location.pathname+'?kode='+encodeURIComponent(a.code),width:150,height:150});try{JsBarcode('#barcode',a.code,{format:'CODE128',displayValue:true,width:2,height:65,margin:8})}catch(e){toast(e.message)}}
 function startSelectedInspection(){const a=getSelectedAsset();if(!a)return toast('Pilih kendaraan dulu.');startInspection(a)}function startInspectionByCode(c){const a=state.assets.find(x=>x.code===c);if(a)startInspection(a)}
 function startInspection(a){if(!isDriver())return toast('Pemeriksaan dilakukan oleh Driver setelah login.');state.currentAsset=a;$('inspectionAssetInfo').innerHTML=`<b>${esc(a.code)}</b> — ${esc(a.name)} | Polisi: ${esc(a.plate||'-')}`;$('inspectionDriver').value=`${state.session.driverId||state.session.id} — ${state.session.name||state.session.namaDriver}`;$('inspectionTime').value=nowLocal();$('inspectionTimestamp').value=new Date().toLocaleString('id-ID');buildConditions();buildMedia();$('inspectionModal').classList.add('show');getGPS()}
 function buildConditions(){$('conditionGrid').innerHTML=CONDITIONS.map(([k,l])=>`<div class="checkitem"><b>${esc(l)}</b><select data-condition="${k}"><option value="">Pilih</option><option>Baik</option><option>Perlu Perhatian</option><option>Rusak</option><option>Tidak Ada</option></select></div>`).join('')}
@@ -107,5 +153,5 @@ function openCorrection(id){correctionInspectionId=id;const x=state.inspections.
 $('correctionColumn').addEventListener('change',()=>{const x=state.inspections.find(r=>String(r['Inspection ID'])===String(correctionInspectionId));if(x)$('correctionOld').value=x[$('correctionColumn').value]||''})
 async function submitCorrection(){if(!correctionInspectionId||!val('correctionReason'))return toast('Alasan wajib diisi.');try{const r=await api('requestCorrection',{inspectionId:correctionInspectionId,driverId:state.session.driverId||state.session.id,namaDriver:state.session.name||state.session.namaDriver,jenisKoreksi:'Data',kolomKoreksi:val('correctionColumn'),nilaiLama:val('correctionOld'),nilaiBaru:val('correctionNew'),alasan:val('correctionReason')},'POST');toast(r.message);closeModal('correctionModal');refreshAll()}catch(e){toast(e.message)}}
 async function approveCorrection(id){if(!isSuper())return toast('Hanya Super Admin.');try{const r=await api('approveCorrection',{correctionId:id,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}async function rejectCorrection(id){if(!isSuper())return toast('Hanya Super Admin.');const n=prompt('Catatan penolakan:','Koreksi ditolak.');try{const r=await api('rejectCorrection',{correctionId:id,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role,catatanAdmin:n||'Koreksi ditolak.'},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}
-window.addEventListener('load',()=>{boot();const c=getDeepLinkAssetCode();if(c){window.__qrAssetCode=c;setTimeout(()=>{const a=state.assets.find(a=>String(a.code||'').toUpperCase()===c);if(a){selectAsset(a.code);$('faceMessage').textContent=`QR/Barcode kendaraan terdeteksi. Pilih Driver ID dan lanjutkan login.`}},1200)}});window.addEventListener('beforeunload',stopCamera);
+window.addEventListener('load',()=>{boot();const c=new URLSearchParams(location.search).get('kode');if(c){window.__qrAssetCode=c;setTimeout(()=>{const a=state.assets.find(a=>String(a.code).toUpperCase()===String(c).toUpperCase());if(a){selectAsset(a.code);$('faceMessage').textContent=`QR kendaraan ${a.code} terdeteksi. Pilih Driver ID dan lanjutkan login.`}},1200)}});window.addEventListener('beforeunload',stopCamera);
 </script></body></html>
