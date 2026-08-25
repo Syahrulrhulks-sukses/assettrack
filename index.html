@@ -1,158 +1,5954 @@
+# AssetTrack — index.html Lengkap
+
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AssetTrack — Manajemen & Pemeriksaan Armada</title>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<style>
-:root{--bg:#fff0f6;--card:#fff;--ink:#24111b;--muted:#7a5265;--line:#f1c9da;--primary:#d81b60;--primary2:#ad1457;--dark:#4a0d28;--ok:#16803c;--warn:#d97706;--bad:#c62828}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px Arial,Helvetica,sans-serif}button,input,select,textarea{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.btn-primary{background:linear-gradient(135deg,#d81b60,#ad1457);color:#fff}.btn-ok{background:var(--ok);color:#fff}.btn-warn{background:#f59e0b;color:#fff}.btn-bad{background:var(--bad);color:#fff}.btn-soft{background:#e8eef6;color:var(--ink)}.wrap{max-width:1320px;margin:auto;padding:0 16px}.top{background:linear-gradient(135deg,#4a0d28,#d81b60);color:#fff;position:sticky;top:0;z-index:10}.topbar{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:12px}.brandmark{width:42px;height:42px;border-radius:12px;background:#fff;color:#d81b60;display:grid;place-items:center;font-size:22px}.brand h1{margin:0;font-size:21px}.brand small{opacity:.8}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.userpill{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px}.login{min-height:100vh;display:grid;place-items:center;padding:25px 14px;background:radial-gradient(circle at 15% 10%,#f8bbd0 0,#fce4ec 28%,#fff0f6 58%,#f8d7e6 100%)}.login-card{width:min(560px,100%);background:#fff;border-radius:20px;padding:24px;box-shadow:0 18px 50px rgba(15,23,42,.12)}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}.tab{background:#e8eef6}.tab.active{background:linear-gradient(135deg,#d81b60,#ad1457);color:#fff}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:12px;font-weight:700;color:#334155}.field.full{grid-column:1/-1}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px 11px;background:#fff;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(216,27,96,.12)}textarea{min-height:85px;resize:vertical}.notice{background:#fce4ec;color:#880e4f;border:1px solid #f5b6cd;padding:11px 12px;border-radius:10px;font-size:12px}.warnbox{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;padding:11px 12px;border-radius:10px;font-size:12px}.main{padding:20px 0 50px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}.stat{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:14px;padding:15px}.stat small{color:var(--muted)}.stat b{display:block;font-size:26px;margin-top:4px;color:var(--primary)}.panel{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:16px;box-shadow:0 3px 12px rgba(15,23,42,.04)}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.panel h2{font-size:18px;margin:0}.panel h3{font-size:15px;margin:18px 0 10px}.actions{display:flex;gap:8px;flex-wrap:wrap}.table{overflow:auto}table{border-collapse:collapse;width:100%;min-width:980px}th,td{border-bottom:1px solid #e5eaf1;padding:9px;text-align:left;vertical-align:top;font-size:12px}th{background:#f8fafc;position:sticky;top:0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700}.badge.ok{background:#dcfce7;color:#166534}.badge.bad{background:#fee2e2;color:#991b1b}.badge.warn{background:#fef3c7;color:#92400e}.badge.info{background:#dbeafe;color:#1e40af}.hidden{display:none!important}.side-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.side-tabs button.active{background:var(--dark);color:#fff}.asset-tools{display:grid;grid-template-columns:1fr 1fr;gap:12px}.code-box{display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;border:1px dashed #94a3b8;border-radius:12px;padding:14px;margin-top:12px;background:#f8fafc}.code-item{text-align:center}.modal{position:fixed;inset:0;background:rgba(15,23,42,.72);display:none;align-items:center;justify-content:center;padding:12px;z-index:30}.modal.show{display:flex}.modalbox{width:min(1150px,100%);max-height:95vh;overflow:auto;background:#fff;border-radius:18px;padding:20px}.modalhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.modalhead h2{margin:0}.checkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.checkitem{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcff}.media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.media{border:1px dashed #aab6c6;border-radius:10px;padding:10px;background:#f8fafc}.preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.preview img,.preview video{width:110px;height:80px;object-fit:cover;border-radius:7px}.progress{height:8px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin-top:8px}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#d81b60,#ec407a)}.toast{position:fixed;right:15px;bottom:15px;z-index:99;background:#0f172a;color:#fff;padding:12px 15px;border-radius:10px;display:none;max-width:min(460px,90%);box-shadow:0 10px 30px rgba(0,0,0,.2)}.toast.show{display:block}.empty{padding:25px;text-align:center;color:var(--muted)}.small{font-size:12px;color:var(--muted)}.sticky-actions{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding-top:12px;margin-top:15px}.camera{width:100%;max-width:520px;aspect-ratio:4/3;object-fit:cover;background:#0b1220;border-radius:14px}.camera-wrap{text-align:center}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid,.asset-tools,.checkgrid,.media-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr}.topbar{align-items:flex-start;padding:10px 0}.login-card{padding:18px}}
-.btn-primary:hover{filter:brightness(.96);transform:translateY(-1px)}.tab.active{box-shadow:0 6px 16px rgba(173,20,87,.22)}.login-card{border:1px solid rgba(216,27,96,.12)}
-</style>
-</head>
-<body>
-<div id="loginView" class="login"><div class="login-card">
-  <div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Sistem Manajemen & Pemeriksaan Armada</small></div></div>
-  <div class="tabs"><button class="tab active" id="driverTab" onclick="switchLogin('driver')">🚗 Driver</button><button class="tab" id="adminTab" onclick="switchLogin('admin')">👑 Admin</button></div>
-  <div id="driverLoginBox"><div class="grid" style="margin-top:12px"><div class="field"><label>Driver ID</label><select id="loginDriver"><option>Memuat...</option></select></div><div class="field"><label>Status Wajah</label><input id="loginFaceStatus" readonly value="Pilih driver"></div></div><div class="small" style="margin-top:8px;color:#8a3a5c">Pilih Driver ID, aktifkan kamera, lalu masuk untuk melanjutkan pemeriksaan kendaraan.</div><div class="camera-wrap" style="margin-top:12px"><video id="loginVideo" class="camera" autoplay muted playsinline></video><div class="actions" style="justify-content:center;margin-top:9px"><button class="btn-primary" onclick="startCamera('loginVideo')">📷 Kamera</button><button class="btn-ok" onclick="loginDriver()">🔐 Masuk Driver</button></div><div id="faceMessage" class="small" style="margin-top:8px">Pilih Driver ID lalu aktifkan kamera.</div></div></div>
-  <div id="adminLoginBox" class="hidden">
-  <div class="grid" style="margin-top:12px">
-    <div class="field"><label>Admin ID</label><input id="adminId" autocomplete="username"></div>
-    <div class="field"><label>Nama Admin</label><input id="adminName" autocomplete="name"></div>
-    <div class="field full"><label>PIN</label><input id="adminPin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="6 digit PIN"></div>
-  </div>
-  <div class="actions" style="margin-top:12px">
-    <button class="btn-primary" id="adminCredentialBtn" onclick="checkAdminCredentials()">👑 Lanjut ke Kamera</button>
-  </div>
 
-  <div id="adminCameraBox" class="hidden" style="margin-top:14px">
-    <div class="notice">Data login benar. Arahkan wajah ke kamera, lalu ambil foto untuk melanjutkan.</div>
-    <div class="camera-wrap" style="margin-top:10px">
-      <video id="adminLoginVideo" class="camera" autoplay muted playsinline></video>
-    </div>
-    <div class="actions" style="justify-content:center;margin-top:10px">
-      <button class="btn-primary" onclick="startCamera('adminLoginVideo')">📷 Aktifkan Kamera</button>
-      <button class="btn-ok" onclick="completeAdminLogin()">🔐 Ambil Foto & Masuk</button>
-    </div>
-    <div id="adminFaceMessage" class="small" style="margin-top:8px">Kamera belum aktif.</div>
-  </div>
-</div>
-</div></div>
-<div id="appView" class="hidden"><header class="top"><div class="wrap topbar"><div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Manajemen, Barcode, KM & Pemeriksaan Armada</small></div></div><div class="top-actions"><span id="sessionPill" class="userpill">-</span><button class="btn-bad" onclick="logout()">Keluar</button></div></div></header>
-<main class="wrap main">
-<section class="stats"><div class="stat"><small>Total Aset</small><b id="statAssets">0</b></div><div class="stat"><small>Aset Aktif</small><b id="statActive">0</b></div><div class="stat"><small>Perawatan</small><b id="statMaint">0</b></div><div class="stat"><small>Driver Aktif</small><b id="statDrivers">0</b></div><div class="stat"><small>Pemeriksaan</small><b id="statInspections">0</b></div></section>
-<section class="panel"><div class="panel-head"><div><h2>📊 Dashboard</h2><div id="welcome" class="small"></div></div><button class="btn-primary" onclick="refreshAll()">↻ Refresh</button></div><div id="driverNotice" class="notice hidden">Pilih kendaraan lalu mulai pemeriksaan.</div></section>
-<section id="adminPanel" class="panel hidden"><div class="panel-head"><h2>👑 Panel Admin</h2></div><div class="side-tabs"><button class="btn-soft active" onclick="adminTab('assets',this)">Aset</button><button class="btn-soft" onclick="adminTab('drivers',this)">Driver</button><button class="btn-soft" onclick="adminTab('admins',this)">Admin</button><button class="btn-soft" onclick="adminTab('inspections',this)">Pemeriksaan</button><button class="btn-soft" onclick="adminTab('km',this)">KM</button><button class="btn-soft" onclick="adminTab('corrections',this)">Koreksi</button><button class="btn-soft" onclick="adminTab('audit',this)">Audit</button></div>
-<div id="adminAssetsTab"><form id="assetForm"><input type="hidden" id="assetId"><div class="grid"><div class="field"><label>Kode Aset *</label><input id="assetCode" required></div><div class="field"><label>Nama Kendaraan *</label><input id="assetName" required></div><div class="field"><label>Nomor Polisi</label><input id="assetPlate"></div><div class="field"><label>Merek</label><input id="assetBrand"></div><div class="field"><label>Model / Tipe</label><input id="assetModel"></div><div class="field"><label>Tahun</label><input id="assetYear" type="number"></div><div class="field"><label>Lokasi</label><input id="assetLocation"></div><div class="field"><label>Penanggung Jawab</label><input id="assetResponsible"></div><div class="field"><label>Status</label><select id="assetStatus"><option>Aktif</option><option>Perawatan</option><option>Tidak Aktif</option></select></div><div class="field"><label>Tanggal Perolehan</label><input id="assetPurchaseDate" type="date"></div><div class="field full"><label>Catatan</label><textarea id="assetNotes"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary">💾 Simpan Aset</button><button type="button" class="btn-soft" onclick="resetAssetForm()">Reset</button></div></form><div class="table" style="margin-top:15px"><table><thead><tr><th>Kode</th><th>Kendaraan</th><th>Polisi</th><th>Merek/Model</th><th>Tahun</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="assetRows"></tbody></table></div></div>
-<div id="adminDriversTab" class="hidden"><button class="btn-primary" onclick="openDriverModal()">➕ Driver Baru</button><div class="table" style="margin-top:12px"><table><thead><tr><th>Driver ID</th><th>Nama</th><th>Email</th><th>Status</th><th>Wajah</th><th>Aksi</th></tr></thead><tbody id="driverRows"></tbody></table></div></div>
-<div id="adminAdminsTab" class="hidden"><div class="table"><table><thead><tr><th>Admin ID</th><th>Nama</th><th>Role</th><th>Status</th></tr></thead><tbody id="adminRows"></tbody></table></div></div>
-<div id="adminInspectionsTab" class="hidden"><div class="table"><table><thead><tr><th>Inspection ID</th><th>Waktu</th><th>Aset</th><th>Driver</th><th>KM Start</th><th>KM Finish</th><th>Total</th><th>Status</th></tr></thead><tbody id="inspectionRows"></tbody></table></div></div>
-<div id="adminKmTab" class="hidden"><div class="table"><table><thead><tr><th>KM ID</th><th>Timestamp</th><th>Inspection</th><th>Aset</th><th>Kendaraan</th><th>Driver</th><th>Start</th><th>Sebelum BBM</th><th>Sesudah BBM</th><th>Finish</th><th>Total</th><th>Sejak Oli</th></tr></thead><tbody id="kmRows"></tbody></table></div></div>
-<div id="adminCorrectionsTab" class="hidden"><div class="warnbox">🔒 Koreksi dilakukan melalui permintaan dan approval Super Admin.</div><div class="table" style="margin-top:12px"><table><thead><tr><th>ID</th><th>Waktu</th><th>Inspection</th><th>Kolom</th><th>Lama</th><th>Baru</th><th>Alasan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="correctionRows"></tbody></table></div></div>
-<div id="adminAuditTab" class="hidden"><div class="table"><table><thead><tr><th>Waktu</th><th>User</th><th>Role</th><th>Action</th><th>ID</th><th>Detail</th></tr></thead><tbody id="auditRows"></tbody></table></div></div></section>
-<section class="panel"><div class="panel-head"><h2>🚗 Kendaraan</h2></div><div class="asset-tools"><div class="field"><label>Cari</label><input id="assetSearch" oninput="renderAssetList()" placeholder="Kode, kendaraan, polisi..."></div><div class="field"><label>Pilih kendaraan</label><select id="assetSelect" onchange="showAssetCode()"></select></div></div><div id="assetCodeArea" class="code-box hidden"><div class="code-item"><b>QR PEMERIKSAAN</b><div id="qr" style="margin-top:8px"></div></div><div class="code-item"><b>BARCODE CODE 128</b><svg id="barcode" style="margin-top:8px"></svg></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="makeCodes()">Tampilkan QR / Barcode</button><button class="btn-ok" onclick="startSelectedInspection()">🔍 Mulai Pemeriksaan</button></div><div class="table" style="margin-top:15px"><table><thead><tr><th>Kode</th><th>Kendaraan</th><th>Polisi</th><th>Merek</th><th>Model</th><th>Tahun</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="publicAssetRows"></tbody></table></div></section>
-<section id="driverHistoryPanel" class="panel hidden"><div class="panel-head"><h2>🧾 Pemeriksaan Saya</h2></div><div class="table"><table><thead><tr><th>Inspection ID</th><th>Waktu</th><th>Aset</th><th>KM Start</th><th>KM Finish</th><th>Total KM</th><th>Status</th></tr></thead><tbody id="driverHistoryRows"></tbody></table></div></section>
-</main></div>
-<div id="inspectionModal" class="modal"><div class="modalbox"><div class="modalhead"><h2>🔍 Pemeriksaan Armada</h2><button class="btn-soft" onclick="closeModal('inspectionModal')">Tutup</button></div><div id="inspectionAssetInfo" class="notice"></div><div class="warnbox" style="margin-top:10px">🔒 Setelah dikirim, pemeriksaan, KM, GPS, foto dan video menjadi data tersimpan.</div><form id="inspectionForm"><div class="grid" style="margin-top:12px"><div class="field"><label>Inspection ID</label><input id="inspectionId" readonly value="Dibuat server"></div><div class="field"><label>Timestamp</label><input id="inspectionTimestamp" readonly></div><div class="field"><label>Driver</label><input id="inspectionDriver" readonly></div><div class="field"><label>Waktu Pemeriksaan</label><input id="inspectionTime" type="datetime-local" required></div></div><h3>🛠️ Checklist Kondisi</h3><div id="conditionGrid" class="checkgrid"></div><h3>📸 Foto</h3><div id="photoGrid" class="media-grid"></div><h3>🎥 Video</h3><div id="videoGrid" class="media-grid"></div><h3>📍 GPS & KM</h3><div class="grid"><div class="field"><label>Latitude *</label><input id="latitude" readonly></div><div class="field"><label>Longitude *</label><input id="longitude" readonly></div><div class="field"><label>Akurasi GPS (m)</label><input id="gpsAccuracy" readonly></div><div class="field"><label>Label lokasi</label><input id="gpsLabel"></div><div class="field"><label>KM Start *</label><input id="kmStart" type="number" min="0" step="1" required></div><div class="field"><label>KM Sebelum Isi Bensin</label><input id="kmBeforeFuel" type="number" min="0" step="1"></div><div class="field"><label>KM Sesudah Isi Bensin</label><input id="kmAfterFuel" type="number" min="0" step="1"></div><div class="field"><label>KM Finish *</label><input id="kmFinish" type="number" min="0" step="1" required></div><div class="field"><label>KM Ganti Oli</label><input id="kmOilChange" type="number" min="0" step="1"></div><div class="field full"><label>Catatan</label><textarea id="inspectionNotes"></textarea></div></div><div class="progress"><i id="uploadProgress"></i></div><div id="uploadText" class="small" style="margin-top:5px"></div><div class="sticky-actions actions"><button class="btn-ok" id="submitInspection">🔒 Kunci & Kirim</button><button type="button" class="btn-soft" onclick="closeModal('inspectionModal')">Batal</button></div></form></div></div>
-<div id="driverModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><h2>👤 Driver Baru</h2><button class="btn-soft" onclick="closeModal('driverModal')">Tutup</button></div><div class="grid"><div class="field"><label>Driver ID</label><input id="newDriverId" placeholder="Otomatis jika kosong"></div><div class="field"><label>Nama *</label><input id="newDriverName"></div><div class="field"><label>Email</label><input id="newDriverEmail" type="email"></div><div class="field"><label>No HP</label><input id="newDriverPhone"></div><div class="field"><label>Status</label><select id="newDriverStatus"><option>Aktif</option><option>Tidak Aktif</option></select></div><div class="field full"><label>Keterangan</label><textarea id="newDriverNote"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="saveDriver()">Simpan Driver</button></div></div></div>
-<div id="faceModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><h2>📷 Daftar Foto Wajah Driver</h2><button class="btn-soft" onclick="closeFaceModal()">Tutup</button></div><div class="notice">Ambil satu foto wajah yang jelas. Foto disimpan ke Google Drive.</div><div class="camera-wrap" style="margin-top:12px"><video id="faceVideo" class="camera" autoplay muted playsinline></video></div><div class="actions" style="justify-content:center;margin-top:10px"><button class="btn-primary" onclick="startCamera('faceVideo')">Aktifkan Kamera</button><button class="btn-ok" onclick="registerFaceNow()">Simpan Foto Wajah</button></div><div id="faceRegisterInfo" class="small" style="margin-top:8px"></div></div></div>
-<div id="correctionModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><h2>✏️ Ajukan Koreksi</h2><button class="btn-soft" onclick="closeModal('correctionModal')">Tutup</button></div><div id="correctionInfo" class="notice"></div><div class="grid" style="margin-top:12px"><div class="field full"><label>Kolom yang dikoreksi</label><select id="correctionColumn"></select></div><div class="field"><label>Nilai Lama</label><input id="correctionOld" readonly></div><div class="field"><label>Nilai Baru</label><input id="correctionNew"></div><div class="field full"><label>Alasan</label><textarea id="correctionReason"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="submitCorrection()">Kirim Koreksi</button></div></div></div>
-<div id="toast" class="toast"></div>
-<script>
-const API_URL='https://script.google.com/macros/s/AKfycby29V9fghZIGV0P1ic3MVwb7811hF9MhRUNqf7Z5p7fZJgJ3LyJ-AIsZRhi-IaRnB96GA/exec';
-const CONDITIONS=[['oliMesin','Oli Mesin'],['oliPowerSteering','Oli Power Steering'],['taliKipasVbelt','Tali Kipas / V-Belt'],['aki','Aki'],['banKiriDepan','Ban Kiri Depan'],['banKiriBelakang','Ban Kiri Belakang'],['banKananDepan','Ban Kanan Depan'],['banKananBelakang','Ban Kanan Belakang'],['banSerep','Ban Serep'],['kunciRodaDongkrak','Kunci Roda & Dongkrak'],['rem','Rem'],['kopling','Kopling'],['setir','Setir'],['klakson','Klakson'],['sabukPengaman','Sabuk Pengaman']];
-const PHOTO_CONFIG={body:['Foto Body Mobil','body'],radiator:['Foto Radiator','radiator'],reservoirRadiator:['Foto Reservoir Radiator','reservoirRadiator'],minyakRem:['Foto Minyak Rem','minyakRem'],stikOli:['Foto Stik Oli','stikOli'],banKiriDepan:['Foto Ban Kiri Depan','banKiriDepan'],banKiriBelakang:['Foto Ban Kiri Belakang','banKiriBelakang'],banKananDepan:['Foto Ban Kanan Depan','banKananDepan'],banKananBelakang:['Foto Ban Kanan Belakang','banKananBelakang'],banSerep:['Foto Ban Serep','banSerep'],kunciRodaDongkrak:['Foto Kunci Roda & Dongkrak','kunciRodaDongkrak'],interiorBox:['Foto Interior Box','interiorBox'],sisiDalamBak:['Foto Sisi Dalam Bak','sisiDalamBak'],kmStart:['Foto KM Start','kmStart'],kmSebelumIsiBensin:['Foto KM Sebelum Isi Bensin','kmSebelumIsiBensin'],kmSesudahIsiBensin:['Foto KM Sesudah Isi Bensin','kmSesudahIsiBensin'],kmFinishAkhir:['Foto KM Finish Akhir','kmFinishAkhir']};
-const VIDEO_CONFIG={lampuUtama:['Video Lampu Utama','lampuUtama'],lampuRem:['Video Lampu Rem','lampuRem'],lampuSein:['Video Lampu Sein','lampuSein'],bodyLecet:['Video Body Mobil Lecet','bodyLecet'],interior:['Video Interior','interior'],kerusakanUrgent:['Video Kerusakan yang Urgent','kerusakanUrgent']};
-let state={assets:[],drivers:[],admins:[],inspections:[],km:[],corrections:[],audit:[],session:null,currentAsset:null,stream:null,faceDriverId:null,pendingAdmin:null};
-let correctionInspectionId=null;
-const $=id=>document.getElementById(id),val=id=>$(id)?.value??'',esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),4500)}
-function formatDate(v){if(!v)return'-';const d=new Date(v);return isNaN(d.getTime())?String(v):d.toLocaleString('id-ID')}
-function badge(v){const s=String(v||'').toLowerCase();let c=s.includes('aktif')&&!s.includes('tidak')?'ok':s.includes('perawatan')||s.includes('menunggu')?'warn':s.includes('tidak')||s.includes('ditolak')?'bad':'info';return `<span class="badge ${c}">${esc(v||'-')}</span>`}
-function switchLogin(t){$('driverLoginBox').classList.toggle('hidden',t!=='driver');$('adminLoginBox').classList.toggle('hidden',t!=='admin');$('driverTab').classList.toggle('active',t==='driver');$('adminTab').classList.toggle('active',t==='admin')}
-function nowLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
-async function api(action,payload={},method='GET'){let u=API_URL+'?action='+encodeURIComponent(action)+'&ts='+Date.now();const o={method};if(method==='POST'){o.headers={'Content-Type':'text/plain;charset=utf-8'};o.body=JSON.stringify({...payload,action})}const r=await fetch(u,o);const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){throw new Error('Backend tidak mengembalikan JSON: '+t.slice(0,220))}if(!j.success)throw new Error(j.message||'Permintaan gagal');return j}
-async function boot(){
-  try{const d=await api('drivers');state.drivers=normalizeDrivers(d.drivers);populateDriverLogin();$('loginFaceStatus').value=state.drivers.length?`${state.drivers.length} driver tersedia`:'Belum ada driver';console.log('AssetTrack drivers:',state.drivers)}catch(e){console.error('drivers:',e);$('loginFaceStatus').value='Gagal memuat driver';$('faceMessage').textContent='Gagal memuat Driver ID: '+e.message}
-  try{const a=await api('assets');state.assets=a.assets||[];renderAssetList();renderStats()}catch(e){toast('Backend aset: '+e.message);console.error('assets:',e)}
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+<style>
+*{
+  box-sizing:border-box;
 }
-function driverIdOf(d){return String(d?.driverId??d?.id??d?.['Driver ID']??'').trim()}
-function driverNameOf(d){return String(d?.name??d?.namaDriver??d?.['Nama Driver']??'').trim()}
-function driverStatusOf(d){return String(d?.status??d?.statusDriver??d?.['Status']??d?.['Status Driver']??'Aktif').trim()}
-function driverIsActive(d){const s=driverStatusOf(d).toLowerCase().replace(/[ _-]+/g,' ').trim();return !s||['aktif','active','1','true','ya'].includes(s)}
-function driverFaceOf(d){return String(d?.faceStatus??d?.['Face Status']??'Belum Terdaftar').trim()}
-function normalizeDrivers(rows){return (Array.isArray(rows)?rows:[]).map(d=>typeof d==='string'?{driverId:d,name:d,status:'Aktif',faceStatus:'Belum Terdaftar'}:{...d,driverId:driverIdOf(d),name:driverNameOf(d),status:driverStatusOf(d),faceStatus:driverFaceOf(d)}).filter(d=>d.driverId||d.name)}
-function populateDriverLogin(){const s=$('loginDriver');const rows=state.drivers.filter(d=>driverIdOf(d)||driverNameOf(d));s.innerHTML='<option value="">Pilih Driver</option>'+rows.map(d=>{const id=driverIdOf(d),name=driverNameOf(d)||id,status=driverStatusOf(d);return `<option value="${esc(id)}">${esc(id)} — ${esc(name)}${driverIsActive(d)?'':' — '+esc(status)}</option>`}).join('');s.onchange=()=>{const d=state.drivers.find(x=>driverIdOf(x)===s.value);$('loginFaceStatus').value=d?driverFaceOf(d):'Pilih driver';if(d)$('faceMessage').textContent=`Driver ${driverNameOf(d)||driverIdOf(d)} dipilih. Aktifkan kamera lalu masuk.`}}
-async function checkAdminCredentials(){
-  const id=val('adminId').trim(), name=val('adminName').trim(), pin=val('adminPin').trim();
-  if(!id||!name||!pin)return toast('Admin ID, Nama Admin dan PIN wajib.');
-  try{
-    const r=await api('adminLogin',{adminId:id,namaAdmin:name,pin},'POST');
-    state.pendingAdmin={...r.admin};
-    $('adminCameraBox').classList.remove('hidden');
-    $('adminFaceMessage').textContent='Data login benar. Aktifkan kamera untuk mengambil foto.';
-    await startCamera('adminLoginVideo');
-  }catch(e){toast(e.message)}
+
+:root{
+  --pink:#c2185b;
+  --pink2:#e91e63;
+  --pink3:#fce4ec;
+  --pink4:#fff5f8;
+  --dark:#263238;
+  --gray:#607d8b;
+  --light:#f5f7fa;
+  --white:#fff;
+  --green:#2e7d32;
+  --red:#c62828;
+  --orange:#ef6c00;
+  --blue:#1565c0;
+  --border:#d9dee5;
+  --shadow:0 8px 25px rgba(0,0,0,.08);
 }
-async function completeAdminLogin(){
-  if(!state.pendingAdmin)return toast('Validasi ID, Nama Admin, dan PIN terlebih dahulu.');
-  if(!state.stream)await startCamera('adminLoginVideo');
-  try{
-    const data=captureFrame('adminLoginVideo');
-    const r=await api('adminPhotoLogin',{
-      adminId:state.pendingAdmin.adminId||state.pendingAdmin.id,
-      namaAdmin:state.pendingAdmin.name||state.pendingAdmin.namaAdmin,
-      data:data
-    },'POST');
-    state.session={...r.admin};
-    state.pendingAdmin=null;
-    stopCamera();
-    enterApp();
-  }catch(e){
-    $('adminFaceMessage').textContent=e.message;
-    toast(e.message);
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#fff5f8;
+  color:var(--dark);
+}
+
+button,
+input,
+select,
+textarea{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.app{
+  min-height:100vh;
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+#loginPage{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at top left,#f8bbd0,transparent 35%),
+    linear-gradient(135deg,#fff5f8,#fce4ec);
+}
+
+.login-card{
+  width:100%;
+  max-width:470px;
+  background:white;
+  border-radius:24px;
+  padding:28px;
+  box-shadow:0 18px 55px rgba(194,24,91,.18);
+}
+
+.logo{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.logo-icon{
+  font-size:42px;
+}
+
+.logo h1{
+  margin:5px 0;
+  color:var(--pink);
+  font-size:28px;
+}
+
+.logo p{
+  color:var(--gray);
+  margin:0;
+}
+
+.login-tabs{
+  display:flex;
+  gap:8px;
+  margin:20px 0;
+}
+
+.login-tabs button{
+  flex:1;
+  border:0;
+  padding:13px;
+  border-radius:12px;
+  background:#edf2f7;
+  font-weight:bold;
+  color:#455a64;
+}
+
+.login-tabs button.active{
+  background:var(--pink);
+  color:white;
+}
+
+.login-panel{
+  margin-top:10px;
+}
+
+.form-group{
+  margin-bottom:15px;
+}
+
+.form-group label{
+  display:block;
+  font-weight:bold;
+  font-size:14px;
+  margin-bottom:7px;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:12px 13px;
+  border:1px solid #cfd8dc;
+  border-radius:10px;
+  outline:none;
+  background:white;
+  font-size:14px;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:var(--pink);
+  box-shadow:0 0 0 3px rgba(194,24,91,.08);
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.primary-btn{
+  width:100%;
+  border:0;
+  padding:13px 16px;
+  background:var(--pink);
+  color:white;
+  border-radius:11px;
+  font-weight:bold;
+  font-size:15px;
+}
+
+.primary-btn:hover{
+  background:#ad1457;
+}
+
+.secondary-btn{
+  border:0;
+  padding:11px 15px;
+  border-radius:10px;
+  background:#eceff1;
+  color:#37474f;
+  font-weight:bold;
+}
+
+.danger-btn{
+  border:0;
+  padding:10px 14px;
+  border-radius:9px;
+  background:#ffebee;
+  color:var(--red);
+  font-weight:bold;
+}
+
+.success-btn{
+  border:0;
+  padding:10px 14px;
+  border-radius:9px;
+  background:#e8f5e9;
+  color:var(--green);
+  font-weight:bold;
+}
+
+.info-box{
+  padding:12px;
+  border-radius:10px;
+  background:var(--pink3);
+  color:#ad1457;
+  font-size:13px;
+  margin-bottom:15px;
+}
+
+.camera-box{
+  border:2px dashed #ec407a;
+  border-radius:14px;
+  padding:12px;
+  background:#fff8fa;
+  text-align:center;
+  margin:15px 0;
+}
+
+.camera-box video{
+  width:100%;
+  max-height:280px;
+  border-radius:12px;
+  background:#222;
+  object-fit:cover;
+}
+
+.camera-buttons{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.camera-buttons button{
+  flex:1;
+}
+
+.photo-preview{
+  width:100%;
+  max-height:240px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-top:10px;
+  display:none;
+}
+
+.login-status{
+  margin-top:12px;
+  font-size:13px;
+  text-align:center;
+}
+
+/* =========================
+   APP LAYOUT
+========================= */
+
+#appPage{
+  display:none;
+  min-height:100vh;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:white;
+  border-bottom:1px solid #eee;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+
+.topbar-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.menu-btn{
+  border:0;
+  background:var(--pink3);
+  color:var(--pink);
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  font-size:20px;
+}
+
+.brand{
+  font-weight:bold;
+  color:var(--pink);
+  font-size:19px;
+}
+
+.user-info{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.user-avatar{
+  width:38px;
+  height:38px;
+  background:var(--pink);
+  color:white;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+.user-text{
+  font-size:13px;
+}
+
+.user-text strong{
+  display:block;
+}
+
+.user-text span{
+  color:var(--gray);
+}
+
+.sidebar{
+  position:fixed;
+  top:64px;
+  left:0;
+  bottom:0;
+  width:245px;
+  background:white;
+  border-right:1px solid #eee;
+  padding:15px 10px;
+  z-index:40;
+  overflow-y:auto;
+  transition:.2s;
+}
+
+.sidebar.closed{
+  transform:translateX(-100%);
+}
+
+.nav-section{
+  margin:8px 0;
+  padding:8px 12px;
+  font-size:11px;
+  text-transform:uppercase;
+  color:#90a4ae;
+  font-weight:bold;
+}
+
+.nav-btn{
+  width:100%;
+  border:0;
+  background:transparent;
+  padding:12px;
+  border-radius:10px;
+  text-align:left;
+  color:#455a64;
+  font-weight:bold;
+  margin-bottom:3px;
+}
+
+.nav-btn:hover,
+.nav-btn.active{
+  background:var(--pink3);
+  color:var(--pink);
+}
+
+.main{
+  margin-left:245px;
+  padding:22px;
+  transition:.2s;
+}
+
+.main.full{
+  margin-left:0;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+.page-title{
+  margin-bottom:20px;
+}
+
+.page-title h2{
+  margin:0 0 5px;
+  color:#37474f;
+}
+
+.page-title p{
+  margin:0;
+  color:#78909c;
+  font-size:14px;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.stat-card{
+  background:white;
+  border-radius:15px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.stat-card .label{
+  color:#78909c;
+  font-size:13px;
+}
+
+.stat-card .number{
+  font-size:29px;
+  font-weight:bold;
+  margin-top:7px;
+  color:var(--pink);
+}
+
+.panel{
+  background:white;
+  border-radius:15px;
+  padding:18px;
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
+}
+
+.panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.panel-header h3{
+  margin:0;
+  color:#455a64;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+
+.toolbar input,
+.toolbar select{
+  max-width:250px;
+}
+
+.toolbar button{
+  width:auto;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrap{
+  overflow:auto;
+  border:1px solid #eceff1;
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:800px;
+}
+
+th,
+td{
+  padding:10px 11px;
+  border-bottom:1px solid #eceff1;
+  text-align:left;
+  font-size:13px;
+  vertical-align:middle;
+}
+
+th{
+  background:#fafafa;
+  color:#546e7a;
+  white-space:nowrap;
+}
+
+tr:hover td{
+  background:#fff9fb;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.badge.green{
+  background:#e8f5e9;
+  color:#2e7d32;
+}
+
+.badge.red{
+  background:#ffebee;
+  color:#c62828;
+}
+
+.badge.orange{
+  background:#fff3e0;
+  color:#ef6c00;
+}
+
+.badge.blue{
+  background:#e3f2fd;
+  color:#1565c0;
+}
+
+/* =========================
+   FORM GRID
+========================= */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.form-grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+.full-width{
+  grid-column:1/-1;
+}
+
+.section-title{
+  grid-column:1/-1;
+  margin-top:8px;
+  padding:10px 12px;
+  background:var(--pink3);
+  color:#ad1457;
+  border-radius:9px;
+  font-weight:bold;
+}
+
+.form-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:18px;
+}
+
+.form-actions button{
+  width:auto;
+}
+
+/* =========================
+   BARCODE
+========================= */
+
+.barcode-card{
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  text-align:center;
+  box-shadow:var(--shadow);
+}
+
+.barcode-card svg{
+  max-width:100%;
+  height:auto;
+}
+
+.barcode-info{
+  margin-top:10px;
+  font-weight:bold;
+}
+
+/* =========================
+   MEDIA
+========================= */
+
+.media-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.media-item{
+  border:1px solid #eceff1;
+  border-radius:10px;
+  padding:12px;
+}
+
+.media-item label{
+  display:block;
+  font-size:13px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.media-item input{
+  padding:8px;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:100;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-content{
+  background:white;
+  border-radius:18px;
+  width:100%;
+  max-width:700px;
+  max-height:90vh;
+  overflow:auto;
+  padding:20px;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.modal-header h3{
+  margin:0;
+}
+
+.close-btn{
+  border:0;
+  background:#eceff1;
+  border-radius:8px;
+  width:36px;
+  height:36px;
+}
+
+/* =========================
+   TOAST
+========================= */
+
+#toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:200;
+  max-width:380px;
+  display:none;
+}
+
+.toast-inner{
+  padding:14px 16px;
+  border-radius:11px;
+  color:white;
+  box-shadow:var(--shadow);
+  font-size:14px;
+}
+
+.toast-success{
+  background:#2e7d32;
+}
+
+.toast-error{
+  background:#c62828;
+}
+
+.toast-info{
+  background:#1565c0;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1000px){
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .form-grid-3{
+    grid-template-columns:1fr 1fr;
   }
 }
-async function loginDriver(){const id=val('loginDriver');if(!id)return toast('Pilih Driver ID.');try{if(!state.stream)await startCamera('loginVideo');const data=captureFrame('loginVideo');const r=await api('driverLogin',{driverId:id,data},'POST');state.session={...r.driver};enterApp()}catch(e){$('faceMessage').textContent=e.message;toast(e.message)}}
-function enterApp(){$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');const role=String(state.session?.role||'').toUpperCase();$('sessionPill').textContent=`${state.session?.name||state.session?.namaAdmin||''} • ${role}`;$('welcome').textContent=`Selamat datang, ${state.session?.name||state.session?.namaAdmin||''}.`;$('adminPanel').classList.toggle('hidden',!['ADMIN','SUPER_ADMIN'].includes(role));$('driverHistoryPanel').classList.toggle('hidden',role!=='DRIVER');$('driverNotice').classList.toggle('hidden',role!=='DRIVER');stopCamera();refreshAll()}
-function logout(){state.session=null;state.pendingAdmin=null;state.currentAsset=null;stopCamera();$('appView').classList.add('hidden');$('loginView').classList.remove('hidden');$('adminCameraBox').classList.add('hidden');switchLogin('driver')}
-function isAdmin(){return['ADMIN','SUPER_ADMIN'].includes(String(state.session?.role||'').toUpperCase())}function isSuper(){return String(state.session?.role||'').toUpperCase()==='SUPER_ADMIN'}function isDriver(){return String(state.session?.role||'').toUpperCase()==='DRIVER'}
-async function refreshAll(){try{const a=await api('assets');state.assets=a.assets||[];renderStats();renderAssetList();const d=await api('drivers');state.drivers=normalizeDrivers(d.drivers);populateDriverLogin();if(isAdmin()){state.admins=(await api('admins')).admins||[];state.inspections=(await api('inspections')).rows||[];state.km=(await api('km')).rows||[];state.corrections=(await api('corrections')).rows||[];state.audit=(await api('audit')).rows||[];renderAssetsAdmin();renderDrivers();renderAdmins();renderInspections();renderKM();renderCorrections();renderAudit()}else if(isDriver()){state.inspections=(await api('inspections')).rows||[];renderDriverHistory()}$('statInspections').textContent=state.inspections.length}catch(e){toast(e.message)}}
-function renderStats(){$('statAssets').textContent=state.assets.length;$('statActive').textContent=state.assets.filter(a=>String(a.status).toLowerCase()==='aktif').length;$('statMaint').textContent=state.assets.filter(a=>String(a.status).toLowerCase().includes('perawatan')).length;$('statDrivers').textContent=state.drivers.filter(d=>driverStatusOf(d).toLowerCase()==='aktif').length;$('statInspections').textContent=state.inspections.length}
-function renderAssetList(){const q=val('assetSearch').toLowerCase();const list=state.assets.filter(a=>!q||[a.code,a.name,a.plate,a.location,a.brand,a.model].some(v=>String(v||'').toLowerCase().includes(q)));$('assetSelect').innerHTML='<option value="">Pilih kendaraan</option>'+list.map(a=>`<option value="${esc(a.code)}">${esc(a.code)} — ${esc(a.name)}</option>`).join('');$('publicAssetRows').innerHTML=list.map(a=>`<tr><td><b>${esc(a.code)}</b></td><td>${esc(a.name)}</td><td>${esc(a.plate)}</td><td>${esc(a.brand)}</td><td>${esc(a.model)}</td><td>${esc(a.year)}</td><td>${esc(a.location)}</td><td>${badge(a.status)}</td><td><div class="actions"><button class="btn-primary" onclick="selectAsset('${esc(a.code)}')">Pilih</button><button class="btn-ok" onclick="startInspectionByCode('${esc(a.code)}')">Periksa</button></div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Tidak ada aset.</td></tr>'}
-function selectAsset(code){$('assetSelect').value=code;showAssetCode()}function getSelectedAsset(){return state.assets.find(a=>a.code===val('assetSelect'))||null}function showAssetCode(){const a=getSelectedAsset();if(!a){$('assetCodeArea').classList.add('hidden');return}state.currentAsset=a;makeCodes()}
-function makeCodes(){const a=getSelectedAsset()||state.currentAsset;if(!a)return toast('Pilih kendaraan.');$('assetCodeArea').classList.remove('hidden');$('qr').innerHTML='';new QRCode($('qr'),{text:location.origin+location.pathname+'?kode='+encodeURIComponent(a.code),width:150,height:150});try{JsBarcode('#barcode',a.code,{format:'CODE128',displayValue:true,width:2,height:65,margin:8})}catch(e){toast(e.message)}}
-function startSelectedInspection(){const a=getSelectedAsset();if(!a)return toast('Pilih kendaraan dulu.');startInspection(a)}function startInspectionByCode(c){const a=state.assets.find(x=>x.code===c);if(a)startInspection(a)}
-function startInspection(a){if(!isDriver())return toast('Pemeriksaan dilakukan oleh Driver setelah login.');state.currentAsset=a;$('inspectionAssetInfo').innerHTML=`<b>${esc(a.code)}</b> — ${esc(a.name)} | Polisi: ${esc(a.plate||'-')}`;$('inspectionDriver').value=`${state.session.driverId||state.session.id} — ${state.session.name||state.session.namaDriver}`;$('inspectionTime').value=nowLocal();$('inspectionTimestamp').value=new Date().toLocaleString('id-ID');buildConditions();buildMedia();$('inspectionModal').classList.add('show');getGPS()}
-function buildConditions(){$('conditionGrid').innerHTML=CONDITIONS.map(([k,l])=>`<div class="checkitem"><b>${esc(l)}</b><select data-condition="${k}"><option value="">Pilih</option><option>Baik</option><option>Perlu Perhatian</option><option>Rusak</option><option>Tidak Ada</option></select></div>`).join('')}
-function buildMedia(){$('photoGrid').innerHTML=Object.entries(PHOTO_CONFIG).map(([k,[l,c]])=>`<div class="media"><b>${esc(l)}</b><input type="file" accept="image/*" capture="environment" data-photo="${c}"><div class="preview" id="p-${c}"></div></div>`).join('');$('videoGrid').innerHTML=Object.entries(VIDEO_CONFIG).map(([k,[l,c]])=>`<div class="media"><b>${esc(l)}</b><input type="file" accept="video/*" capture="environment" data-video="${c}"><div class="preview" id="v-${c}"></div></div>`).join('');document.querySelectorAll('[data-photo]').forEach(x=>x.onchange=()=>previewFile(x,'p-'+x.dataset.photo,false));document.querySelectorAll('[data-video]').forEach(x=>x.onchange=()=>previewFile(x,'v-'+x.dataset.video,true))}
-function previewFile(i,target,video){const f=i.files?.[0],b=$(target);b.innerHTML='';if(!f)return;const u=URL.createObjectURL(f),e=document.createElement(video?'video':'img');e.src=u;if(video){e.controls=true;e.muted=true}b.appendChild(e)}
-function getGPS(){if(!navigator.geolocation)return toast('Browser tidak mendukung GPS.');navigator.geolocation.getCurrentPosition(p=>{$('latitude').value=p.coords.latitude;$('longitude').value=p.coords.longitude;$('gpsAccuracy').value=p.coords.accuracy.toFixed(1)},e=>toast('GPS: '+e.message),{enableHighAccuracy:true,timeout:15000,maximumAge:0})}
-function captureFrame(id){const v=$(id),c=document.createElement('canvas');c.width=v.videoWidth||640;c.height=v.videoHeight||480;c.getContext('2d').drawImage(v,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.82)}
-async function startCamera(id){try{stopCamera();state.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});$(id).srcObject=state.stream;await $(id).play();toast('Kamera aktif.')}catch(e){toast('Kamera gagal: '+e.message)}}function stopCamera(){if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null}}
-async function fileData(f,max){if(!f)return null;if(f.size>max)throw new Error(f.name+' melebihi batas '+Math.round(max/1024/1024)+' MB.');return await new Promise((ok,bad)=>{const r=new FileReader();r.onload=()=>ok({data:r.result,type:f.type||'application/octet-stream',name:f.name});r.onerror=bad;r.readAsDataURL(f)})}
-async function mediaMap(sel,max){const o={};for(const x of document.querySelectorAll(sel)){const f=x.files?.[0];if(f)o[x.dataset.photo||x.dataset.video]=[await fileData(f,max)]}return o}
-$('inspectionForm').addEventListener('submit',async e=>{e.preventDefault();if(!state.currentAsset||!isDriver())return toast('Sesi driver tidak valid.');if(!val('latitude')||!val('longitude'))return toast('GPS wajib tersedia.');if(Number(val('kmFinish'))<Number(val('kmStart')))return toast('KM Finish tidak boleh lebih kecil dari KM Start.');try{const conditions={};document.querySelectorAll('[data-condition]').forEach(x=>conditions[x.dataset.condition]=x.value);const photos=await mediaMap('[data-photo]',8*1024*1024),videos=await mediaMap('[data-video]',20*1024*1024);const r=await api('saveInspection',{kodeAset:state.currentAsset.code,driverId:state.session.driverId||state.session.id,namaDriver:state.session.name||state.session.namaDriver,waktuPemeriksaan:val('inspectionTime'),latitude:val('latitude'),longitude:val('longitude'),gpsAccuracy:val('gpsAccuracy'),gpsLabel:val('gpsLabel'),kmStart:val('kmStart'),kmBeforeFuel:val('kmBeforeFuel'),kmAfterFuel:val('kmAfterFuel'),kmFinishAkhir:val('kmFinish'),kmOilChange:val('kmOilChange'),conditions,statusPemeriksaan:'Selesai',catatan:val('inspectionNotes'),media:{...photos,...videos}},'POST');toast(r.message);closeModal('inspectionModal');refreshAll()}catch(e){toast(e.message)}})
-function closeModal(id){$(id).classList.remove('show');if(id==='inspectionModal')stopCamera()}function adminTab(n,b){['assets','drivers','admins','inspections','km','corrections','audit'].forEach(x=>$('admin'+x[0].toUpperCase()+x.slice(1)+'Tab').classList.toggle('hidden',x!==n));document.querySelectorAll('.side-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
-$('assetForm').addEventListener('submit',async e=>{e.preventDefault();try{const r=await api('saveAsset',{id:val('assetId'),code:val('assetCode'),name:val('assetName'),plate:val('assetPlate'),brand:val('assetBrand'),model:val('assetModel'),year:val('assetYear'),location:val('assetLocation'),responsible:val('assetResponsible'),status:val('assetStatus'),purchaseDate:val('assetPurchaseDate'),notes:val('assetNotes'),userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);resetAssetForm();refreshAll()}catch(e){toast(e.message)}})
-function renderAssetsAdmin(){$('assetRows').innerHTML=state.assets.map(a=>`<tr><td>${esc(a.code)}</td><td>${esc(a.name)}</td><td>${esc(a.plate)}</td><td>${esc(a.brand)} / ${esc(a.model)}</td><td>${esc(a.year)}</td><td>${esc(a.location)}</td><td>${badge(a.status)}</td><td><button class="btn-soft" onclick="editAsset('${esc(a.id)}')">Edit</button> <button class="btn-bad" onclick="deleteAsset('${esc(a.id)}','${esc(a.code)}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan="8" class="empty">Belum ada aset.</td></tr>'}
-function editAsset(id){const a=state.assets.find(x=>x.id===id);if(!a)return;$('assetId').value=a.id;$('assetCode').value=a.code;$('assetName').value=a.name;$('assetPlate').value=a.plate;$('assetBrand').value=a.brand;$('assetModel').value=a.model;$('assetYear').value=a.year;$('assetLocation').value=a.location;$('assetResponsible').value=a.responsible;$('assetStatus').value=a.status||'Aktif';$('assetPurchaseDate').value=(a.purchaseDate||'').slice(0,10);$('assetNotes').value=a.notes||''}function resetAssetForm(){['assetId','assetCode','assetName','assetPlate','assetBrand','assetModel','assetYear','assetLocation','assetResponsible','assetPurchaseDate','assetNotes'].forEach(i=>$(i).value='');$('assetStatus').value='Aktif'}
-async function deleteAsset(id,code){if(!confirm('Hapus aset '+code+'?'))return;try{const r=await api('deleteAsset',{id,code,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}
-function renderDrivers(){$('driverRows').innerHTML=state.drivers.map(d=>{const id=driverIdOf(d),name=driverNameOf(d)||id;return `<tr><td>${esc(id)}</td><td>${esc(name)}</td><td>${esc(d.email??d['Email']??'')}</td><td>${badge(driverStatusOf(d))}</td><td>${badge(driverFaceOf(d))}</td><td><button class="btn-primary" onclick="openFaceModal('${esc(id)}')">📷 Foto Wajah</button></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Belum ada driver.</td></tr>'}
-function renderAdmins(){$('adminRows').innerHTML=state.admins.map(a=>`<tr><td>${esc(a.adminId)}</td><td>${esc(a.name)}</td><td>${esc(a.role)}</td><td>${badge(a.status)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">Belum ada admin.</td></tr>'}
-function renderInspections(){$('inspectionRows').innerHTML=state.inspections.slice().reverse().map(x=>`<tr><td>${esc(x['Inspection ID'])}</td><td>${esc(formatDate(x['Waktu Pemeriksaan']||x['Timestamp']))}</td><td>${esc(x['Kode Aset'])}<br>${esc(x['Nomor Polisi'])}</td><td>${esc(x['Driver ID'])} — ${esc(x['Nama Driver'])}</td><td>${esc(x['KM Start'])}</td><td>${esc(x['KM Finish Akhir'])}</td><td>${esc(x['KM Total Perjalanan'])}</td><td>${badge(x['Status Pemeriksaan'])}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">Belum ada pemeriksaan.</td></tr>'}
-function renderKM(){$('kmRows').innerHTML=state.km.slice().reverse().map(x=>`<tr><td>${esc(x['KM ID'])}</td><td>${esc(formatDate(x['Timestamp']))}</td><td>${esc(x['Inspection ID'])}</td><td>${esc(x['Kode Aset'])}</td><td>${esc(x['Nama Kendaraan'])}</td><td>${esc(x['Driver ID'])} — ${esc(x['Nama Driver'])}</td><td>${esc(x['KM Start'])}</td><td>${esc(x['KM Sebelum Isi Bensin'])}</td><td>${esc(x['KM Sesudah Isi Bensin'])}</td><td>${esc(x['KM Finish Akhir'])}</td><td>${esc(x['KM Total Perjalanan'])}</td><td>${esc(x['KM Sejak Ganti Oli'])}</td></tr>`).join('')||'<tr><td colspan="12" class="empty">Belum ada data KM.</td></tr>'}
-function renderCorrections(){$('correctionRows').innerHTML=state.corrections.slice().reverse().map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(formatDate(x.timestamp))}</td><td>${esc(x.inspectionId)}</td><td>${esc(x['Kolom Koreksi']||x.type)}</td><td>${esc(x.oldValue)}</td><td>${esc(x.newValue)}</td><td>${esc(x.reason)}</td><td>${badge(x.status)}</td><td>${x.status==='Menunggu Approval'&&isSuper()?`<button class="btn-ok" onclick="approveCorrection('${esc(x.id)}')">Setujui</button> <button class="btn-bad" onclick="rejectCorrection('${esc(x.id)}')">Tolak</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">Tidak ada koreksi.</td></tr>'}
-function renderAudit(){$('auditRows').innerHTML=state.audit.slice().reverse().map(x=>`<tr><td>${esc(formatDate(x['Timestamp']))}</td><td>${esc(x['User ID'])} — ${esc(x['User Name'])}</td><td>${esc(x['Role'])}</td><td>${esc(x['Action'])}</td><td>${esc(x['Target ID'])}</td><td>${esc(x['Keterangan'])}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Belum ada audit.</td></tr>'}
-function renderDriverHistory(){const id=state.session?.driverId||state.session?.id;const rows=state.inspections.filter(x=>String(x['Driver ID'])===String(id)).slice().reverse();$('driverHistoryRows').innerHTML=rows.map(x=>`<tr><td>${esc(x['Inspection ID'])}</td><td>${esc(formatDate(x['Waktu Pemeriksaan']||x['Timestamp']))}</td><td>${esc(x['Kode Aset'])} — ${esc(x['Nama Kendaraan'])}</td><td>${esc(x['KM Start'])}</td><td>${esc(x['KM Finish Akhir'])}</td><td>${esc(x['KM Total Perjalanan'])}</td><td>${badge(x['Status Pemeriksaan'])}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">Belum ada pemeriksaan.</td></tr>'}
-function openDriverModal(){$('driverModal').classList.add('show')}function closeFaceModal(){closeModal('faceModal');state.faceDriverId=null}function openFaceModal(id){state.faceDriverId=id;$('faceRegisterInfo').textContent='Driver: '+id;$('faceModal').classList.add('show')}
-async function saveDriver(){try{const r=await api('registerDriver',{driverId:val('newDriverId'),namaDriver:val('newDriverName'),email:val('newDriverEmail'),noHp:val('newDriverPhone'),status:val('newDriverStatus'),keterangan:val('newDriverNote'),userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);closeModal('driverModal');refreshAll()}catch(e){toast(e.message)}}
-async function registerFaceNow(){if(!state.faceDriverId)return toast('Driver tidak dipilih.');if(!state.stream)return toast('Aktifkan kamera.');try{const r=await api('registerDriverFace',{driverId:state.faceDriverId,data:captureFrame('faceVideo')},'POST');toast(r.message);closeFaceModal();refreshAll()}catch(e){toast(e.message)}}
-const CORRECTION_COLUMNS=['Oli Mesin','Oli Power Steering','Tali Kipas / V-Belt','Aki','Ban Kiri Depan','Ban Kiri Belakang','Ban Kanan Depan','Ban Kanan Belakang','Ban Serep','Kunci Roda & Dongkrak','Rem','Kopling','Setir','Klakson','Sabuk Pengaman','KM Start','KM Sebelum Isi Bensin','KM Sesudah Isi Bensin','KM Finish Akhir','KM Ganti Oli','Status Pemeriksaan','Catatan'];
-function openCorrection(id){correctionInspectionId=id;const x=state.inspections.find(r=>String(r['Inspection ID'])===String(id));if(!x)return;$('correctionColumn').innerHTML=CORRECTION_COLUMNS.map(c=>`<option>${esc(c)}</option>`).join('');$('correctionInfo').textContent=`Inspection ${id} — ${x['Kode Aset']} — ${x['Nama Kendaraan']}`;$('correctionOld').value=x[$('correctionColumn').value]||'';$('correctionNew').value='';$('correctionReason').value='';$('correctionModal').classList.add('show')}
-$('correctionColumn').addEventListener('change',()=>{const x=state.inspections.find(r=>String(r['Inspection ID'])===String(correctionInspectionId));if(x)$('correctionOld').value=x[$('correctionColumn').value]||''})
-async function submitCorrection(){if(!correctionInspectionId||!val('correctionReason'))return toast('Alasan wajib diisi.');try{const r=await api('requestCorrection',{inspectionId:correctionInspectionId,driverId:state.session.driverId||state.session.id,namaDriver:state.session.name||state.session.namaDriver,jenisKoreksi:'Data',kolomKoreksi:val('correctionColumn'),nilaiLama:val('correctionOld'),nilaiBaru:val('correctionNew'),alasan:val('correctionReason')},'POST');toast(r.message);closeModal('correctionModal');refreshAll()}catch(e){toast(e.message)}}
-async function approveCorrection(id){if(!isSuper())return toast('Hanya Super Admin.');try{const r=await api('approveCorrection',{correctionId:id,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}async function rejectCorrection(id){if(!isSuper())return toast('Hanya Super Admin.');const n=prompt('Catatan penolakan:','Koreksi ditolak.');try{const r=await api('rejectCorrection',{correctionId:id,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role,catatanAdmin:n||'Koreksi ditolak.'},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}
-window.addEventListener('load',()=>{boot();const c=new URLSearchParams(location.search).get('kode');if(c){window.__qrAssetCode=c;setTimeout(()=>{const a=state.assets.find(a=>String(a.code).toUpperCase()===String(c).toUpperCase());if(a){selectAsset(a.code);$('faceMessage').textContent=`QR kendaraan ${a.code} terdeteksi. Pilih Driver ID dan lanjutkan login.`}},1200)}});window.addEventListener('beforeunload',stopCamera);
-</script></body></html>
+
+@media(max-width:750px){
+  .sidebar{
+    transform:translateX(-100%);
+  }
+
+  .sidebar.open{
+    transform:translateX(0);
+  }
+
+  .main{
+    margin-left:0;
+    padding:15px;
+  }
+
+  .cards{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .form-grid,
+  .form-grid-3,
+  .media-grid{
+    grid-template-columns:1fr;
+  }
+
+  .user-text{
+    display:none;
+  }
+}
+
+@media(max-width:480px){
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  .login-card{
+    padding:20px;
+  }
+
+  .topbar{
+    padding:0 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     LOGIN PAGE
+========================================================= -->
+
+<section id="loginPage">
+
+  <div class="login-card">
+
+    <div class="logo">
+      <div class="logo-icon">🚗</div>
+      <h1>AssetTrack</h1>
+      <p>Sistem Manajemen & Pemeriksaan Armada</p>
+    </div>
+
+    <div class="login-tabs">
+      <button id="driverTab" class="active" onclick="switchLogin('driver')">
+        🚗 Driver
+      </button>
+
+      <button id="adminTab" onclick="switchLogin('admin')">
+        👑 Admin
+      </button>
+    </div>
+
+    <!-- DRIVER LOGIN -->
+
+    <div id="driverLoginPanel" class="login-panel">
+
+      <div class="info-box">
+        Login Driver menggunakan Driver ID dan foto wajah langsung dari kamera.
+      </div>
+
+      <div class="form-group">
+        <label>Driver ID</label>
+        <input
+          id="loginDriverId"
+          type="text"
+          placeholder="Contoh: DRV-001"
+          autocomplete="off">
+      </div>
+
+      <div class="camera-box">
+
+        <video id="driverLoginVideo" autoplay playsinline></video>
+
+        <canvas id="driverLoginCanvas" class="hidden"></canvas>
+
+        <img id="driverLoginPreview" class="photo-preview">
+
+        <div class="camera-buttons">
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="startCamera('driverLogin')">
+            📷 Buka Kamera
+          </button>
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="capturePhoto('driverLogin')">
+            📸 Ambil Foto
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        class="primary-btn"
+        onclick="loginDriver()">
+        Masuk sebagai Driver
+      </button>
+
+    </div>
+
+    <!-- ADMIN LOGIN -->
+
+    <div id="adminLoginPanel" class="login-panel hidden">
+
+      <div class="info-box">
+        Login Admin menggunakan ID, Nama Admin, dan PIN. Setelah data benar,
+        kamera wajib digunakan untuk verifikasi foto login.
+      </div>
+
+      <div class="form-group">
+        <label>Admin ID</label>
+        <input
+          id="loginAdminId"
+          type="text"
+          placeholder="Masukkan Admin ID"
+          autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Admin</label>
+        <input
+          id="loginAdminName"
+          type="text"
+          placeholder="Masukkan Nama Admin"
+          autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>PIN</label>
+        <input
+          id="loginAdminPin"
+          type="password"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="6 digit PIN"
+          autocomplete="off">
+      </div>
+
+      <div class="camera-box">
+
+        <video id="adminLoginVideo" autoplay playsinline></video>
+
+        <canvas id="adminLoginCanvas" class="hidden"></canvas>
+
+        <img id="adminLoginPreview" class="photo-preview">
+
+        <div class="camera-buttons">
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="startCamera('adminLogin')">
+            📷 Buka Kamera
+          </button>
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="capturePhoto('adminLogin')">
+            📸 Ambil Foto
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        class="primary-btn"
+        onclick="loginAdmin()">
+        🔐 Login Admin
+      </button>
+
+    </div>
+
+    <div id="loginStatus" class="login-status"></div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     APP
+========================================================= -->
+
+<section id="appPage">
+
+  <header class="topbar">
+
+    <div class="topbar-left">
+
+      <button
+        class="menu-btn"
+        onclick="toggleSidebar()">
+        ☰
+      </button>
+
+      <div class="brand">
+        🚗 AssetTrack
+      </div>
+
+    </div>
+
+    <div class="user-info">
+
+      <div class="user-avatar" id="userAvatar">
+        A
+      </div>
+
+      <div class="user-text">
+        <strong id="currentUserName">-</strong>
+        <span id="currentUserRole">-</span>
+      </div>
+
+      <button
+        class="danger-btn"
+        onclick="logout()">
+        Keluar
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <aside id="sidebar" class="sidebar">
+
+    <div class="nav-section">Utama</div>
+
+    <button
+      class="nav-btn active"
+      data-page="dashboard"
+      onclick="showPage('dashboard')">
+      📊 Dashboard
+    </button>
+
+    <button
+      class="nav-btn"
+      data-page="assets"
+      onclick="showPage('assets')">
+      🚗 Data Aset
+    </button>
+
+    <button
+      class="nav-btn"
+      data-page="barcode"
+      onclick="showPage('barcode')">
+      ▣ Barcode
+    </button>
+
+    <button
+      class="nav-btn"
+      data-page="inspection"
+      onclick="showPage('inspection')">
+      🔍 Pemeriksaan
+    </button>
+
+    <div class="nav-section">Data</div>
+
+    <button
+      class="nav-btn"
+      data-page="drivers"
+      onclick="showPage('drivers')">
+      👨‍✈️ Data Driver
+    </button>
+
+    <button
+      class="nav-btn"
+      data-page="km"
+      onclick="showPage('km')">
+      📏 Data KM
+    </button>
+
+    <button
+      class="nav-btn"
+      data-page="corrections"
+      onclick="showPage('corrections')">
+      ✏️ Koreksi
+    </button>
+
+    <div class="nav-section">Laporan</div>
+
+    <button
+      class="nav-btn"
+      data-page="reports"
+      onclick="showPage('reports')">
+      📋 Laporan Pemeriksaan
+    </button>
+
+    <button
+      class="nav-btn"
+      data-page="audit"
+      onclick="showPage('audit')">
+      📝 Audit Log
+    </button>
+
+    <div id="adminNavigation">
+
+      <div class="nav-section">Administrasi</div>
+
+      <button
+        class="nav-btn"
+        data-page="admins"
+        onclick="showPage('admins')">
+        👑 Data Admin
+      </button>
+
+      <button
+        class="nav-btn"
+        data-page="settings"
+        onclick="showPage('settings')">
+        ⚙️ Pengaturan
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <main id="mainContent" class="main">
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+
+    <div id="page-dashboard" class="page active">
+
+      <div class="page-title">
+        <h2>Dashboard</h2>
+        <p>Ringkasan AssetTrack</p>
+      </div>
+
+      <div class="cards">
+
+        <div class="stat-card">
+          <div class="label">Total Aset</div>
+          <div class="number" id="statAssets">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Driver Aktif</div>
+          <div class="number" id="statDrivers">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Pemeriksaan</div>
+          <div class="number" id="statInspections">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Koreksi Menunggu</div>
+          <div class="number" id="statCorrections">0</div>
+        </div>
+
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-header">
+          <h3>Status Sistem</h3>
+
+          <button
+            class="secondary-btn"
+            onclick="refreshAll()">
+            🔄 Refresh
+          </button>
+        </div>
+
+        <div id="systemStatus">
+          Memuat data...
+        </div>
+
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-header">
+          <h3>Pemeriksaan Terbaru</h3>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Kode Aset</th>
+                <th>Kendaraan</th>
+                <th>Driver</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="dashboardInspectionBody"></tbody>
+
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ASSETS
+    ====================================================== -->
+
+    <div id="page-assets" class="page">
+
+      <div class="page-title">
+        <h2>Data Aset</h2>
+        <p>Manajemen kendaraan dan aset armada</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="toolbar">
+
+          <input
+            id="assetSearch"
+            placeholder="Cari kode, kendaraan, nopol..."
+            oninput="renderAssets()">
+
+          <button
+            class="primary-btn"
+            style="width:auto"
+            onclick="openAssetForm()">
+            + Tambah Aset
+          </button>
+
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Kode Aset</th>
+                <th>Kendaraan</th>
+                <th>No Polisi</th>
+                <th>Merek</th>
+                <th>Tahun</th>
+                <th>Lokasi</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody id="assetBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BARCODE
+    ====================================================== -->
+
+    <div id="page-barcode" class="page">
+
+      <div class="page-title">
+        <h2>Barcode Aset</h2>
+        <p>Buat dan cetak barcode kendaraan</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="toolbar">
+
+          <select id="barcodeAssetSelect"
+                  onchange="generateSelectedBarcode()">
+            <option value="">Pilih aset</option>
+          </select>
+
+          <button
+            class="primary-btn"
+            style="width:auto"
+            onclick="printBarcode()">
+            🖨️ Cetak Barcode
+          </button>
+
+        </div>
+
+        <div
+          id="barcodeResult"
+          class="barcode-card">
+
+          <p>Pilih aset untuk menampilkan barcode.</p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INSPECTION
+    ====================================================== -->
+
+    <div id="page-inspection" class="page">
+
+      <div class="page-title">
+        <h2>Pemeriksaan Armada</h2>
+        <p>Form pemeriksaan kendaraan sesuai database AssetTrack</p>
+      </div>
+
+      <div class="panel">
+
+        <form id="inspectionForm">
+
+          <div class="form-grid">
+
+            <div class="section-title">
+              🚗 Identitas Kendaraan
+            </div>
+
+            <div class="form-group">
+              <label>Kode Aset</label>
+
+              <select id="inspectionAsset"
+                      onchange="onInspectionAssetChange()"
+                      required>
+                <option value="">Pilih aset</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Nama Kendaraan</label>
+              <input id="inspectionVehicle" readonly>
+            </div>
+
+            <div class="form-group">
+              <label>Nomor Polisi</label>
+              <input id="inspectionPlate" readonly>
+            </div>
+
+            <div class="form-group">
+              <label>Driver</label>
+
+              <select id="inspectionDriver" required>
+                <option value="">Pilih driver</option>
+              </select>
+            </div>
+
+
+            <div class="section-title">
+              📍 Lokasi & Waktu
+            </div>
+
+            <div class="form-group">
+              <label>Waktu Pemeriksaan</label>
+              <input
+                id="inspectionTime"
+                type="datetime-local">
+            </div>
+
+            <div class="form-group">
+              <label>GPS Accuracy</label>
+              <input id="gpsAccuracy" readonly>
+            </div>
+
+            <div class="form-group">
+              <label>Latitude</label>
+              <input id="latitude" readonly required>
+            </div>
+
+            <div class="form-group">
+              <label>Longitude</label>
+              <input id="longitude" readonly required>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Lokasi GPS</label>
+              <input id="gpsLabel" readonly>
+            </div>
+
+            <div class="full-width">
+              <button
+                type="button"
+                class="secondary-btn"
+                onclick="getGPS()">
+                📍 Ambil Lokasi GPS
+              </button>
+            </div>
+
+
+            <div class="section-title">
+              📏 Kilometer
+            </div>
+
+            <div class="form-group">
+              <label>KM Start</label>
+              <input
+                id="kmStart"
+                type="number"
+                step="0.1">
+            </div>
+
+            <div class="form-group">
+              <label>KM Sebelum Isi Bensin</label>
+              <input
+                id="kmBeforeFuel"
+                type="number"
+                step="0.1">
+            </div>
+
+            <div class="form-group">
+              <label>KM Sesudah Isi Bensin</label>
+              <input
+                id="kmAfterFuel"
+                type="number"
+                step="0.1">
+            </div>
+
+            <div class="form-group">
+              <label>KM Finish Akhir</label>
+              <input
+                id="kmFinish"
+                type="number"
+                step="0.1">
+            </div>
+
+            <div class="form-group">
+              <label>KM Ganti Oli</label>
+              <input
+                id="kmOilChange"
+                type="number"
+                step="0.1">
+            </div>
+
+
+            <div class="section-title">
+              🔧 Pemeriksaan Mesin
+            </div>
+
+            <div class="form-group">
+              <label>Oli Mesin</label>
+              <select id="oliMesin">
+                <option value="">Pilih</option>
+                <option>Baik</option>
+                <option>Perlu Perhatian</option>
+                <option>Rusak</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Oli Power Steering</label>
+              <select id="oliPowerSteering">
+                <option value="">Pilih</option>
+                <option>Baik</option>
+                <option>Perlu Perhatian</option>
+                <option>Rusak</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Tali Kipas / V-Belt</label>
+              <select id="taliKipasVbelt">
+                <option value="">Pilih</option>
+                <option>Baik</option>
+                <option>Perlu Perhatian</option>
+                <option>Rusak</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Aki</label>
+              <select id="aki">
+                <option value="">Pilih</option>
+                <option>Baik</option>
+                <option>Perlu Perhatian</option>
+                <option>Rusak</option>
+              </select>
+            </div>
+
+
+            <div class="section-title">
+              🛞 Pemeriksaan Ban
+            </div>
+
+            <div class="form-group">
+              <label>Ban Kiri Depan</label>
+              <select id="banKiriDepan"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Ban Kiri Belakang</label>
+              <select id="banKiriBelakang"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Ban Kanan Depan</label>
+              <select id="banKananDepan"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Ban Kanan Belakang</label>
+              <select id="banKananBelakang"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Ban Serep</label>
+              <select id="banSerep"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Kunci Roda & Dongkrak</label>
+              <select id="kunciRodaDongkrak"></select>
+            </div>
+
+
+            <div class="section-title">
+              🛠️ Pemeriksaan Keselamatan
+            </div>
+
+            <div class="form-group">
+              <label>Rem</label>
+              <select id="rem"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Kopling</label>
+              <select id="kopling"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Setir</label>
+              <select id="setir"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Klakson</label>
+              <select id="klakson"></select>
+            </div>
+
+            <div class="form-group">
+              <label>Sabuk Pengaman</label>
+              <select id="sabukPengaman"></select>
+            </div>
+
+
+            <div class="section-title">
+              📸 Foto Pemeriksaan
+            </div>
+
+            <div id="photoFields"
+                 class="media-grid full-width"></div>
+
+
+            <div class="section-title">
+              🎥 Video Pemeriksaan
+            </div>
+
+            <div id="videoFields"
+                 class="media-grid full-width"></div>
+
+
+            <div class="section-title">
+              📋 Hasil Pemeriksaan
+            </div>
+
+            <div class="form-group">
+              <label>Status Pemeriksaan</label>
+
+              <select id="statusPemeriksaan">
+                <option value="Selesai">Selesai</option>
+                <option value="Perlu Perhatian">Perlu Perhatian</option>
+                <option value="Tidak Layak">Tidak Layak</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Catatan</label>
+              <textarea id="inspectionNotes"></textarea>
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="secondary-btn"
+              onclick="resetInspectionForm()">
+              Reset
+            </button>
+
+            <button
+              type="submit"
+              class="primary-btn"
+              style="width:auto">
+              💾 Simpan Pemeriksaan
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DRIVERS
+    ====================================================== -->
+
+    <div id="page-drivers" class="page">
+
+      <div class="page-title">
+        <h2>Data Driver</h2>
+        <p>Pendaftaran driver dan foto wajah</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="toolbar">
+
+          <button
+            class="primary-btn"
+            style="width:auto"
+            onclick="openDriverForm()">
+            + Daftar Driver
+          </button>
+
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Driver ID</th>
+                <th>Nama</th>
+                <th>No HP</th>
+                <th>Status</th>
+                <th>Status Wajah</th>
+                <th>Login Terakhir</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody id="driverBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         KM
+    ====================================================== -->
+
+    <div id="page-km" class="page">
+
+      <div class="page-title">
+        <h2>Data Kilometer</h2>
+        <p>Riwayat kilometer armada</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Kode Aset</th>
+                <th>Kendaraan</th>
+                <th>Driver</th>
+                <th>KM Start</th>
+                <th>KM Finish</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+
+            <tbody id="kmBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CORRECTIONS
+    ====================================================== -->
+
+    <div id="page-corrections" class="page">
+
+      <div class="page-title">
+        <h2>Koreksi Data</h2>
+        <p>Pengajuan dan approval koreksi pemeriksaan</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Correction ID</th>
+                <th>Kode Aset</th>
+                <th>Kolom</th>
+                <th>Lama</th>
+                <th>Baru</th>
+                <th>Alasan</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody id="correctionBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         REPORTS
+    ====================================================== -->
+
+    <div id="page-reports" class="page">
+
+      <div class="page-title">
+        <h2>Laporan Pemeriksaan</h2>
+        <p>Data pemeriksaan yang tersimpan di Laporan_Web</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="toolbar">
+
+          <input
+            id="inspectionSearch"
+            placeholder="Cari kode aset, kendaraan, driver..."
+            oninput="renderInspections()">
+
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Kode Aset</th>
+                <th>Kendaraan</th>
+                <th>Nopol</th>
+                <th>Driver</th>
+                <th>KM Start</th>
+                <th>KM Finish</th>
+                <th>Total KM</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody id="inspectionBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         AUDIT
+    ====================================================== -->
+
+    <div id="page-audit" class="page">
+
+      <div class="page-title">
+        <h2>Audit Log</h2>
+        <p>Catatan aktivitas sistem AssetTrack</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User ID</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Keterangan</th>
+              </tr>
+            </thead>
+
+            <tbody id="auditBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ADMINS
+    ====================================================== -->
+
+    <div id="page-admins" class="page">
+
+      <div class="page-title">
+        <h2>Data Admin</h2>
+        <p>Manajemen pengguna administrator</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="toolbar">
+
+          <button
+            class="primary-btn"
+            style="width:auto"
+            onclick="openAdminForm()">
+            + Tambah Admin
+          </button>
+
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Admin ID</th>
+                <th>Nama</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Foto Wajah</th>
+                <th>Keterangan</th>
+              </tr>
+            </thead>
+
+            <tbody id="adminBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SETTINGS
+    ====================================================== -->
+
+    <div id="page-settings" class="page">
+
+      <div class="page-title">
+        <h2>Pengaturan</h2>
+        <p>Pengaturan Super Admin AssetTrack</p>
+      </div>
+
+      <div class="panel">
+
+        <h3>Ganti PIN Super Admin</h3>
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label>PIN Lama</label>
+            <input
+              id="oldPin"
+              type="password"
+              maxlength="6"
+              inputmode="numeric">
+          </div>
+
+          <div class="form-group">
+            <label>PIN Baru</label>
+            <input
+              id="newPin"
+              type="password"
+              maxlength="6"
+              inputmode="numeric">
+          </div>
+
+        </div>
+
+        <button
+          class="primary-btn"
+          style="width:auto"
+          onclick="changePin()">
+          🔐 Ganti PIN
+        </button>
+
+      </div>
+
+      <div class="panel">
+
+        <h3>Informasi API</h3>
+
+        <p>
+          <strong>Google Apps Script:</strong>
+        </p>
+
+        <input
+          value="https://script.google.com/macros/s/AKfycby29V9fghZIGV0P1ic3MVwb7811hF9MhRUNqf7Z5p7fZJgJ3LyJ-AIsZRhi-IaRnB96GA/exec"
+          readonly>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</section>
+
+
+<!-- =========================================================
+     MODAL
+========================================================= -->
+
+<div id="modal" class="modal">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h3 id="modalTitle">Form</h3>
+
+      <button
+        class="close-btn"
+        onclick="closeModal()">
+        ✕
+      </button>
+
+    </div>
+
+    <div id="modalBody"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     TOAST
+========================================================= -->
+
+<div id="toast">
+
+  <div
+    id="toastInner"
+    class="toast-inner">
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const API_URL =
+'https://script.google.com/macros/s/AKfycby29V9fghZIGV0P1ic3MVwb7811hF9MhRUNqf7Z5p7fZJgJ3LyJ-AIsZRhi-IaRnB96GA/exec';
+
+const state = {
+
+  user:null,
+
+  loginPhoto:{
+    driverLogin:null,
+    adminLogin:null
+  },
+
+  camera:{
+    driverLogin:null,
+    adminLogin:null
+  },
+
+  assets:[],
+  drivers:[],
+  admins:[],
+  inspections:[],
+  km:[],
+  corrections:[],
+  audit:[],
+
+  selectedAsset:null
+
+};
+
+
+/* =========================================================
+   API
+========================================================= */
+
+async function apiGet(action,params={}){
+
+  const query = new URLSearchParams();
+
+  query.set('action',action);
+
+  Object.keys(params).forEach(key=>{
+    if(params[key] !== undefined && params[key] !== null){
+      query.set(key,String(params[key]));
+    }
+  });
+
+  const response = await fetch(
+    API_URL+'?'+query.toString(),
+    {
+      method:'GET',
+      cache:'no-store'
+    }
+  );
+
+  const text = await response.text();
+
+  let data;
+
+  try{
+    data = JSON.parse(text);
+  }catch(e){
+    throw new Error(
+      'Server tidak mengembalikan JSON: '+text.substring(0,300)
+    );
+  }
+
+  if(data && data.success === false){
+    throw new Error(data.message || 'Permintaan gagal.');
+  }
+
+  return data;
+}
+
+
+async function apiPost(data){
+
+  const response = await fetch(
+    API_URL,
+    {
+      method:'POST',
+      headers:{
+        'Content-Type':'text/plain;charset=utf-8'
+      },
+      body:JSON.stringify(data)
+    }
+  );
+
+  const text = await response.text();
+
+  let result;
+
+  try{
+    result = JSON.parse(text);
+  }catch(e){
+    throw new Error(
+      'Server tidak mengembalikan JSON: '+text.substring(0,300)
+    );
+  }
+
+  if(result && result.success === false){
+    throw new Error(result.message || 'Permintaan gagal.');
+  }
+
+  return result;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer=null;
+
+function toast(message,type='info'){
+
+  const box=document.getElementById('toast');
+  const inner=document.getElementById('toastInner');
+
+  inner.textContent=message;
+
+  inner.className='toast-inner '+
+    (type==='success'
+      ? 'toast-success'
+      : type==='error'
+        ? 'toast-error'
+        : 'toast-info');
+
+  box.style.display='block';
+
+  clearTimeout(toastTimer);
+
+  toastTimer=setTimeout(()=>{
+    box.style.display='none';
+  },3500);
+}
+
+
+/* =========================================================
+   LOGIN TAB
+========================================================= */
+
+function switchLogin(type){
+
+  const driverTab=document.getElementById('driverTab');
+  const adminTab=document.getElementById('adminTab');
+
+  const driverPanel=document.getElementById('driverLoginPanel');
+  const adminPanel=document.getElementById('adminLoginPanel');
+
+  if(type==='driver'){
+
+    driverTab.classList.add('active');
+    adminTab.classList.remove('active');
+
+    driverPanel.classList.remove('hidden');
+    adminPanel.classList.add('hidden');
+
+  }else{
+
+    driverTab.classList.remove('active');
+    adminTab.classList.add('active');
+
+    driverPanel.classList.add('hidden');
+    adminPanel.classList.remove('hidden');
+
+  }
+
+}
+
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+async function startCamera(type){
+
+  try{
+
+    stopCamera(type);
+
+    const video=document.getElementById(
+      type==='adminLogin'
+        ? 'adminLoginVideo'
+        : 'driverLoginVideo'
+    );
+
+    const stream=await navigator.mediaDevices.getUserMedia({
+
+      video:{
+        facingMode:'user',
+        width:{ideal:1280},
+        height:{ideal:720}
+      },
+
+      audio:false
+
+    });
+
+    video.srcObject=stream;
+
+    state.camera[type]=stream;
+
+    await video.play();
+
+    toast('Kamera berhasil dibuka.','success');
+
+  }catch(error){
+
+    toast(
+      'Kamera tidak dapat digunakan: '+error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+function stopCamera(type){
+
+  const stream=state.camera[type];
+
+  if(stream){
+
+    stream.getTracks().forEach(track=>{
+      track.stop();
+    });
+
+    state.camera[type]=null;
+  }
+
+}
+
+
+function capturePhoto(type){
+
+  const video=document.getElementById(
+    type==='adminLogin'
+      ? 'adminLoginVideo'
+      : 'driverLoginVideo'
+  );
+
+  const canvas=document.getElementById(
+    type==='adminLogin'
+      ? 'adminLoginCanvas'
+      : 'driverLoginCanvas'
+  );
+
+  const preview=document.getElementById(
+    type==='adminLogin'
+      ? 'adminLoginPreview'
+      : 'driverLoginPreview'
+  );
+
+  if(!video.srcObject){
+
+    toast(
+      'Buka kamera terlebih dahulu.',
+      'error'
+    );
+
+    return;
+  }
+
+  if(!video.videoWidth){
+
+    toast(
+      'Kamera belum siap. Tunggu sebentar lalu ambil foto.',
+      'error'
+    );
+
+    return;
+  }
+
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+
+  const ctx=canvas.getContext('2d');
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  const data=canvas.toDataURL(
+    'image/jpeg',
+    .82
+  );
+
+  state.loginPhoto[type]=data;
+
+  preview.src=data;
+  preview.style.display='block';
+
+  toast(
+    'Foto berhasil diambil.',
+    'success'
+  );
+
+}
+
+
+/* =========================================================
+   DRIVER LOGIN
+========================================================= */
+
+async function loginDriver(){
+
+  try{
+
+    const driverId=document
+      .getElementById('loginDriverId')
+      .value
+      .trim();
+
+    if(!driverId){
+
+      toast(
+        'Driver ID wajib diisi.',
+        'error'
+      );
+
+      return;
+    }
+
+    if(!state.loginPhoto.driverLogin){
+
+      toast(
+        'Foto wajah wajib diambil langsung dari kamera.',
+        'error'
+      );
+
+      return;
+    }
+
+    setLoginStatus('Memproses login Driver...');
+
+    const result=await apiPost({
+
+      action:'driverLogin',
+
+      driverId:driverId,
+
+      data:state.loginPhoto.driverLogin,
+
+      mimeType:'image/jpeg'
+
+    });
+
+    state.user={
+      ...result.driver,
+
+      role:'DRIVER',
+
+      loginPhoto:result.loginPhoto
+
+    };
+
+    stopCamera('driverLogin');
+
+    await enterApplication();
+
+    toast(
+      'Login Driver berhasil.',
+      'success'
+    );
+
+  }catch(error){
+
+    setLoginStatus(error.message,true);
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   ADMIN LOGIN
+========================================================= */
+
+async function loginAdmin(){
+
+  try{
+
+    const id=document
+      .getElementById('loginAdminId')
+      .value
+      .trim();
+
+    const name=document
+      .getElementById('loginAdminName')
+      .value
+      .trim();
+
+    const pin=document
+      .getElementById('loginAdminPin')
+      .value
+      .trim();
+
+    if(!id){
+
+      toast(
+        'Admin ID wajib diisi.',
+        'error'
+      );
+
+      return;
+    }
+
+    if(!name){
+
+      toast(
+        'Nama Admin wajib diisi.',
+        'error'
+      );
+
+      return;
+    }
+
+    if(!/^\d{6}$/.test(pin)){
+
+      toast(
+        'PIN harus 6 digit angka.',
+        'error'
+      );
+
+      return;
+    }
+
+    /*
+      LANGKAH 1:
+      Verifikasi ID + Nama + PIN
+    */
+
+    setLoginStatus(
+      'Memverifikasi ID, Nama Admin, dan PIN...'
+    );
+
+    const login=await apiPost({
+
+      action:'adminLogin',
+
+      adminId:id,
+
+      namaAdmin:name,
+
+      pin:pin
+
+    });
+
+    /*
+      LANGKAH 2:
+      FOTO KAMERA WAJIB
+    */
+
+    if(!state.loginPhoto.adminLogin){
+
+      toast(
+        'ID, Nama, dan PIN benar. Sekarang foto kamera wajib diambil.',
+        'info'
+      );
+
+      setLoginStatus(
+        'Data login benar. Ambil foto menggunakan kamera untuk melanjutkan.'
+      );
+
+      return;
+    }
+
+    /*
+      LANGKAH 3:
+      Kirim foto ke Code.gs
+    */
+
+    setLoginStatus(
+      'Memverifikasi foto login...'
+    );
+
+    const photoLogin=await apiPost({
+
+      action:'adminPhotoLogin',
+
+      adminId:login.admin.adminId,
+
+      namaAdmin:login.admin.namaAdmin,
+
+      data:state.loginPhoto.adminLogin,
+
+      mimeType:'image/jpeg'
+
+    });
+
+    state.user={
+      ...photoLogin.admin,
+
+      role:photoLogin.admin.role ||
+        login.admin.role ||
+        'ADMIN',
+
+      loginPhoto:photoLogin.loginPhoto
+
+    };
+
+    stopCamera('adminLogin');
+
+    await enterApplication();
+
+    toast(
+      'Login Admin berhasil.',
+      'success'
+    );
+
+  }catch(error){
+
+    setLoginStatus(
+      error.message,
+      true
+    );
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+function setLoginStatus(message,error=false){
+
+  const el=document.getElementById(
+    'loginStatus'
+  );
+
+  el.textContent=message;
+
+  el.style.color=
+    error
+      ? '#c62828'
+      : '#2e7d32';
+
+}
+
+
+/* =========================================================
+   APPLICATION
+========================================================= */
+
+async function enterApplication(){
+
+  document.getElementById(
+    'loginPage'
+  ).style.display='none';
+
+  document.getElementById(
+    'appPage'
+  ).style.display='block';
+
+  const user=state.user;
+
+  document.getElementById(
+    'currentUserName'
+  ).textContent=
+    user.name ||
+    user.namaAdmin ||
+    user.namaDriver ||
+    '-';
+
+  document.getElementById(
+    'currentUserRole'
+  ).textContent=
+    user.role ||
+    'USER';
+
+  const initial=(
+    user.name ||
+    user.namaAdmin ||
+    user.namaDriver ||
+    'A'
+  ).charAt(0).toUpperCase();
+
+  document.getElementById(
+    'userAvatar'
+  ).textContent=initial;
+
+  const isAdmin=
+    user.role==='ADMIN' ||
+    user.role==='SUPER_ADMIN';
+
+  document.getElementById(
+    'adminNavigation'
+  ).style.display=
+    isAdmin ? 'block' : 'none';
+
+  if(!isAdmin){
+
+    document.querySelector(
+      '[data-page="admins"]'
+    )?.classList.add('hidden');
+
+    document.querySelector(
+      '[data-page="settings"]'
+    )?.classList.add('hidden');
+
+  }
+
+  await refreshAll();
+
+  showPage('dashboard');
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function logout(){
+
+  stopCamera('driverLogin');
+  stopCamera('adminLogin');
+
+  state.user=null;
+
+  state.loginPhoto={
+    driverLogin:null,
+    adminLogin:null
+  };
+
+  document.getElementById(
+    'appPage'
+  ).style.display='none';
+
+  document.getElementById(
+    'loginPage'
+  ).style.display='flex';
+
+  document.getElementById(
+    'loginAdminPin'
+  ).value='';
+
+  document.getElementById(
+    'loginStatus'
+  ).textContent='';
+
+  toast(
+    'Anda telah keluar dari AssetTrack.',
+    'info'
+  );
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function toggleSidebar(){
+
+  const sidebar=document.getElementById(
+    'sidebar'
+  );
+
+  sidebar.classList.toggle('open');
+
+}
+
+
+function showPage(page){
+
+  document
+    .querySelectorAll('.page')
+    .forEach(el=>{
+      el.classList.remove('active');
+    });
+
+  const target=document.getElementById(
+    'page-'+page
+  );
+
+  if(target){
+    target.classList.add('active');
+  }
+
+  document
+    .querySelectorAll('.nav-btn')
+    .forEach(btn=>{
+      btn.classList.toggle(
+        'active',
+        btn.dataset.page===page
+      );
+    });
+
+  document
+    .getElementById('sidebar')
+    .classList.remove('open');
+
+  if(page==='assets'){
+    renderAssets();
+  }
+
+  if(page==='barcode'){
+    populateBarcodeAssets();
+  }
+
+  if(page==='drivers'){
+    renderDrivers();
+  }
+
+  if(page==='km'){
+    renderKM();
+  }
+
+  if(page==='corrections'){
+    renderCorrections();
+  }
+
+  if(page==='reports'){
+    renderInspections();
+  }
+
+  if(page==='audit'){
+    renderAudit();
+  }
+
+  if(page==='admins'){
+    renderAdmins();
+  }
+
+}
+
+
+/* =========================================================
+   REFRESH ALL
+========================================================= */
+
+async function refreshAll(){
+
+  try{
+
+    const [
+      assets,
+      drivers,
+      admins,
+      inspections,
+      km,
+      corrections,
+      audit
+    ]=await Promise.all([
+
+      apiGet('assets'),
+      apiGet('drivers'),
+      apiGet('admins'),
+      apiGet('inspections'),
+      apiGet('km'),
+      apiGet('corrections'),
+      apiGet('audit')
+
+    ]);
+
+    state.assets=assets.assets || [];
+    state.drivers=drivers.drivers || [];
+    state.admins=admins.admins || [];
+    state.inspections=inspections.rows || [];
+    state.km=km.rows || [];
+    state.corrections=corrections.rows || [];
+    state.audit=audit.rows || [];
+
+    updateDashboard();
+
+    populateAssetSelects();
+    populateDriverSelect();
+
+    renderAssets();
+    renderDrivers();
+    renderKM();
+    renderCorrections();
+    renderInspections();
+    renderAudit();
+    renderAdmins();
+
+    document.getElementById(
+      'systemStatus'
+    ).innerHTML=
+      '<span class="badge green">ONLINE</span> '+
+      'AssetTrack berhasil terhubung dengan Google Apps Script.';
+
+  }catch(error){
+
+    document.getElementById(
+      'systemStatus'
+    ).innerHTML=
+      '<span class="badge red">ERROR</span> '+
+      escapeHtml(error.message);
+
+    toast(
+      'Gagal mengambil data: '+error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function updateDashboard(){
+
+  document.getElementById(
+    'statAssets'
+  ).textContent=state.assets.length;
+
+  document.getElementById(
+    'statDrivers'
+  ).textContent=
+    state.drivers.filter(
+      d=>String(d.status).toLowerCase()==='aktif'
+    ).length;
+
+  document.getElementById(
+    'statInspections'
+  ).textContent=state.inspections.length;
+
+  document.getElementById(
+    'statCorrections'
+  ).textContent=
+    state.corrections.filter(
+      x=>String(x.status).toLowerCase()
+        .includes('menunggu')
+    ).length;
+
+  const latest=[
+    ...state.inspections
+  ].reverse().slice(0,10);
+
+  const body=document.getElementById(
+    'dashboardInspectionBody'
+  );
+
+  body.innerHTML='';
+
+  latest.forEach(row=>{
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+      <td>${escapeHtml(formatDate(row['Waktu Pemeriksaan'] || row['Timestamp']))}</td>
+      <td>${escapeHtml(row['Kode Aset'])}</td>
+      <td>${escapeHtml(row['Nama Kendaraan'])}</td>
+      <td>${escapeHtml(row['Nama Driver'])}</td>
+      <td>${statusBadge(row['Status Pemeriksaan'])}</td>
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+/* =========================================================
+   ASSET
+========================================================= */
+
+function renderAssets(){
+
+  const body=document.getElementById(
+    'assetBody'
+  );
+
+  if(!body)return;
+
+  const search=(
+    document.getElementById(
+      'assetSearch'
+    )?.value || ''
+  ).toLowerCase();
+
+  const rows=state.assets.filter(a=>{
+
+    const text=[
+      a.code,
+      a.name,
+      a.plate,
+      a.brand,
+      a.model,
+      a.location
+    ].join(' ').toLowerCase();
+
+    return text.includes(search);
+
+  });
+
+  body.innerHTML='';
+
+  rows.forEach(asset=>{
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+
+      <td>
+        <strong>${escapeHtml(asset.code)}</strong>
+      </td>
+
+      <td>
+        ${escapeHtml(asset.name)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.plate)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.brand)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.year)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.location)}
+      </td>
+
+      <td>
+        ${statusBadge(asset.status)}
+      </td>
+
+      <td>
+
+        <button
+          class="secondary-btn"
+          onclick="openAssetForm('${escapeJs(asset.id)}')">
+          Edit
+        </button>
+
+        <button
+          class="danger-btn"
+          onclick="deleteAsset('${escapeJs(asset.id)}','${escapeJs(asset.code)}')">
+          Hapus
+        </button>
+
+      </td>
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+function openAssetForm(id=''){
+
+  const asset=
+    state.assets.find(
+      x=>String(x.id)===String(id)
+    ) || {};
+
+  openModal(
+    id
+      ? 'Edit Aset'
+      : 'Tambah Aset',
+
+    `
+
+    <form id="assetForm">
+
+      <input
+        type="hidden"
+        id="assetId"
+        value="${escapeHtml(asset.id || '')}">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Kode Aset *</label>
+          <input
+            id="assetCode"
+            required
+            value="${escapeHtml(asset.code || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Nama Kendaraan *</label>
+          <input
+            id="assetName"
+            required
+            value="${escapeHtml(asset.name || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Nomor Polisi</label>
+          <input
+            id="assetPlate"
+            value="${escapeHtml(asset.plate || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Merek</label>
+          <input
+            id="assetBrand"
+            value="${escapeHtml(asset.brand || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Model / Tipe</label>
+          <input
+            id="assetModel"
+            value="${escapeHtml(asset.model || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Tahun</label>
+          <input
+            id="assetYear"
+            value="${escapeHtml(asset.year || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Lokasi Aset</label>
+          <input
+            id="assetLocation"
+            value="${escapeHtml(asset.location || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Penanggung Jawab</label>
+          <input
+            id="assetResponsible"
+            value="${escapeHtml(asset.responsible || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+
+          <select id="assetStatus">
+
+            <option
+              ${asset.status==='Aktif'?'selected':''}>
+              Aktif
+            </option>
+
+            <option
+              ${asset.status==='Tidak Aktif'?'selected':''}>
+              Tidak Aktif
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal Perolehan</label>
+
+          <input
+            id="assetPurchaseDate"
+            type="date"
+            value="${escapeHtml(toDateInput(asset.purchaseDate || ''))}">
+        </div>
+
+        <div class="form-group full-width">
+          <label>Catatan</label>
+
+          <textarea
+            id="assetNotes">${escapeHtml(asset.notes || '')}</textarea>
+
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          onclick="closeModal()">
+          Batal
+        </button>
+
+        <button
+          class="primary-btn"
+          type="submit"
+          style="width:auto">
+          Simpan
+        </button>
+
+      </div>
+
+    </form>
+
+    `
+  );
+
+  document
+    .getElementById('assetForm')
+    .addEventListener(
+      'submit',
+      saveAsset
+    );
+
+}
+
+
+async function saveAsset(event){
+
+  event.preventDefault();
+
+  try{
+
+    const id=document
+      .getElementById('assetId')
+      .value.trim();
+
+    const data={
+
+      action:'saveAsset',
+
+      id:id,
+
+      code:document
+        .getElementById('assetCode')
+        .value.trim(),
+
+      name:document
+        .getElementById('assetName')
+        .value.trim(),
+
+      plate:document
+        .getElementById('assetPlate')
+        .value.trim(),
+
+      brand:document
+        .getElementById('assetBrand')
+        .value.trim(),
+
+      model:document
+        .getElementById('assetModel')
+        .value.trim(),
+
+      year:document
+        .getElementById('assetYear')
+        .value.trim(),
+
+      location:document
+        .getElementById('assetLocation')
+        .value.trim(),
+
+      responsible:document
+        .getElementById('assetResponsible')
+        .value.trim(),
+
+      status:document
+        .getElementById('assetStatus')
+        .value,
+
+      purchaseDate:document
+        .getElementById('assetPurchaseDate')
+        .value,
+
+      notes:document
+        .getElementById('assetNotes')
+        .value,
+
+      userId:state.user.id ||
+        state.user.adminId ||
+        state.user.driverId,
+
+      userName:state.user.name ||
+        state.user.namaAdmin ||
+        state.user.namaDriver,
+
+      role:state.user.role
+
+    };
+
+    const result=await apiPost(data);
+
+    closeModal();
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    await refreshAll();
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+async function deleteAsset(id,code){
+
+  if(!confirm(
+    'Hapus aset '+code+'?'
+  ))return;
+
+  try{
+
+    const result=await apiPost({
+
+      action:'deleteAsset',
+
+      id:id,
+
+      code:code,
+
+      userId:state.user.id ||
+        state.user.adminId,
+
+      userName:state.user.name ||
+        state.user.namaAdmin,
+
+      role:state.user.role
+
+    });
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    await refreshAll();
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   BARCODE
+========================================================= */
+
+function populateBarcodeAssets(){
+
+  const select=document.getElementById(
+    'barcodeAssetSelect'
+  );
+
+  if(!select)return;
+
+  const current=select.value;
+
+  select.innerHTML=
+    '<option value="">Pilih aset</option>';
+
+  state.assets.forEach(asset=>{
+
+    const option=document.createElement('option');
+
+    option.value=asset.code;
+
+    option.textContent=
+      asset.code+' — '+asset.name+
+      (asset.plate
+        ? ' — '+asset.plate
+        : '');
+
+    select.appendChild(option);
+
+  });
+
+  if(current){
+    select.value=current;
+  }
+
+}
+
+
+function generateSelectedBarcode(){
+
+  const code=document
+    .getElementById('barcodeAssetSelect')
+    .value;
+
+  const box=document.getElementById(
+    'barcodeResult'
+  );
+
+  if(!code){
+
+    box.innerHTML=
+      '<p>Pilih aset untuk menampilkan barcode.</p>';
+
+    return;
+  }
+
+  const asset=
+    state.assets.find(
+      x=>x.code===code
+    );
+
+  if(!asset)return;
+
+  box.innerHTML=`
+
+    <div>
+      <strong>${escapeHtml(asset.name)}</strong>
+    </div>
+
+    <svg id="barcodeSvg"></svg>
+
+    <div class="barcode-info">
+      ${escapeHtml(asset.code)}
+    </div>
+
+    <div>
+      ${escapeHtml(asset.plate || '')}
+    </div>
+
+  `;
+
+  JsBarcode(
+    '#barcodeSvg',
+    asset.code,
+    {
+      format:'CODE128',
+      lineColor:'#000',
+      width:2,
+      height:90,
+      displayValue:true,
+      fontSize:18,
+      margin:15
+    }
+  );
+
+}
+
+
+function printBarcode(){
+
+  const code=document
+    .getElementById('barcodeAssetSelect')
+    .value;
+
+  if(!code){
+
+    toast(
+      'Pilih aset terlebih dahulu.',
+      'error'
+    );
+
+    return;
+  }
+
+  const asset=
+    state.assets.find(
+      x=>x.code===code
+    );
+
+  if(!asset)return;
+
+  const svg=document
+    .getElementById('barcodeSvg')
+    ?.outerHTML || '';
+
+  const win=window.open(
+    '',
+    '_blank'
+  );
+
+  win.document.write(`
+
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+      <title>Barcode ${escapeHtml(asset.code)}</title>
+
+      <style>
+
+        body{
+          font-family:Arial;
+          text-align:center;
+          padding:40px;
+        }
+
+        svg{
+          max-width:500px;
+        }
+
+        h2{
+          margin-bottom:5px;
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      <h2>AssetTrack</h2>
+
+      <h3>${escapeHtml(asset.name)}</h3>
+
+      <p>${escapeHtml(asset.plate || '')}</p>
+
+      ${svg}
+
+      <h3>${escapeHtml(asset.code)}</h3>
+
+    </body>
+
+    </html>
+
+  `);
+
+  win.document.close();
+
+  win.focus();
+
+  setTimeout(()=>{
+    win.print();
+  },500);
+
+}
+
+
+/* =========================================================
+   SELECT ASSET
+========================================================= */
+
+function populateAssetSelects(){
+
+  const select=document.getElementById(
+    'inspectionAsset'
+  );
+
+  if(!select)return;
+
+  const current=select.value;
+
+  select.innerHTML=
+    '<option value="">Pilih aset</option>';
+
+  state.assets.forEach(asset=>{
+
+    const option=document.createElement('option');
+
+    option.value=asset.code;
+
+    option.textContent=
+      asset.code+' — '+
+      asset.name+
+      (asset.plate
+        ? ' — '+asset.plate
+        : '');
+
+    select.appendChild(option);
+
+  });
+
+  if(current){
+    select.value=current;
+  }
+
+}
+
+
+function onInspectionAssetChange(){
+
+  const code=document
+    .getElementById('inspectionAsset')
+    .value;
+
+  const asset=
+    state.assets.find(
+      x=>x.code===code
+    );
+
+  document.getElementById(
+    'inspectionVehicle'
+  ).value=
+    asset?.name || '';
+
+  document.getElementById(
+    'inspectionPlate'
+  ).value=
+    asset?.plate || '';
+
+}
+
+
+/* =========================================================
+   DRIVER SELECT
+========================================================= */
+
+function populateDriverSelect(){
+
+  const select=document.getElementById(
+    'inspectionDriver'
+  );
+
+  if(!select)return;
+
+  const current=select.value;
+
+  select.innerHTML=
+    '<option value="">Pilih driver</option>';
+
+  state.drivers
+    .filter(
+      d=>String(d.status).toLowerCase()==='aktif'
+    )
+    .forEach(driver=>{
+
+      const option=document.createElement('option');
+
+      option.value=driver.id;
+
+      option.textContent=
+        driver.id+' — '+driver.name;
+
+      select.appendChild(option);
+
+    });
+
+  if(current){
+    select.value=current;
+  }
+
+}
+
+
+/* =========================================================
+   INSPECTION OPTIONS
+========================================================= */
+
+function buildInspectionOptions(){
+
+  const ids=[
+    'banKiriDepan',
+    'banKiriBelakang',
+    'banKananDepan',
+    'banKananBelakang',
+    'banSerep',
+    'kunciRodaDongkrak',
+    'rem',
+    'kopling',
+    'setir',
+    'klakson',
+    'sabukPengaman'
+  ];
+
+  ids.forEach(id=>{
+
+    const select=document.getElementById(id);
+
+    if(!select)return;
+
+    select.innerHTML=`
+
+      <option value="">Pilih</option>
+      <option value="Baik">Baik</option>
+      <option value="Perlu Perhatian">
+        Perlu Perhatian
+      </option>
+      <option value="Rusak">Rusak</option>
+
+    `;
+
+  });
+
+}
+
+
+/* =========================================================
+   MEDIA FIELDS
+========================================================= */
+
+const PHOTO_MAP_FRONTEND={
+
+  body:'Foto Body Mobil',
+
+  radiator:'Foto Radiator',
+
+  reservoirRadiator:'Foto Reservoir Radiator',
+
+  minyakRem:'Foto Minyak Rem',
+
+  stikOli:'Foto Stik Oli',
+
+  banKiriDepan:'Foto Ban Kiri Depan',
+
+  banKiriBelakang:'Foto Ban Kiri Belakang',
+
+  banKananDepan:'Foto Ban Kanan Depan',
+
+  banKananBelakang:'Foto Ban Kanan Belakang',
+
+  banSerep:'Foto Ban Serep',
+
+  kunciRodaDongkrak:
+    'Foto Kunci Roda & Dongkrak',
+
+  interiorBox:'Foto Interior Box',
+
+  sisiDalamBak:'Foto Sisi Dalam Bak',
+
+  kmStart:'Foto KM Start',
+
+  kmSebelumIsiBensin:
+    'Foto KM Sebelum Isi Bensin',
+
+  kmSesudahIsiBensin:
+    'Foto KM Sesudah Isi Bensin',
+
+  kmFinishAkhir:
+    'Foto KM Finish Akhir'
+
+};
+
+
+const VIDEO_MAP_FRONTEND={
+
+  lampuUtama:'Video Lampu Utama',
+
+  lampuRem:'Video Lampu Rem',
+
+  lampuSein:'Video Lampu Sein',
+
+  bodyLecet:'Video Body Mobil Lecet',
+
+  interior:'Video Interior',
+
+  kerusakanUrgent:
+    'Video Kerusakan yang Urgent'
+
+};
+
+
+function buildMediaFields(){
+
+  const photoBox=document.getElementById(
+    'photoFields'
+  );
+
+  const videoBox=document.getElementById(
+    'videoFields'
+  );
+
+  photoBox.innerHTML='';
+
+  videoBox.innerHTML='';
+
+  Object.entries(
+    PHOTO_MAP_FRONTEND
+  ).forEach(([key,label])=>{
+
+    photoBox.innerHTML+=`
+
+      <div class="media-item">
+
+        <label>${escapeHtml(label)}</label>
+
+        <input
+          type="file"
+          id="photo_${key}"
+          accept="image/*"
+          capture="environment">
+
+      </div>
+
+    `;
+
+  });
+
+  Object.entries(
+    VIDEO_MAP_FRONTEND
+  ).forEach(([key,label])=>{
+
+    videoBox.innerHTML+=`
+
+      <div class="media-item">
+
+        <label>${escapeHtml(label)}</label>
+
+        <input
+          type="file"
+          id="video_${key}"
+          accept="video/*"
+          capture="environment">
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+
+/* =========================================================
+   GPS
+========================================================= */
+
+function getGPS(){
+
+  if(!navigator.geolocation){
+
+    toast(
+      'Browser tidak mendukung GPS.',
+      'error'
+    );
+
+    return;
+  }
+
+  toast(
+    'Mengambil lokasi GPS...',
+    'info'
+  );
+
+  navigator.geolocation.getCurrentPosition(
+
+    position=>{
+
+      const c=position.coords;
+
+      document.getElementById(
+        'latitude'
+      ).value=c.latitude;
+
+      document.getElementById(
+        'longitude'
+      ).value=c.longitude;
+
+      document.getElementById(
+        'gpsAccuracy'
+      ).value=c.accuracy;
+
+      document.getElementById(
+        'gpsLabel'
+      ).value=
+        c.latitude+', '+c.longitude;
+
+      if(c.accuracy>100){
+
+        toast(
+          'Akurasi GPS '+Math.round(c.accuracy)+
+          ' meter. Code.gs membatasi maksimal 100 meter.',
+          'error'
+        );
+
+      }else{
+
+        toast(
+          'Lokasi GPS berhasil diperoleh.',
+          'success'
+        );
+
+      }
+
+    },
+
+    error=>{
+
+      toast(
+        'GPS gagal: '+error.message,
+        'error'
+      );
+
+    },
+
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    }
+
+  );
+
+}
+
+
+/* =========================================================
+   INSPECTION SUBMIT
+========================================================= */
+
+document.getElementById(
+  'inspectionForm'
+).addEventListener(
+  'submit',
+  saveInspectionForm
+);
+
+
+async function saveInspectionForm(event){
+
+  event.preventDefault();
+
+  try{
+
+    const code=document
+      .getElementById('inspectionAsset')
+      .value;
+
+    const driverId=document
+      .getElementById('inspectionDriver')
+      .value;
+
+    const driver=
+      state.drivers.find(
+        x=>x.id===driverId
+      );
+
+    if(!code){
+
+      toast(
+        'Kode aset wajib dipilih.',
+        'error'
+      );
+
+      return;
+    }
+
+    if(!driver){
+
+      toast(
+        'Driver wajib dipilih.',
+        'error'
+      );
+
+      return;
+    }
+
+    const lat=document
+      .getElementById('latitude')
+      .value;
+
+    const lng=document
+      .getElementById('longitude')
+      .value;
+
+    if(!lat || !lng){
+
+      toast(
+        'Lokasi GPS wajib diambil.',
+        'error'
+      );
+
+      return;
+    }
+
+    const media={};
+
+    /*
+      Foto
+    */
+
+    for(
+      const [key] of Object.entries(
+        PHOTO_MAP_FRONTEND
+      )
+    ){
+
+      const input=document.getElementById(
+        'photo_'+key
+      );
+
+      if(input?.files?.length){
+
+        media[key]=[
+          await fileToMedia(
+            input.files[0],
+            false
+          )
+        ];
+
+      }
+
+    }
+
+    /*
+      Video
+    */
+
+    for(
+      const [key] of Object.entries(
+        VIDEO_MAP_FRONTEND
+      )
+    ){
+
+      const input=document.getElementById(
+        'video_'+key
+      );
+
+      if(input?.files?.length){
+
+        media[key]=[
+          await fileToMedia(
+            input.files[0],
+            true
+          )
+        ];
+
+      }
+
+    }
+
+    const conditions={
+
+      oliMesin:getValue('oliMesin'),
+
+      oliPowerSteering:getValue(
+        'oliPowerSteering'
+      ),
+
+      taliKipasVbelt:getValue(
+        'taliKipasVbelt'
+      ),
+
+      aki:getValue('aki'),
+
+      banKiriDepan:getValue(
+        'banKiriDepan'
+      ),
+
+      banKiriBelakang:getValue(
+        'banKiriBelakang'
+      ),
+
+      banKananDepan:getValue(
+        'banKananDepan'
+      ),
+
+      banKananBelakang:getValue(
+        'banKananBelakang'
+      ),
+
+      banSerep:getValue(
+        'banSerep'
+      ),
+
+      kunciRodaDongkrak:getValue(
+        'kunciRodaDongkrak'
+      ),
+
+      rem:getValue('rem'),
+
+      kopling:getValue('kopling'),
+
+      setir:getValue('setir'),
+
+      klakson:getValue('klakson'),
+
+      sabukPengaman:getValue(
+        'sabukPengaman'
+      )
+
+    };
+
+    const payload={
+
+      action:'saveInspection',
+
+      kodeAset:code,
+
+      driverId:driver.id,
+
+      namaDriver:driver.name,
+
+      waktuPemeriksaan:
+        document.getElementById(
+          'inspectionTime'
+        ).value,
+
+      latitude:lat,
+
+      longitude:lng,
+
+      gpsAccuracy:
+        document.getElementById(
+          'gpsAccuracy'
+        ).value,
+
+      gpsLabel:
+        document.getElementById(
+          'gpsLabel'
+        ).value,
+
+      kmStart:
+        document.getElementById(
+          'kmStart'
+        ).value,
+
+      kmBeforeFuel:
+        document.getElementById(
+          'kmBeforeFuel'
+        ).value,
+
+      kmAfterFuel:
+        document.getElementById(
+          'kmAfterFuel'
+        ).value,
+
+      kmFinishAkhir:
+        document.getElementById(
+          'kmFinish'
+        ).value,
+
+      kmOilChange:
+        document.getElementById(
+          'kmOilChange'
+        ).value,
+
+      conditions:conditions,
+
+      statusPemeriksaan:
+        document.getElementById(
+          'statusPemeriksaan'
+        ).value,
+
+      catatan:
+        document.getElementById(
+          'inspectionNotes'
+        ).value,
+
+      media:media
+
+    };
+
+    /*
+      Cek ukuran payload secara kasar.
+    */
+
+    const jsonSize=
+      JSON.stringify(payload).length;
+
+    if(jsonSize>45*1024*1024){
+
+      throw new Error(
+        'Ukuran data pemeriksaan terlalu besar. Kurangi foto/video.'
+      );
+
+    }
+
+    toast(
+      'Menyimpan pemeriksaan...',
+      'info'
+    );
+
+    const result=await apiPost(
+      payload
+    );
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    resetInspectionForm();
+
+    await refreshAll();
+
+    showPage('reports');
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FILE TO BASE64
+========================================================= */
+
+async function fileToMedia(file,isVideo){
+
+  const max=
+    isVideo
+      ? 20*1024*1024
+      : 8*1024*1024;
+
+  if(file.size>max){
+
+    throw new Error(
+      (isVideo?'Video':'Foto')+
+      ' '+file.name+
+      ' melebihi batas '+
+      (isVideo?'20':'8')+
+      ' MB.'
+    );
+
+  }
+
+  /*
+    Foto dikompres supaya request Apps Script
+    tidak terlalu besar.
+  */
+
+  if(!isVideo && file.type.startsWith('image/')){
+
+    const data=await compressImage(
+      file,
+      1280,
+      .78
+    );
+
+    return {
+      name:file.name,
+      type:'image/jpeg',
+      data:data
+    };
+
+  }
+
+  const data=await readFileAsDataURL(
+    file
+  );
+
+  return {
+    name:file.name,
+    type:file.type || (
+      isVideo
+        ? 'video/webm'
+        : 'image/jpeg'
+    ),
+    data:data
+  };
+
+}
+
+
+function readFileAsDataURL(file){
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const reader=new FileReader();
+
+      reader.onload=()=>{
+        resolve(reader.result);
+      };
+
+      reader.onerror=()=>{
+        reject(
+          new Error(
+            'Gagal membaca file '+file.name
+          )
+        );
+      };
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
+}
+
+
+function compressImage(
+  file,
+  maxWidth=1280,
+  quality=.78
+){
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const reader=new FileReader();
+
+      reader.onload=e=>{
+
+        const img=new Image();
+
+        img.onload=()=>{
+
+          let width=img.width;
+          let height=img.height;
+
+          if(width>maxWidth){
+
+            height=
+              height*
+              (maxWidth/width);
+
+            width=maxWidth;
+
+          }
+
+          const canvas=
+            document.createElement(
+              'canvas'
+            );
+
+          canvas.width=width;
+          canvas.height=height;
+
+          const ctx=
+            canvas.getContext('2d');
+
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            width,
+            height
+          );
+
+          resolve(
+            canvas.toDataURL(
+              'image/jpeg',
+              quality
+            )
+          );
+
+        };
+
+        img.onerror=()=>{
+          reject(
+            new Error(
+              'Gagal memproses gambar.'
+            )
+          );
+        };
+
+        img.src=e.target.result;
+
+      };
+
+      reader.onerror=()=>{
+        reject(
+          new Error(
+            'Gagal membaca gambar.'
+          )
+        );
+      };
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   RESET INSPECTION
+========================================================= */
+
+function resetInspectionForm(){
+
+  document
+    .getElementById(
+      'inspectionForm'
+    )
+    .reset();
+
+  document.getElementById(
+    'inspectionTime'
+  ).value=
+    getCurrentDateTimeLocal();
+
+  document.getElementById(
+    'latitude'
+  ).value='';
+
+  document.getElementById(
+    'longitude'
+  ).value='';
+
+  document.getElementById(
+    'gpsAccuracy'
+  ).value='';
+
+  document.getElementById(
+    'gpsLabel'
+  ).value='';
+
+  document.getElementById(
+    'inspectionVehicle'
+  ).value='';
+
+  document.getElementById(
+    'inspectionPlate'
+  ).value='';
+
+}
+
+
+/* =========================================================
+   DRIVER MANAGEMENT
+========================================================= */
+
+function renderDrivers(){
+
+  const body=document.getElementById(
+    'driverBody'
+  );
+
+  if(!body)return;
+
+  body.innerHTML='';
+
+  state.drivers.forEach(driver=>{
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+
+      <td>
+        <strong>${escapeHtml(driver.id)}</strong>
+      </td>
+
+      <td>
+        ${escapeHtml(driver.name)}
+      </td>
+
+      <td>
+        ${escapeHtml(driver.phone)}
+      </td>
+
+      <td>
+        ${statusBadge(driver.status)}
+      </td>
+
+      <td>
+        ${statusBadge(driver.faceStatus)}
+      </td>
+
+      <td>
+        ${escapeHtml(formatDate(driver.lastLogin))}
+      </td>
+
+      <td>
+
+        <button
+          class="secondary-btn"
+          onclick="openDriverFace('${escapeJs(driver.id)}')">
+          📷 Foto Wajah
+        </button>
+
+        <button
+          class="secondary-btn"
+          onclick="openDriverForm('${escapeJs(driver.id)}')">
+          Edit
+        </button>
+
+      </td>
+
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+function openDriverForm(id=''){
+
+  const driver=
+    state.drivers.find(
+      x=>x.id===id
+    ) || {};
+
+  openModal(
+    id
+      ? 'Edit Driver'
+      : 'Daftar Driver',
+
+    `
+
+    <form id="driverForm">
+
+      <input
+        type="hidden"
+        id="driverFormId"
+        value="${escapeHtml(driver.id || '')}">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Driver ID</label>
+
+          <input
+            id="driverFormDriverId"
+            value="${escapeHtml(driver.id || '')}"
+            placeholder="Kosongkan untuk otomatis"
+            ${id?'readonly':''}>
+        </div>
+
+        <div class="form-group">
+          <label>Nama Driver *</label>
+
+          <input
+            id="driverFormName"
+            required
+            value="${escapeHtml(driver.name || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+
+          <input
+            id="driverFormEmail"
+            type="email"
+            value="${escapeHtml(driver.email || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>No HP</label>
+
+          <input
+            id="driverFormPhone"
+            value="${escapeHtml(driver.phone || '')}">
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+
+          <select id="driverFormStatus">
+
+            <option
+              ${driver.status==='Aktif'?'selected':''}>
+              Aktif
+            </option>
+
+            <option
+              ${driver.status==='Tidak Aktif'?'selected':''}>
+              Tidak Aktif
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="form-group">
+          <label>Keterangan</label>
+
+          <input
+            id="driverFormNotes"
+            value="${escapeHtml(driver.notes || '')}">
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          onclick="closeModal()">
+          Batal
+        </button>
+
+        <button
+          class="primary-btn"
+          style="width:auto">
+          Simpan
+        </button>
+
+      </div>
+
+    </form>
+
+    `
+  );
+
+  document
+    .getElementById('driverForm')
+    .addEventListener(
+      'submit',
+      saveDriverForm
+    );
+
+}
+
+
+async function saveDriverForm(event){
+
+  event.preventDefault();
+
+  try{
+
+    const id=
+      document.getElementById(
+        'driverFormId'
+      ).value;
+
+    const driverId=
+      document.getElementById(
+        'driverFormDriverId'
+      ).value.trim();
+
+    const name=
+      document.getElementById(
+        'driverFormName'
+      ).value.trim();
+
+    const email=
+      document.getElementById(
+        'driverFormEmail'
+      ).value.trim();
+
+    const phone=
+      document.getElementById(
+        'driverFormPhone'
+      ).value.trim();
+
+    const status=
+      document.getElementById(
+        'driverFormStatus'
+      ).value;
+
+    const notes=
+      document.getElementById(
+        'driverFormNotes'
+      ).value;
+
+    let result;
+
+    if(id){
+
+      result=await apiPost({
+
+        action:'updateDriver',
+
+        driverId:id,
+
+        namaDriver:name,
+
+        email:email,
+
+        noHp:phone,
+
+        status:status,
+
+        keterangan:notes,
+
+        userId:state.user.id ||
+          state.user.adminId,
+
+        userName:state.user.name ||
+          state.user.namaAdmin,
+
+        role:state.user.role
+
+      });
+
+    }else{
+
+      result=await apiPost({
+
+        action:'registerDriver',
+
+        driverId:driverId,
+
+        namaDriver:name,
+
+        email:email,
+
+        noHp:phone,
+
+        status:status,
+
+        keterangan:notes,
+
+        userId:state.user.id ||
+          state.user.adminId,
+
+        userName:state.user.name ||
+          state.user.namaAdmin,
+
+        role:state.user.role
+
+      });
+
+    }
+
+    closeModal();
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    await refreshAll();
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   DRIVER FACE REGISTRATION
+========================================================= */
+
+function openDriverFace(id){
+
+  const driver=
+    state.drivers.find(
+      x=>x.id===id
+    );
+
+  if(!driver)return;
+
+  openModal(
+
+    'Daftarkan Foto Wajah — '+driver.name,
+
+    `
+
+      <div class="camera-box">
+
+        <video
+          id="driverFaceVideo"
+          autoplay
+          playsinline>
+        </video>
+
+        <canvas
+          id="driverFaceCanvas"
+          class="hidden">
+        </canvas>
+
+        <img
+          id="driverFacePreview"
+          class="photo-preview">
+
+        <div class="camera-buttons">
+
+          <button
+            class="secondary-btn"
+            type="button"
+            onclick="startDriverFaceCamera()">
+            📷 Buka Kamera
+          </button>
+
+          <button
+            class="secondary-btn"
+            type="button"
+            onclick="captureDriverFace()">
+            📸 Ambil Foto
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        class="primary-btn"
+        type="button"
+        onclick="saveDriverFace('${escapeJs(id)}')">
+        💾 Simpan Foto Wajah
+      </button>
+
+    `
+
+  );
+
+}
+
+
+let driverFaceStream=null;
+let driverFaceData=null;
+
+
+async function startDriverFaceCamera(){
+
+  try{
+
+    driverFaceStream=
+      await navigator.mediaDevices
+        .getUserMedia({
+
+          video:{
+            facingMode:'user',
+            width:{ideal:1280},
+            height:{ideal:720}
+          },
+
+          audio:false
+
+        });
+
+    const video=
+      document.getElementById(
+        'driverFaceVideo'
+      );
+
+    video.srcObject=
+      driverFaceStream;
+
+    await video.play();
+
+  }catch(error){
+
+    toast(
+      'Kamera gagal dibuka: '+error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+function captureDriverFace(){
+
+  const video=
+    document.getElementById(
+      'driverFaceVideo'
+    );
+
+  const canvas=
+    document.getElementById(
+      'driverFaceCanvas'
+    );
+
+  const preview=
+    document.getElementById(
+      'driverFacePreview'
+    );
+
+  if(!driverFaceStream){
+
+    toast(
+      'Buka kamera terlebih dahulu.',
+      'error'
+    );
+
+    return;
+  }
+
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+
+  canvas
+    .getContext('2d')
+    .drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+  driverFaceData=
+    canvas.toDataURL(
+      'image/jpeg',
+      .82
+    );
+
+  preview.src=
+    driverFaceData;
+
+  preview.style.display=
+    'block';
+
+}
+
+
+async function saveDriverFace(id){
+
+  try{
+
+    if(!driverFaceData){
+
+      toast(
+        'Foto wajah belum diambil.',
+        'error'
+      );
+
+      return;
+    }
+
+    const result=
+      await apiPost({
+
+        action:'registerDriverFace',
+
+        driverId:id,
+
+        data:driverFaceData,
+
+        mimeType:'image/jpeg'
+
+      });
+
+    if(driverFaceStream){
+
+      driverFaceStream
+        .getTracks()
+        .forEach(t=>t.stop());
+
+      driverFaceStream=null;
+    }
+
+    driverFaceData=null;
+
+    closeModal();
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    await refreshAll();
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   KM
+========================================================= */
+
+function renderKM(){
+
+  const body=document.getElementById(
+    'kmBody'
+  );
+
+  if(!body)return;
+
+  body.innerHTML='';
+
+  [
+    ...state.km
+  ].reverse().forEach(row=>{
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+
+      <td>
+        ${escapeHtml(formatDate(row['Timestamp']))}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Kode Aset'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Nama Kendaraan'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Nama Driver'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['KM Start'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['KM Finish Akhir'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['KM Total Perjalanan'])}
+      </td>
+
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+/* =========================================================
+   CORRECTIONS
+========================================================= */
+
+function renderCorrections(){
+
+  const body=document.getElementById(
+    'correctionBody'
+  );
+
+  if(!body)return;
+
+  body.innerHTML='';
+
+  [
+    ...state.corrections
+  ].reverse().forEach(row=>{
+
+    const tr=document.createElement('tr');
+
+    const pending=
+      String(row.status)
+        .toLowerCase()
+        .includes('menunggu');
+
+    tr.innerHTML=`
+
+      <td>
+        ${escapeHtml(row.id)}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Kode Aset'] || row.kodeAset || '')}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Kolom Koreksi'] || '')}
+      </td>
+
+      <td>
+        ${escapeHtml(row.oldValue || row['Nilai Lama'] || '')}
+      </td>
+
+      <td>
+        ${escapeHtml(row.newValue || row['Nilai Baru'] || '')}
+      </td>
+
+      <td>
+        ${escapeHtml(row.reason || row['Alasan'] || '')}
+      </td>
+
+      <td>
+        ${statusBadge(row.status)}
+      </td>
+
+      <td>
+
+        ${
+          pending && isSuperAdmin()
+          ?
+
+          `
+
+          <button
+            class="success-btn"
+            onclick="approveCorrection('${escapeJs(row.id)}')">
+            Setujui
+          </button>
+
+          <button
+            class="danger-btn"
+            onclick="rejectCorrection('${escapeJs(row.id)}')">
+            Tolak
+          </button>
+
+          `
+
+          : ''
+
+        }
+
+      </td>
+
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+async function approveCorrection(id){
+
+  if(!isSuperAdmin()){
+
+    toast(
+      'Hanya Super Admin yang dapat menyetujui koreksi.',
+      'error'
+    );
+
+    return;
+  }
+
+  if(!confirm(
+    'Setujui koreksi ini?'
+  ))return;
+
+  try{
+
+    const result=
+      await apiPost({
+
+        action:'approveCorrection',
+
+        correctionId:id,
+
+        userId:state.user.id ||
+          state.user.adminId,
+
+        userName:state.user.name ||
+          state.user.namaAdmin,
+
+        role:'SUPER_ADMIN'
+
+      });
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    await refreshAll();
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+async function rejectCorrection(id){
+
+  if(!isSuperAdmin()){
+
+    toast(
+      'Hanya Super Admin yang dapat menolak koreksi.',
+      'error'
+    );
+
+    return;
+  }
+
+  const note=
+    prompt(
+      'Catatan penolakan:'
+    ) || 'Koreksi ditolak.';
+
+  try{
+
+    const result=
+      await apiPost({
+
+        action:'rejectCorrection',
+
+        correctionId:id,
+
+        catatanAdmin:note,
+
+        userId:state.user.id ||
+          state.user.adminId,
+
+        userName:state.user.name ||
+          state.user.namaAdmin,
+
+        role:'SUPER_ADMIN'
+
+      });
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    await refreshAll();
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   INSPECTIONS
+========================================================= */
+
+function renderInspections(){
+
+  const body=document.getElementById(
+    'inspectionBody'
+  );
+
+  if(!body)return;
+
+  const search=(
+    document.getElementById(
+      'inspectionSearch'
+    )?.value || ''
+  ).toLowerCase();
+
+  const rows=state.inspections.filter(row=>{
+
+    const text=[
+
+      row['Kode Aset'],
+      row['Nama Kendaraan'],
+      row['Nomor Polisi'],
+      row['Nama Driver'],
+      row['Status Pemeriksaan']
+
+    ].join(' ').toLowerCase();
+
+    return text.includes(search);
+
+  });
+
+  body.innerHTML='';
+
+  [
+    ...rows
+  ].reverse().forEach(row=>{
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+
+      <td>
+        ${escapeHtml(formatDate(row['Timestamp']))}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Kode Aset'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Nama Kendaraan'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Nomor Polisi'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Nama Driver'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['KM Start'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['KM Finish Akhir'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['KM Total Perjalanan'])}
+      </td>
+
+      <td>
+        ${statusBadge(row['Status Pemeriksaan'])}
+      </td>
+
+      <td>
+
+        <button
+          class="secondary-btn"
+          onclick="showInspection('${escapeJs(row['Inspection ID'])}')">
+          Detail
+        </button>
+
+      </td>
+
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+function showInspection(id){
+
+  const row=
+    state.inspections.find(
+      x=>String(x['Inspection ID'])===String(id)
+    );
+
+  if(!row)return;
+
+  let html='<div class="form-grid">';
+
+  Object.keys(row).forEach(key=>{
+
+    const value=row[key];
+
+    if(
+      value===null ||
+      value===undefined ||
+      value===''
+    )return;
+
+    html+=`
+
+      <div class="form-group">
+
+        <label>
+          ${escapeHtml(key)}
+        </label>
+
+        <div
+          style="
+            padding:10px;
+            background:#f8f9fa;
+            border-radius:8px;
+            font-size:13px;
+            word-break:break-word;
+          ">
+
+          ${formatInspectionValue(
+            key,
+            value
+          )}
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  html+='</div>';
+
+  openModal(
+    'Detail Pemeriksaan',
+    html
+  );
+
+}
+
+
+function formatInspectionValue(
+  key,
+  value
+){
+
+  const s=String(value);
+
+  if(
+    s.startsWith('http://') ||
+    s.startsWith('https://')
+  ){
+
+    const urls=
+      s.split(/\s+/);
+
+    return urls.map(url=>`
+
+      <a
+        href="${escapeHtml(url)}"
+        target="_blank"
+        rel="noopener">
+        Buka Media
+      </a>
+
+    `).join('<br>');
+
+  }
+
+  return escapeHtml(
+    formatDate(
+      value
+    )
+  );
+
+}
+
+
+/* =========================================================
+   AUDIT
+========================================================= */
+
+function renderAudit(){
+
+  const body=document.getElementById(
+    'auditBody'
+  );
+
+  if(!body)return;
+
+  body.innerHTML='';
+
+  [
+    ...state.audit
+  ].reverse().slice(0,500)
+  .forEach(row=>{
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+
+      <td>
+        ${escapeHtml(formatDate(row['Timestamp']))}
+      </td>
+
+      <td>
+        ${escapeHtml(row['User ID'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['User Name'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Role'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Action'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Target ID'])}
+      </td>
+
+      <td>
+        ${escapeHtml(row['Keterangan'])}
+      </td>
+
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+/* =========================================================
+   ADMINS
+========================================================= */
+
+function renderAdmins(){
+
+  const body=document.getElementById(
+    'adminBody'
+  );
+
+  if(!body)return;
+
+  body.innerHTML='';
+
+  state.admins.forEach(admin=>{
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+
+      <td>
+        ${escapeHtml(admin.id)}
+      </td>
+
+      <td>
+        ${escapeHtml(admin.name)}
+      </td>
+
+      <td>
+        ${escapeHtml(admin.role)}
+      </td>
+
+      <td>
+        ${statusBadge(admin.status)}
+      </td>
+
+      <td>
+
+        ${
+          admin.facePhoto
+          ?
+          `<a
+             href="${escapeHtml(admin.facePhoto)}"
+             target="_blank">
+             Lihat Foto
+           </a>`
+          :
+          'Belum ada'
+        }
+
+      </td>
+
+      <td>
+        ${escapeHtml(admin.notes)}
+      </td>
+
+    `;
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+
+function openAdminForm(){
+
+  openModal(
+
+    'Tambah Admin',
+
+    `
+
+    <form id="adminForm">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Admin ID</label>
+
+          <input
+            id="adminFormId"
+            placeholder="Kosongkan untuk otomatis">
+        </div>
+
+        <div class="form-group">
+          <label>Nama Admin *</label>
+
+          <input
+            id="adminFormName"
+            required>
+        </div>
+
+        <div class="form-group">
+
+          <label>Role</label>
+
+          <select id="adminFormRole">
+
+            <option value="ADMIN">
+              ADMIN
+            </option>
+
+            <option value="SUPER_ADMIN">
+              SUPER_ADMIN
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="form-group">
+
+          <label>Status</label>
+
+          <select id="adminFormStatus">
+
+            <option>
+              Aktif
+            </option>
+
+            <option>
+              Tidak Aktif
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="form-group full-width">
+
+          <label>Keterangan</label>
+
+          <textarea
+            id="adminFormNotes"></textarea>
+
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          onclick="closeModal()">
+          Batal
+        </button>
+
+        <button
+          class="primary-btn"
+          style="width:auto">
+          Simpan
+        </button>
+
+      </div>
+
+    </form>
+
+    `
+
+  );
+
+  document
+    .getElementById('adminForm')
+    .addEventListener(
+      'submit',
+      saveAdminForm
+    );
+
+}
+
+
+async function saveAdminForm(event){
+
+  event.preventDefault();
+
+  try{
+
+    const result=
+      await apiPost({
+
+        action:'saveAdmin',
+
+        adminId:
+          document.getElementById(
+            'adminFormId'
+          ).value.trim(),
+
+        namaAdmin:
+          document.getElementById(
+            'adminFormName'
+          ).value.trim(),
+
+        role:
+          document.getElementById(
+            'adminFormRole'
+          ).value,
+
+        status:
+          document.getElementById(
+            'adminFormStatus'
+          ).value,
+
+        keterangan:
+          document.getElementById(
+            'adminFormNotes'
+          ).value,
+
+        userId:state.user.id ||
+          state.user.adminId,
+
+        userName:state.user.name ||
+          state.user.namaAdmin,
+
+        userRole:state.user.role
+
+      });
+
+    closeModal();
+
+    toast(
+      result.message,
+      'success'
+    );
+
+    await refreshAll();
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CHANGE PIN
+========================================================= */
+
+async function changePin(){
+
+  if(!isSuperAdmin()){
+
+    toast(
+      'Hanya Super Admin yang dapat mengganti PIN.',
+      'error'
+    );
+
+    return;
+  }
+
+  const oldPin=
+    document.getElementById(
+      'oldPin'
+    ).value.trim();
+
+  const newPin=
+    document.getElementById(
+      'newPin'
+    ).value.trim();
+
+  if(!/^\d{6}$/.test(oldPin)){
+
+    toast(
+      'PIN lama harus 6 digit.',
+      'error'
+    );
+
+    return;
+  }
+
+  if(!/^\d{6}$/.test(newPin)){
+
+    toast(
+      'PIN baru harus 6 digit.',
+      'error'
+    );
+
+    return;
+  }
+
+  try{
+
+    const result=
+      await apiPost({
+
+        action:'changeSuperAdminPin',
+
+        oldPin:oldPin,
+
+        newPin:newPin,
+
+        userId:state.user.id ||
+          state.user.adminId,
+
+        userName:state.user.name ||
+          state.user.namaAdmin,
+
+        role:'SUPER_ADMIN'
+
+      });
+
+    document.getElementById(
+      'oldPin'
+    ).value='';
+
+    document.getElementById(
+      'newPin'
+    ).value='';
+
+    toast(
+      result.message,
+      'success'
+    );
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal(title,html){
+
+  document.getElementById(
+    'modalTitle'
+  ).textContent=title;
+
+  document.getElementById(
+    'modalBody'
+  ).innerHTML=html;
+
+  document.getElementById(
+    'modal'
+  ).classList.add('show');
+
+}
+
+
+function closeModal(){
+
+  document.getElementById(
+    'modal'
+  ).classList.remove('show');
+
+  if(driverFaceStream){
+
+    driverFaceStream
+      .getTracks()
+      .forEach(
+        t=>t.stop()
+      );
+
+    driverFaceStream=null;
+
+  }
+
+  driverFaceData=null;
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function getValue(id){
+
+  return document.getElementById(
+    id
+  )?.value || '';
+
+}
+
+
+function isSuperAdmin(){
+
+  return state.user &&
+    String(
+      state.user.role || ''
+    ).toUpperCase()==='SUPER_ADMIN';
+
+}
+
+
+function statusBadge(status){
+
+  const s=String(
+    status || '-'
+  );
+
+  const lower=s.toLowerCase();
+
+  let cls='blue';
+
+  if(
+    lower.includes('aktif') ||
+    lower.includes('baik') ||
+    lower.includes('selesai') ||
+    lower.includes('terdaftar') ||
+    lower.includes('disetujui')
+  ){
+    cls='green';
+  }
+
+  if(
+    lower.includes('rusak') ||
+    lower.includes('tidak') ||
+    lower.includes('ditolak')
+  ){
+    cls='red';
+  }
+
+  if(
+    lower.includes('perhatian') ||
+    lower.includes('menunggu')
+  ){
+    cls='orange';
+  }
+
+  return `
+    <span class="badge ${cls}">
+      ${escapeHtml(s)}
+    </span>
+  `;
+
+}
+
+
+function formatDate(value){
+
+  if(
+    value===null ||
+    value===undefined ||
+    value===''
+  ){
+    return '';
+  }
+
+  const d=new Date(value);
+
+  if(isNaN(d.getTime())){
+    return String(value);
+  }
+
+  return d.toLocaleString(
+    'id-ID',
+    {
+      dateStyle:'short',
+      timeStyle:'medium'
+    }
+  );
+
+}
+
+
+function toDateInput(value){
+
+  if(!value)return '';
+
+  const d=new Date(value);
+
+  if(isNaN(d.getTime())){
+    return '';
+  }
+
+  const y=d.getFullYear();
+
+  const m=String(
+    d.getMonth()+1
+  ).padStart(2,'0');
+
+  const day=String(
+    d.getDate()
+  ).padStart(2,'0');
+
+  return `${y}-${m}-${day}`;
+
+}
+
+
+function getCurrentDateTimeLocal(){
+
+  const d=new Date();
+
+  const offset=
+    d.getTimezoneOffset();
+
+  const local=
+    new Date(
+      d.getTime()-
+      offset*60000
+    );
+
+  return local
+    .toISOString()
+    .slice(0,16);
+
+}
+
+
+function escapeHtml(value){
+
+  return String(
+    value===null ||
+    value===undefined
+      ? ''
+      : value
+  )
+  .replace(/&/g,'&amp;')
+  .replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;')
+  .replace(/'/g,'&#039;');
+
+}
+
+
+function escapeJs(value){
+
+  return String(
+    value===null ||
+    value===undefined
+      ? ''
+      : value
+  )
+  .replace(/\\/g,'\\\\')
+  .replace(/'/g,"\\'")
+  .replace(/\r/g,'')
+  .replace(/\n/g,'\\n');
+
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  ()=>{
+
+    buildInspectionOptions();
+
+    buildMediaFields();
+
+    document.getElementById(
+      'inspectionTime'
+    ).value=
+      getCurrentDateTimeLocal();
+
+    /*
+      Cek API ketika halaman dibuka.
+    */
+
+    apiGet('')
+      .then(result=>{
+
+        console.log(
+          'AssetTrack API:',
+          result
+        );
+
+      })
+      .catch(error=>{
+
+        console.warn(
+          'API belum dapat dihubungi:',
+          error.message
+        );
+
+      });
+
+  }
+);
+
+
+/* =========================================================
+   MODAL OUTSIDE CLICK
+========================================================= */
+
+document
+  .getElementById('modal')
+  .addEventListener(
+    'click',
+    function(event){
+
+      if(event.target===this){
+        closeModal();
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   ESC KEY
+========================================================= */
+
+document.addEventListener(
+  'keydown',
+  event=>{
+
+    if(event.key==='Escape'){
+      closeModal();
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
+```
