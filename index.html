@@ -1,6 +1,3 @@
-# AssetTrack — index.html Lengkap
-
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,6 +6,7 @@
 <title>AssetTrack — Manajemen & Pemeriksaan Armada</title>
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 *{
@@ -600,6 +598,10 @@ tr:hover td{
   height:auto;
 }
 
+.qr-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-top:10px;}
+.qr-code{width:230px;min-height:230px;display:flex;align-items:center;justify-content:center;padding:12px;background:#fff;border:1px solid #eceff1;border-radius:12px;}
+.qr-code img,.qr-code canvas{max-width:100%;height:auto;}
+
 .barcode-info{
   margin-top:10px;
   font-weight:bold;
@@ -807,12 +809,10 @@ tr:hover td{
       </div>
 
       <div class="form-group">
-        <label>Driver ID</label>
-        <input
-          id="loginDriverId"
-          type="text"
-          placeholder="Contoh: DRV-001"
-          autocomplete="off">
+        <label>Driver</label>
+        <select id="loginDriverId" required>
+          <option value="">Memuat Driver...</option>
+        </select>
       </div>
 
       <div class="camera-box">
@@ -1217,8 +1217,8 @@ tr:hover td{
     <div id="page-barcode" class="page">
 
       <div class="page-title">
-        <h2>Barcode Aset</h2>
-        <p>Buat dan cetak barcode kendaraan</p>
+        <h2>QR Code Aset</h2>
+        <p>Buat dan cetak QR Code kendaraan</p>
       </div>
 
       <div class="panel">
@@ -1234,7 +1234,7 @@ tr:hover td{
             class="primary-btn"
             style="width:auto"
             onclick="printBarcode()">
-            🖨️ Cetak Barcode
+            🖨️ Cetak QR Code
           </button>
 
         </div>
@@ -1974,7 +1974,8 @@ const state = {
   corrections:[],
   audit:[],
 
-  selectedAsset:null
+  selectedAsset:null,
+  pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim()
 
 };
 
@@ -2116,6 +2117,7 @@ function switchLogin(type){
   });
 
   if(type==='driver'){
+    populateDriverLogin();
     driverTab.classList.add('active');
     adminTab.classList.remove('active');
     driverPanel.classList.remove('hidden');
@@ -2282,88 +2284,19 @@ function isDriverActive(value){
 ========================================================= */
 
 async function loginDriver(){
-
   try{
-
-    const driverId=document
-      .getElementById('loginDriverId')
-      .value
-      .trim();
-
-    if(!driverId){
-
-      toast(
-        'Driver ID wajib diisi.',
-        'error'
-      );
-
-      return;
-    }
-
-    const selectedDriver=state.drivers.find(d=>
-      String(d.id || d.driverId || '').trim().toUpperCase()===driverId.toUpperCase()
-    );
-
-    if(selectedDriver && !isDriverActive(selectedDriver.status)){
-      const status=selectedDriver.status || 'kosong';
-      setLoginStatus('Driver tidak aktif. Status saat ini: '+status+'.',true);
-      toast('Driver tidak aktif. Status saat ini: '+status+'.','error');
-      return;
-    }
-
-    if(!state.loginPhoto.driverLogin){
-
-      toast(
-        'Foto wajah wajib diambil langsung dari kamera.',
-        'error'
-      );
-
-      return;
-    }
-
+    state.user=null;state.loginToken=null;state.loginPhoto.adminLogin=null;
+    const driverId=document.getElementById('loginDriverId').value.trim();
+    if(!driverId){toast('Pilih Driver terlebih dahulu.','error');return;}
+    const selectedDriver=state.drivers.find(d=>driverIdOf(d).toUpperCase()===driverId.toUpperCase());
+    if(!selectedDriver){toast('Driver tidak ditemukan di Data Driver.','error');return;}
+    if(!driverIsActive(selectedDriver)){const status=driverStatusOf(selectedDriver)||'kosong';setLoginStatus('Driver tidak aktif. Status saat ini: '+status+'.',true);toast('Driver tidak aktif. Status saat ini: '+status+'.','error');return;}
+    if(!state.loginPhoto.driverLogin){toast('Foto wajah wajib diambil langsung dari kamera.','error');return;}
     setLoginStatus('Memproses login Driver...');
-
-    const result=await apiPost({
-
-      action:'driverLogin',
-
-      driverId:driverId,
-
-      data:state.loginPhoto.driverLogin,
-
-      mimeType:'image/jpeg'
-
-    });
-
-    state.user={
-      ...result.driver,
-
-      role:'DRIVER',
-
-      loginPhoto:result.loginPhoto
-
-    };
-
-    stopCamera('driverLogin');
-
-    await enterApplication();
-
-    toast(
-      'Login Driver berhasil.',
-      'success'
-    );
-
-  }catch(error){
-
-    setLoginStatus(error.message,true);
-
-    toast(
-      error.message,
-      'error'
-    );
-
-  }
-
+    const result=await apiPost({action:'driverLogin',driverId:driverId,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg'});
+    state.user={...result.driver,id:driverIdOf(result.driver)||driverId,driverId:driverIdOf(result.driver)||driverId,name:driverNameOf(result.driver)||driverNameOf(selectedDriver),namaDriver:driverNameOf(result.driver)||driverNameOf(selectedDriver),role:'DRIVER',loginPhoto:result.loginPhoto};
+    stopCamera('driverLogin');await enterApplication();toast('Login Driver berhasil sebagai '+state.user.namaDriver+'.','success');
+  }catch(error){state.user=null;setLoginStatus(error.message,true);toast(error.message,'error');}
 }
 
 
@@ -2487,6 +2420,17 @@ async function enterApplication(){
 
   await refreshAll();
   showPage('dashboard');
+  if(state.pendingAssetCode) openPendingAsset();
+}
+
+function openPendingAsset(){
+  const code=String(state.pendingAssetCode || '').trim();if(!code)return;
+  const asset=state.assets.find(a=>String(a.code).toUpperCase()===code.toUpperCase());
+  if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');state.pendingAssetCode='';return;}
+  showPage('inspection');
+  const assetSelect=document.getElementById('inspectionAsset');
+  if(assetSelect){assetSelect.value=asset.code;onInspectionAssetChange();}
+  populateDriverSelect();applyLoggedInDriverToInspection();state.pendingAssetCode='';
 }
 
 function clearApplicationState(){
@@ -2495,7 +2439,6 @@ function clearApplicationState(){
   state.loginPhoto={driverLogin:null,adminLogin:null};
   state.selectedAsset=null;
   state.assets=[];
-  state.drivers=[];
   state.admins=[];
   state.inspections=[];
   state.km=[];
@@ -2522,6 +2465,7 @@ function resetToLogin(showToast=true){
   stopCamera('driverLogin');
   stopCamera('adminLogin');
   clearApplicationState();
+  state.pendingAssetCode='';
   resetLoginForm();
 
   document.getElementById('appPage').style.display='none';
@@ -2531,6 +2475,14 @@ function resetToLogin(showToast=true){
   document.getElementById('adminTab')?.classList.remove('active');
   document.getElementById('driverLoginPanel')?.classList.remove('hidden');
   document.getElementById('adminLoginPanel')?.classList.add('hidden');
+
+  apiGet('drivers').then(result=>{
+    state.drivers=result.drivers || [];
+    populateDriverLogin();
+  }).catch(error=>{
+    console.warn('Gagal memuat ulang Driver:',error.message);
+    populateDriverLogin();
+  });
 
   if(showToast) toast('Anda telah keluar dari AssetTrack.','info');
 }
@@ -2659,6 +2611,7 @@ async function refreshAll(){
     state.assets=assets.assets || [];
     state.drivers=drivers.drivers || [];
     state.inspections=inspections.rows || [];
+    populateDriverLogin();
 
     if(isAdmin){
       const [admins,km,corrections,audit]=await Promise.all([
@@ -3188,154 +3141,30 @@ function populateBarcodeAssets(){
 }
 
 
+function buildInspectionUrl(code){
+  const url=new URL(window.location.href);url.search='';url.hash='';url.searchParams.set('asset',code);return url.toString();
+}
+
 function generateSelectedBarcode(){
-
-  const code=document
-    .getElementById('barcodeAssetSelect')
-    .value;
-
-  const box=document.getElementById(
-    'barcodeResult'
-  );
-
-  if(!code){
-
-    box.innerHTML=
-      '<p>Pilih aset untuk menampilkan barcode.</p>';
-
-    return;
-  }
-
-  const asset=
-    state.assets.find(
-      x=>x.code===code
-    );
-
-  if(!asset)return;
-
-  box.innerHTML=`
-
-    <div>
-      <strong>${escapeHtml(asset.name)}</strong>
-    </div>
-
-    <svg id="barcodeSvg"></svg>
-
-    <div class="barcode-info">
-      ${escapeHtml(asset.code)}
-    </div>
-
-    <div>
-      ${escapeHtml(asset.plate || '')}
-    </div>
-
-  `;
-
-  JsBarcode(
-    '#barcodeSvg',
-    asset.code,
-    {
-      format:'CODE128',
-      lineColor:'#000',
-      width:2,
-      height:90,
-      displayValue:true,
-      fontSize:18,
-      margin:15
-    }
-  );
-
+  const code=document.getElementById('barcodeAssetSelect').value;
+  const box=document.getElementById('barcodeResult');
+  if(!code){box.innerHTML='<p>Pilih aset untuk menampilkan QR Code.</p>';return;}
+  const asset=state.assets.find(x=>String(x.code)===String(code));if(!asset)return;
+  const qrUrl=buildInspectionUrl(asset.code);
+  box.innerHTML=`<div><strong>${escapeHtml(asset.name)}</strong></div><div class="qr-wrap"><div id="qrCode" class="qr-code"></div><div class="barcode-info">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><small style="color:#607d8b">Scan QR untuk membuka pemeriksaan aset.</small></div>`;
+  const qr=document.getElementById('qrCode');
+  if(!window.QRCode){qr.innerHTML='<span style="color:#c62828">Library QR Code belum termuat.</span>';return;}
+  new QRCode(qr,{text:qrUrl,width:200,height:200,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
 }
 
 
 function printBarcode(){
-
-  const code=document
-    .getElementById('barcodeAssetSelect')
-    .value;
-
-  if(!code){
-
-    toast(
-      'Pilih aset terlebih dahulu.',
-      'error'
-    );
-
-    return;
-  }
-
-  const asset=
-    state.assets.find(
-      x=>x.code===code
-    );
-
-  if(!asset)return;
-
-  const svg=document
-    .getElementById('barcodeSvg')
-    ?.outerHTML || '';
-
-  const win=window.open(
-    '',
-    '_blank'
-  );
-
-  win.document.write(`
-
-    <!DOCTYPE html>
-
-    <html>
-
-    <head>
-
-      <title>Barcode ${escapeHtml(asset.code)}</title>
-
-      <style>
-
-        body{
-          font-family:Arial;
-          text-align:center;
-          padding:40px;
-        }
-
-        svg{
-          max-width:500px;
-        }
-
-        h2{
-          margin-bottom:5px;
-        }
-
-      </style>
-
-    </head>
-
-    <body>
-
-      <h2>AssetTrack</h2>
-
-      <h3>${escapeHtml(asset.name)}</h3>
-
-      <p>${escapeHtml(asset.plate || '')}</p>
-
-      ${svg}
-
-      <h3>${escapeHtml(asset.code)}</h3>
-
-    </body>
-
-    </html>
-
-  `);
-
-  win.document.close();
-
-  win.focus();
-
-  setTimeout(()=>{
-    win.print();
-  },500);
-
+  const code=document.getElementById('barcodeAssetSelect').value;if(!code){toast('Pilih aset terlebih dahulu.','error');return;}
+  const asset=state.assets.find(x=>String(x.code)===String(code));if(!asset)return;
+  const qr=document.getElementById('qrCode');const qrHtml=qr?qr.innerHTML:'';const qrUrl=buildInspectionUrl(asset.code);
+  const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk AssetTrack.','error');return;}
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>AssetTrack</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
+  win.document.close();win.focus();setTimeout(()=>win.print(),500);
 }
 
 
@@ -3401,6 +3230,9 @@ function onInspectionAssetChange(){
   ).value=
     asset?.plate || '';
 
+  populateDriverSelect();
+  applyLoggedInDriverToInspection();
+
 }
 
 
@@ -3408,40 +3240,36 @@ function onInspectionAssetChange(){
    DRIVER SELECT
 ========================================================= */
 
+function driverIdOf(driver){return String(driver?.id ?? driver?.driverId ?? driver?.['Driver ID'] ?? '').trim();}
+function driverNameOf(driver){return String(driver?.name ?? driver?.namaDriver ?? driver?.['Nama Driver'] ?? '').trim();}
+function driverStatusOf(driver){return String(driver?.status ?? driver?.statusDriver ?? driver?.['Status'] ?? driver?.['Status Driver'] ?? '').trim();}
+function driverIsActive(driver){return ['aktif','active','1','true','ya'].includes(normalizeStatus(driverStatusOf(driver)));}
+
+function populateDriverLogin(){
+  const select=document.getElementById('loginDriverId');if(!select)return;
+  const current=select.value;const active=state.drivers.filter(driverIsActive);
+  select.innerHTML='<option value="">Pilih Driver Aktif</option>'+active.map(driver=>{const id=driverIdOf(driver);const name=driverNameOf(driver)||id;return `<option value="${escapeHtml(id)}">${escapeHtml(id)} — ${escapeHtml(name)}</option>`;}).join('');
+  if(current && active.some(d=>driverIdOf(d).toUpperCase()===current.toUpperCase()))select.value=current;
+}
+
 function populateDriverSelect(){
-
-  const select=document.getElementById(
-    'inspectionDriver'
-  );
-
-  if(!select)return;
-
-  const current=select.value;
-
-  select.innerHTML=
-    '<option value="">Pilih driver</option>';
-
-  state.drivers
-    .filter(
-      d=>String(d.status).toLowerCase()==='aktif'
-    )
-    .forEach(driver=>{
-
-      const option=document.createElement('option');
-
-      option.value=driver.id;
-
-      option.textContent=
-        driver.id+' — '+driver.name;
-
-      select.appendChild(option);
-
-    });
-
-  if(current){
-    select.value=current;
+  const select=document.getElementById('inspectionDriver');if(!select)return;
+  const role=String(state.user?.role || '').toUpperCase();
+  if(role==='DRIVER'){
+    const id=driverIdOf(state.user);const driver=state.drivers.find(d=>driverIdOf(d).toUpperCase()===id.toUpperCase());
+    select.innerHTML=driver?`<option value="${escapeHtml(driverIdOf(driver))}">${escapeHtml(driverIdOf(driver))} — ${escapeHtml(driverNameOf(driver))}</option>`:'<option value="">Driver login tidak ditemukan</option>';
+    select.value=id;select.disabled=true;return;
   }
+  select.disabled=false;const current=select.value;const active=state.drivers.filter(driverIsActive);
+  select.innerHTML='<option value="">Pilih driver</option>'+active.map(driver=>{const id=driverIdOf(driver);return `<option value="${escapeHtml(id)}">${escapeHtml(id)} — ${escapeHtml(driverNameOf(driver)||id)}</option>`;}).join('');
+  if(current)select.value=current;
+}
 
+function applyLoggedInDriverToInspection(){
+  if(String(state.user?.role || '').toUpperCase()!=='DRIVER')return;
+  const select=document.getElementById('inspectionDriver');if(!select)return;
+  const id=driverIdOf(state.user);const driver=state.drivers.find(d=>driverIdOf(d).toUpperCase()===id.toUpperCase());
+  if(driver){select.value=driverIdOf(driver);select.disabled=true;}
 }
 
 
@@ -3718,14 +3546,18 @@ async function saveInspectionForm(event){
       .getElementById('inspectionAsset')
       .value;
 
-    const driverId=document
+    let driverId=document
       .getElementById('inspectionDriver')
       .value;
 
-    const driver=
-      state.drivers.find(
-        x=>x.id===driverId
-      );
+    if(String(state.user?.role || '').toUpperCase()==='DRIVER'){
+      driverId=driverIdOf(state.user);
+      document.getElementById('inspectionDriver').value=driverId;
+    }
+
+    const driver=state.drivers.find(
+      x=>driverIdOf(x).toUpperCase()===String(driverId).toUpperCase()
+    );
 
     if(!code){
 
@@ -3879,9 +3711,9 @@ async function saveInspectionForm(event){
 
       kodeAset:code,
 
-      driverId:driver.id,
+      driverId:driverIdOf(driver),
 
-      namaDriver:driver.name,
+      namaDriver:driverNameOf(driver),
 
       waktuPemeriksaan:
         document.getElementById(
@@ -5847,25 +5679,18 @@ document.addEventListener(
       getCurrentDateTimeLocal();
 
     /*
-      Cek API ketika halaman dibuka.
+      Muat hanya daftar Driver untuk login.
+      Data Admin/Aset/Laporan tidak diambil sebelum login berhasil.
     */
-
-    apiGet('')
+    apiGet('drivers')
       .then(result=>{
-
-        console.log(
-          'AssetTrack API:',
-          result
-        );
-
+        state.drivers=result.drivers || [];
+        populateDriverLogin();
+        if(state.drivers.length===0) setLoginStatus('Belum ada Driver pada Data Driver.',true);
       })
       .catch(error=>{
-
-        console.warn(
-          'API belum dapat dihubungi:',
-          error.message
-        );
-
+        console.warn('Driver belum dapat dimuat:',error.message);
+        setLoginStatus('Gagal memuat daftar Driver: '+error.message,true);
       });
 
   }
@@ -5909,4 +5734,3 @@ document.addEventListener(
 
 </body>
 </html>
-```
