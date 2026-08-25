@@ -1,109 +1,5089 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AssetTrack — Manajemen & Pemeriksaan Armada</title>
+
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
 <style>
-:root{--bg:#fff0f6;--card:#fff;--ink:#24111b;--muted:#7a5265;--line:#f1c9da;--primary:#d81b60;--primary2:#ad1457;--dark:#4a0d28;--ok:#16803c;--warn:#d97706;--bad:#c62828}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px Arial,Helvetica,sans-serif}button,input,select,textarea{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.btn-primary{background:linear-gradient(135deg,#d81b60,#ad1457);color:#fff}.btn-ok{background:var(--ok);color:#fff}.btn-warn{background:#f59e0b;color:#fff}.btn-bad{background:var(--bad);color:#fff}.btn-soft{background:#e8eef6;color:var(--ink)}.wrap{max-width:1320px;margin:auto;padding:0 16px}.top{background:linear-gradient(135deg,#4a0d28,#d81b60);color:#fff;position:sticky;top:0;z-index:10}.topbar{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:12px}.brandmark{width:42px;height:42px;border-radius:12px;background:#fff;color:#d81b60;display:grid;place-items:center;font-size:22px}.brand h1{margin:0;font-size:21px}.brand small{opacity:.8}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.userpill{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px}.login{min-height:100vh;display:grid;place-items:center;padding:25px 14px;background:radial-gradient(circle at 15% 10%,#f8bbd0 0,#fce4ec 28%,#fff0f6 58%,#f8d7e6 100%)}.login-card{width:min(560px,100%);background:#fff;border-radius:20px;padding:24px;box-shadow:0 18px 50px rgba(15,23,42,.12)}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}.tab{background:#e8eef6}.tab.active{background:linear-gradient(135deg,#d81b60,#ad1457);color:#fff}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:12px;font-weight:700;color:#334155}.field.full{grid-column:1/-1}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px 11px;background:#fff;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(216,27,96,.12)}textarea{min-height:85px;resize:vertical}.notice{background:#fce4ec;color:#880e4f;border:1px solid #f5b6cd;padding:11px 12px;border-radius:10px;font-size:12px}.warnbox{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;padding:11px 12px;border-radius:10px;font-size:12px}.main{padding:20px 0 50px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}.stat{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:14px;padding:15px}.stat small{color:var(--muted)}.stat b{display:block;font-size:26px;margin-top:4px;color:var(--primary)}.panel{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:16px;box-shadow:0 3px 12px rgba(15,23,42,.04)}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.panel h2{font-size:18px;margin:0}.panel h3{font-size:15px;margin:18px 0 10px}.actions{display:flex;gap:8px;flex-wrap:wrap}.table{overflow:auto}table{border-collapse:collapse;width:100%;min-width:980px}th,td{border-bottom:1px solid #e5eaf1;padding:9px;text-align:left;vertical-align:top;font-size:12px}th{background:#f8fafc;position:sticky;top:0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700}.badge.ok{background:#dcfce7;color:#166534}.badge.bad{background:#fee2e2;color:#991b1b}.badge.warn{background:#fef3c7;color:#92400e}.badge.info{background:#dbeafe;color:#1e40af}.hidden{display:none!important}.side-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.side-tabs button.active{background:var(--dark);color:#fff}.asset-tools{display:grid;grid-template-columns:1fr 1fr;gap:12px}.code-box{display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;border:1px dashed #94a3b8;border-radius:12px;padding:14px;margin-top:12px;background:#f8fafc}.code-item{text-align:center}.modal{position:fixed;inset:0;background:rgba(15,23,42,.72);display:none;align-items:center;justify-content:center;padding:12px;z-index:30}.modal.show{display:flex}.modalbox{width:min(1150px,100%);max-height:95vh;overflow:auto;background:#fff;border-radius:18px;padding:20px}.modalhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.modalhead h2{margin:0}.checkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.checkitem{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcff}.media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.media{border:1px dashed #aab6c6;border-radius:10px;padding:10px;background:#f8fafc}.preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.preview img,.preview video{width:110px;height:80px;object-fit:cover;border-radius:7px}.progress{height:8px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin-top:8px}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#d81b60,#ec407a)}.toast{position:fixed;right:15px;bottom:15px;z-index:99;background:#0f172a;color:#fff;padding:12px 15px;border-radius:10px;display:none;max-width:min(460px,90%);box-shadow:0 10px 30px rgba(0,0,0,.2)}.toast.show{display:block}.empty{padding:25px;text-align:center;color:var(--muted)}.small{font-size:12px;color:var(--muted)}.sticky-actions{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding-top:12px;margin-top:15px}.camera{width:100%;max-width:520px;aspect-ratio:4/3;object-fit:cover;background:#0b1220;border-radius:14px}.camera-wrap{text-align:center}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid,.asset-tools,.checkgrid,.media-grid{grid-template-columns:1fr}}@media(max-width:520px){.stats{grid-template-columns:1fr}.topbar{align-items:flex-start;padding:10px 0}.login-card{padding:18px}}
-.btn-primary:hover{filter:brightness(.96);transform:translateY(-1px)}.tab.active{box-shadow:0 6px 16px rgba(173,20,87,.22)}.login-card{border:1px solid rgba(216,27,96,.12)}
+:root{
+  --bg:#fff0f6;
+  --card:#fff;
+  --ink:#24111b;
+  --muted:#7a5265;
+  --line:#f1c9da;
+  --primary:#d81b60;
+  --primary2:#ad1457;
+  --dark:#4a0d28;
+  --ok:#16803c;
+  --warn:#d97706;
+  --bad:#c62828;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:14px Arial,Helvetica,sans-serif;
+}
+
+button,input,select,textarea{font:inherit}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:10px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg,#d81b60,#ad1457);
+  color:#fff;
+}
+
+.btn-ok{
+  background:var(--ok);
+  color:#fff;
+}
+
+.btn-warn{
+  background:#f59e0b;
+  color:#fff;
+}
+
+.btn-bad{
+  background:var(--bad);
+  color:#fff;
+}
+
+.btn-soft{
+  background:#e8eef6;
+  color:var(--ink);
+}
+
+.wrap{
+  max-width:1320px;
+  margin:auto;
+  padding:0 16px;
+}
+
+.top{
+  background:linear-gradient(135deg,#4a0d28,#d81b60);
+  color:#fff;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.topbar{
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.brandmark{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:#fff;
+  color:#d81b60;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+}
+
+.brand h1{
+  margin:0;
+  font-size:21px;
+}
+
+.brand small{
+  opacity:.8;
+}
+
+.top-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.userpill{
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  font-size:12px;
+}
+
+.login{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:25px 14px;
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      #f8bbd0 0,
+      #fce4ec 28%,
+      #fff0f6 58%,
+      #f8d7e6 100%
+    );
+}
+
+.login-card{
+  width:min(560px,100%);
+  background:#fff;
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 18px 50px rgba(15,23,42,.12);
+  border:1px solid rgba(216,27,96,.12);
+}
+
+.tabs{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin:15px 0;
+}
+
+.tab{
+  background:#e8eef6;
+}
+
+.tab.active{
+  background:linear-gradient(135deg,#d81b60,#ad1457);
+  color:#fff;
+  box-shadow:0 6px 16px rgba(173,20,87,.22);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.field label{
+  font-size:12px;
+  font-weight:700;
+  color:#334155;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+input,select,textarea{
+  width:100%;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  padding:10px 11px;
+  background:#fff;
+  outline:none;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(216,27,96,.12);
+}
+
+textarea{
+  min-height:85px;
+  resize:vertical;
+}
+
+.notice{
+  background:#fce4ec;
+  color:#880e4f;
+  border:1px solid #f5b6cd;
+  padding:11px 12px;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.warnbox{
+  background:#fff7ed;
+  color:#9a3412;
+  border:1px solid #fed7aa;
+  padding:11px 12px;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.main{
+  padding:20px 0 50px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.stat{
+  background:rgba(255,255,255,.96);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:15px;
+}
+
+.stat small{
+  color:var(--muted);
+}
+
+.stat b{
+  display:block;
+  font-size:26px;
+  margin-top:4px;
+  color:var(--primary);
+}
+
+.panel{
+  background:rgba(255,255,255,.96);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:17px;
+  margin-bottom:16px;
+  box-shadow:0 3px 12px rgba(15,23,42,.04);
+}
+
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.panel h2{
+  font-size:18px;
+  margin:0;
+}
+
+.panel h3{
+  font-size:15px;
+  margin:18px 0 10px;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.table{
+  overflow:auto;
+}
+
+table{
+  border-collapse:collapse;
+  width:100%;
+  min-width:980px;
+}
+
+th,td{
+  border-bottom:1px solid #e5eaf1;
+  padding:9px;
+  text-align:left;
+  vertical-align:top;
+  font-size:12px;
+}
+
+th{
+  background:#f8fafc;
+  position:sticky;
+  top:0;
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.badge.ok{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.badge.bad{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.badge.warn{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.badge.info{
+  background:#dbeafe;
+  color:#1e40af;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.side-tabs{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.side-tabs button.active{
+  background:var(--dark);
+  color:#fff;
+}
+
+.asset-tools{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.code-box{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  border:1px dashed #94a3b8;
+  border-radius:12px;
+  padding:14px;
+  margin-top:12px;
+  background:#f8fafc;
+}
+
+.code-item{
+  text-align:center;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.72);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:12px;
+  z-index:30;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modalbox{
+  width:min(1150px,100%);
+  max-height:95vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+}
+
+.modalhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.modalhead h2{
+  margin:0;
+}
+
+.checkgrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.checkitem{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  background:#fafcff;
+}
+
+.media-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.media{
+  border:1px dashed #aab6c6;
+  border-radius:10px;
+  padding:10px;
+  background:#f8fafc;
+}
+
+.preview{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:7px;
+}
+
+.preview img,
+.preview video{
+  width:110px;
+  height:80px;
+  object-fit:cover;
+  border-radius:7px;
+}
+
+.progress{
+  height:8px;
+  background:#e2e8f0;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:8px;
+}
+
+.progress i{
+  display:block;
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,#d81b60,#ec407a);
+}
+
+.toast{
+  position:fixed;
+  right:15px;
+  bottom:15px;
+  z-index:99;
+  background:#0f172a;
+  color:#fff;
+  padding:12px 15px;
+  border-radius:10px;
+  display:none;
+  max-width:min(460px,90%);
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+}
+
+.toast.show{
+  display:block;
+}
+
+.empty{
+  padding:25px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.small{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.sticky-actions{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+  margin-top:15px;
+}
+
+.camera{
+  width:100%;
+  max-width:520px;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  background:#0b1220;
+  border-radius:14px;
+}
+
+.camera-wrap{
+  text-align:center;
+}
+
+.btn-primary:hover{
+  filter:brightness(.96);
+  transform:translateY(-1px);
+}
+
+@media(max-width:900px){
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .grid,
+  .asset-tools,
+  .checkgrid,
+  .media-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:520px){
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .topbar{
+    align-items:flex-start;
+    padding:10px 0;
+  }
+
+  .login-card{
+    padding:18px;
+  }
+}
 </style>
 </head>
+
 <body>
-<div id="loginView" class="login"><div class="login-card">
-  <div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Sistem Manajemen & Pemeriksaan Armada</small></div></div>
-  <div class="tabs"><button class="tab active" id="driverTab" onclick="switchLogin('driver')">🚗 Driver</button><button class="tab" id="adminTab" onclick="switchLogin('admin')">👑 Admin</button></div>
-  <div id="driverLoginBox"><div class="grid" style="margin-top:12px"><div class="field"><label>Driver ID</label><select id="loginDriver"><option>Memuat...</option></select></div><div class="field"><label>Status Wajah</label><input id="loginFaceStatus" readonly value="Pilih driver"></div></div><div class="small" style="margin-top:8px;color:#8a3a5c">Pilih Driver ID, aktifkan kamera, lalu masuk untuk melanjutkan pemeriksaan kendaraan.</div><div class="camera-wrap" style="margin-top:12px"><video id="loginVideo" class="camera" autoplay muted playsinline></video><div class="actions" style="justify-content:center;margin-top:9px"><button class="btn-primary" onclick="startCamera('loginVideo')">📷 Kamera</button><button class="btn-ok" onclick="loginDriver()">🔐 Masuk Driver</button></div><div id="faceMessage" class="small" style="margin-top:8px">Pilih Driver ID lalu aktifkan kamera.</div></div></div>
-  <div id="adminLoginBox" class="hidden"><div class="grid" style="margin-top:12px"><div class="field"><label>Admin ID</label><input id="adminId" value="ADM-001"></div><div class="field"><label>Nama Admin</label><input id="adminName" value="Syahrul"></div><div class="field full"><label>PIN</label><input id="adminPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN Super Admin (jika diperlukan)"></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="loginAdmin()">👑 Masuk Admin</button></div><div class="small" style="margin-top:10px"></div></div>
-</div></div>
-<div id="appView" class="hidden"><header class="top"><div class="wrap topbar"><div class="brand"><div class="brandmark">🚗</div><div><h1>AssetTrack</h1><small>Manajemen, Barcode, KM & Pemeriksaan Armada</small></div></div><div class="top-actions"><span id="sessionPill" class="userpill">-</span><button class="btn-bad" onclick="logout()">Keluar</button></div></div></header>
+
+<!-- =========================
+     LOGIN
+========================= -->
+
+<div id="loginView" class="login">
+
+  <div class="login-card">
+
+    <div class="brand">
+      <div class="brandmark">🚗</div>
+      <div>
+        <h1>AssetTrack</h1>
+        <small>Sistem Manajemen & Pemeriksaan Armada</small>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button
+        class="tab active"
+        id="driverTab"
+        onclick="switchLogin('driver')">
+        🚗 Driver
+      </button>
+
+      <button
+        class="tab"
+        id="adminTab"
+        onclick="switchLogin('admin')">
+        👑 Admin
+      </button>
+    </div>
+
+    <!-- DRIVER LOGIN -->
+
+    <div id="driverLoginBox">
+
+      <div class="grid" style="margin-top:12px">
+
+        <div class="field">
+          <label>Driver ID</label>
+          <select id="loginDriver">
+            <option>Memuat...</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Status Wajah</label>
+          <input
+            id="loginFaceStatus"
+            readonly
+            value="Pilih driver">
+        </div>
+
+      </div>
+
+      <div class="camera-wrap" style="margin-top:12px">
+
+        <video
+          id="loginVideo"
+          class="camera"
+          autoplay
+          muted
+          playsinline>
+        </video>
+
+        <div
+          class="actions"
+          style="justify-content:center;margin-top:9px">
+
+          <button
+            class="btn-primary"
+            onclick="startCamera('loginVideo')">
+            📷 Kamera
+          </button>
+
+          <button
+            class="btn-ok"
+            onclick="loginDriver()">
+            🔐 Masuk Driver
+          </button>
+
+        </div>
+
+        <div
+          id="faceMessage"
+          class="small"
+          style="margin-top:8px">
+          Pilih Driver ID lalu aktifkan kamera.
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ADMIN LOGIN -->
+
+    <div id="adminLoginBox" class="hidden">
+
+      <div class="grid" style="margin-top:12px">
+
+        <div class="field">
+          <label>Admin ID</label>
+          <input
+            id="adminId"
+            autocomplete="off"
+            placeholder="Masukkan Admin ID">
+        </div>
+
+        <div class="field">
+          <label>Nama Admin</label>
+          <input
+            id="adminName"
+            autocomplete="off"
+            placeholder="Masukkan Nama Admin">
+        </div>
+
+        <div class="field full">
+          <label>PIN</label>
+          <input
+            id="adminPin"
+            type="password"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="off"
+            placeholder="Masukkan PIN">
+        </div>
+
+      </div>
+
+      <div class="actions" style="margin-top:12px">
+
+        <button
+          class="btn-primary"
+          onclick="loginAdmin()">
+          👑 Masuk Admin
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     APPLICATION
+========================= -->
+
+<div id="appView" class="hidden">
+
+<header class="top">
+
+  <div class="wrap topbar">
+
+    <div class="brand">
+
+      <div class="brandmark">🚗</div>
+
+      <div>
+        <h1>AssetTrack</h1>
+        <small>
+          Manajemen, Barcode, KM & Pemeriksaan Armada
+        </small>
+      </div>
+
+    </div>
+
+    <div class="top-actions">
+
+      <span
+        id="sessionPill"
+        class="userpill">
+        -
+      </span>
+
+      <button
+        class="btn-bad"
+        onclick="logout()">
+        Keluar
+      </button>
+
+    </div>
+
+  </div>
+
+</header>
+
+
 <main class="wrap main">
-<section class="stats"><div class="stat"><small>Total Aset</small><b id="statAssets">0</b></div><div class="stat"><small>Aset Aktif</small><b id="statActive">0</b></div><div class="stat"><small>Perawatan</small><b id="statMaint">0</b></div><div class="stat"><small>Driver Aktif</small><b id="statDrivers">0</b></div><div class="stat"><small>Pemeriksaan</small><b id="statInspections">0</b></div></section>
-<section class="panel"><div class="panel-head"><div><h2>📊 Dashboard</h2><div id="welcome" class="small"></div></div><button class="btn-primary" onclick="refreshAll()">↻ Refresh</button></div><div id="driverNotice" class="notice hidden">Pilih kendaraan lalu mulai pemeriksaan.</div></section>
-<section id="adminPanel" class="panel hidden"><div class="panel-head"><h2>👑 Panel Admin</h2></div><div class="side-tabs"><button class="btn-soft active" onclick="adminTab('assets',this)">Aset</button><button class="btn-soft" onclick="adminTab('drivers',this)">Driver</button><button class="btn-soft" onclick="adminTab('admins',this)">Admin</button><button class="btn-soft" onclick="adminTab('inspections',this)">Pemeriksaan</button><button class="btn-soft" onclick="adminTab('km',this)">KM</button><button class="btn-soft" onclick="adminTab('corrections',this)">Koreksi</button><button class="btn-soft" onclick="adminTab('audit',this)">Audit</button></div>
-<div id="adminAssetsTab"><form id="assetForm"><input type="hidden" id="assetId"><div class="grid"><div class="field"><label>Kode Aset *</label><input id="assetCode" required></div><div class="field"><label>Nama Kendaraan *</label><input id="assetName" required></div><div class="field"><label>Nomor Polisi</label><input id="assetPlate"></div><div class="field"><label>Merek</label><input id="assetBrand"></div><div class="field"><label>Model / Tipe</label><input id="assetModel"></div><div class="field"><label>Tahun</label><input id="assetYear" type="number"></div><div class="field"><label>Lokasi</label><input id="assetLocation"></div><div class="field"><label>Penanggung Jawab</label><input id="assetResponsible"></div><div class="field"><label>Status</label><select id="assetStatus"><option>Aktif</option><option>Perawatan</option><option>Tidak Aktif</option></select></div><div class="field"><label>Tanggal Perolehan</label><input id="assetPurchaseDate" type="date"></div><div class="field full"><label>Catatan</label><textarea id="assetNotes"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary">💾 Simpan Aset</button><button type="button" class="btn-soft" onclick="resetAssetForm()">Reset</button></div></form><div class="table" style="margin-top:15px"><table><thead><tr><th>Kode</th><th>Kendaraan</th><th>Polisi</th><th>Merek/Model</th><th>Tahun</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="assetRows"></tbody></table></div></div>
-<div id="adminDriversTab" class="hidden"><button class="btn-primary" onclick="openDriverModal()">➕ Driver Baru</button><div class="table" style="margin-top:12px"><table><thead><tr><th>Driver ID</th><th>Nama</th><th>Email</th><th>Status</th><th>Wajah</th><th>Aksi</th></tr></thead><tbody id="driverRows"></tbody></table></div></div>
-<div id="adminAdminsTab" class="hidden"><div class="table"><table><thead><tr><th>Admin ID</th><th>Nama</th><th>Role</th><th>Status</th></tr></thead><tbody id="adminRows"></tbody></table></div></div>
-<div id="adminInspectionsTab" class="hidden"><div class="table"><table><thead><tr><th>Inspection ID</th><th>Waktu</th><th>Aset</th><th>Driver</th><th>KM Start</th><th>KM Finish</th><th>Total</th><th>Status</th></tr></thead><tbody id="inspectionRows"></tbody></table></div></div>
-<div id="adminKmTab" class="hidden"><div class="table"><table><thead><tr><th>KM ID</th><th>Timestamp</th><th>Inspection</th><th>Aset</th><th>Kendaraan</th><th>Driver</th><th>Start</th><th>Sebelum BBM</th><th>Sesudah BBM</th><th>Finish</th><th>Total</th><th>Sejak Oli</th></tr></thead><tbody id="kmRows"></tbody></table></div></div>
-<div id="adminCorrectionsTab" class="hidden"><div class="warnbox">🔒 Koreksi dilakukan melalui permintaan dan approval Super Admin.</div><div class="table" style="margin-top:12px"><table><thead><tr><th>ID</th><th>Waktu</th><th>Inspection</th><th>Kolom</th><th>Lama</th><th>Baru</th><th>Alasan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="correctionRows"></tbody></table></div></div>
-<div id="adminAuditTab" class="hidden"><div class="table"><table><thead><tr><th>Waktu</th><th>User</th><th>Role</th><th>Action</th><th>ID</th><th>Detail</th></tr></thead><tbody id="auditRows"></tbody></table></div></div></section>
-<section class="panel"><div class="panel-head"><h2>🚗 Kendaraan</h2></div><div class="asset-tools"><div class="field"><label>Cari</label><input id="assetSearch" oninput="renderAssetList()" placeholder="Kode, kendaraan, polisi..."></div><div class="field"><label>Pilih kendaraan</label><select id="assetSelect" onchange="showAssetCode()"></select></div></div><div id="assetCodeArea" class="code-box hidden"><div class="code-item"><b>QR PEMERIKSAAN</b><div id="qr" style="margin-top:8px"></div></div><div class="code-item"><b>BARCODE CODE 128</b><svg id="barcode" style="margin-top:8px"></svg></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="makeCodes()">Tampilkan QR / Barcode</button><button class="btn-ok" onclick="startSelectedInspection()">🔍 Mulai Pemeriksaan</button></div><div class="table" style="margin-top:15px"><table><thead><tr><th>Kode</th><th>Kendaraan</th><th>Polisi</th><th>Merek</th><th>Model</th><th>Tahun</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="publicAssetRows"></tbody></table></div></section>
-<section id="driverHistoryPanel" class="panel hidden"><div class="panel-head"><h2>🧾 Pemeriksaan Saya</h2></div><div class="table"><table><thead><tr><th>Inspection ID</th><th>Waktu</th><th>Aset</th><th>KM Start</th><th>KM Finish</th><th>Total KM</th><th>Status</th></tr></thead><tbody id="driverHistoryRows"></tbody></table></div></section>
-</main></div>
-<div id="inspectionModal" class="modal"><div class="modalbox"><div class="modalhead"><h2>🔍 Pemeriksaan Armada</h2><button class="btn-soft" onclick="closeModal('inspectionModal')">Tutup</button></div><div id="inspectionAssetInfo" class="notice"></div><div class="warnbox" style="margin-top:10px">🔒 Setelah dikirim, pemeriksaan, KM, GPS, foto dan video menjadi data tersimpan.</div><form id="inspectionForm"><div class="grid" style="margin-top:12px"><div class="field"><label>Inspection ID</label><input id="inspectionId" readonly value="Dibuat server"></div><div class="field"><label>Timestamp</label><input id="inspectionTimestamp" readonly></div><div class="field"><label>Driver</label><input id="inspectionDriver" readonly></div><div class="field"><label>Waktu Pemeriksaan</label><input id="inspectionTime" type="datetime-local" required></div></div><h3>🛠️ Checklist Kondisi</h3><div id="conditionGrid" class="checkgrid"></div><h3>📸 Foto</h3><div id="photoGrid" class="media-grid"></div><h3>🎥 Video</h3><div id="videoGrid" class="media-grid"></div><h3>📍 GPS & KM</h3><div class="grid"><div class="field"><label>Latitude *</label><input id="latitude" readonly></div><div class="field"><label>Longitude *</label><input id="longitude" readonly></div><div class="field"><label>Akurasi GPS (m)</label><input id="gpsAccuracy" readonly></div><div class="field"><label>Label lokasi</label><input id="gpsLabel"></div><div class="field"><label>KM Start *</label><input id="kmStart" type="number" min="0" step="1" required></div><div class="field"><label>KM Sebelum Isi Bensin</label><input id="kmBeforeFuel" type="number" min="0" step="1"></div><div class="field"><label>KM Sesudah Isi Bensin</label><input id="kmAfterFuel" type="number" min="0" step="1"></div><div class="field"><label>KM Finish *</label><input id="kmFinish" type="number" min="0" step="1" required></div><div class="field"><label>KM Ganti Oli</label><input id="kmOilChange" type="number" min="0" step="1"></div><div class="field full"><label>Catatan</label><textarea id="inspectionNotes"></textarea></div></div><div class="progress"><i id="uploadProgress"></i></div><div id="uploadText" class="small" style="margin-top:5px"></div><div class="sticky-actions actions"><button class="btn-ok" id="submitInspection">🔒 Kunci & Kirim</button><button type="button" class="btn-soft" onclick="closeModal('inspectionModal')">Batal</button></div></form></div></div>
-<div id="driverModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><h2>👤 Driver Baru</h2><button class="btn-soft" onclick="closeModal('driverModal')">Tutup</button></div><div class="grid"><div class="field"><label>Driver ID</label><input id="newDriverId" placeholder="Otomatis jika kosong"></div><div class="field"><label>Nama *</label><input id="newDriverName"></div><div class="field"><label>Email</label><input id="newDriverEmail" type="email"></div><div class="field"><label>No HP</label><input id="newDriverPhone"></div><div class="field"><label>Status</label><select id="newDriverStatus"><option>Aktif</option><option>Tidak Aktif</option></select></div><div class="field full"><label>Keterangan</label><textarea id="newDriverNote"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="saveDriver()">Simpan Driver</button></div></div></div>
-<div id="faceModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><h2>📷 Daftar Foto Wajah Driver</h2><button class="btn-soft" onclick="closeFaceModal()">Tutup</button></div><div class="notice">Ambil satu foto wajah yang jelas. Foto disimpan ke Google Drive.</div><div class="camera-wrap" style="margin-top:12px"><video id="faceVideo" class="camera" autoplay muted playsinline></video></div><div class="actions" style="justify-content:center;margin-top:10px"><button class="btn-primary" onclick="startCamera('faceVideo')">Aktifkan Kamera</button><button class="btn-ok" onclick="registerFaceNow()">Simpan Foto Wajah</button></div><div id="faceRegisterInfo" class="small" style="margin-top:8px"></div></div></div>
-<div id="correctionModal" class="modal"><div class="modalbox" style="max-width:650px"><div class="modalhead"><h2>✏️ Ajukan Koreksi</h2><button class="btn-soft" onclick="closeModal('correctionModal')">Tutup</button></div><div id="correctionInfo" class="notice"></div><div class="grid" style="margin-top:12px"><div class="field full"><label>Kolom yang dikoreksi</label><select id="correctionColumn"></select></div><div class="field"><label>Nilai Lama</label><input id="correctionOld" readonly></div><div class="field"><label>Nilai Baru</label><input id="correctionNew"></div><div class="field full"><label>Alasan</label><textarea id="correctionReason"></textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn-primary" onclick="submitCorrection()">Kirim Koreksi</button></div></div></div>
+
+<!-- STATISTIK -->
+
+<section class="stats">
+
+  <div class="stat">
+    <small>Total Aset</small>
+    <b id="statAssets">0</b>
+  </div>
+
+  <div class="stat">
+    <small>Aset Aktif</small>
+    <b id="statActive">0</b>
+  </div>
+
+  <div class="stat">
+    <small>Perawatan</small>
+    <b id="statMaint">0</b>
+  </div>
+
+  <div class="stat">
+    <small>Driver Aktif</small>
+    <b id="statDrivers">0</b>
+  </div>
+
+  <div class="stat">
+    <small>Pemeriksaan</small>
+    <b id="statInspections">0</b>
+  </div>
+
+</section>
+
+
+<!-- DASHBOARD -->
+
+<section class="panel">
+
+  <div class="panel-head">
+
+    <div>
+
+      <h2>📊 Dashboard</h2>
+
+      <div
+        id="welcome"
+        class="small">
+      </div>
+
+    </div>
+
+    <button
+      class="btn-primary"
+      onclick="refreshAll()">
+      ↻ Refresh
+    </button>
+
+  </div>
+
+  <div
+    id="driverNotice"
+    class="notice hidden">
+    Pilih kendaraan lalu mulai pemeriksaan.
+  </div>
+
+</section>
+
+
+<!-- ADMIN PANEL -->
+
+<section
+  id="adminPanel"
+  class="panel hidden">
+
+  <div class="panel-head">
+
+    <h2>👑 Panel Admin</h2>
+
+  </div>
+
+  <div class="side-tabs">
+
+    <button
+      class="btn-soft active"
+      onclick="adminTab('assets',this)">
+      Aset
+    </button>
+
+    <button
+      class="btn-soft"
+      onclick="adminTab('drivers',this)">
+      Driver
+    </button>
+
+    <button
+      class="btn-soft"
+      onclick="adminTab('admins',this)">
+      Admin
+    </button>
+
+    <button
+      class="btn-soft"
+      onclick="adminTab('inspections',this)">
+      Pemeriksaan
+    </button>
+
+    <button
+      class="btn-soft"
+      onclick="adminTab('km',this)">
+      KM
+    </button>
+
+    <button
+      class="btn-soft"
+      onclick="adminTab('corrections',this)">
+      Koreksi
+    </button>
+
+    <button
+      class="btn-soft"
+      onclick="adminTab('audit',this)">
+      Audit
+    </button>
+
+  </div>
+
+
+  <!-- ASSET ADMIN -->
+
+  <div id="adminAssetsTab">
+
+    <form id="assetForm">
+
+      <input
+        type="hidden"
+        id="assetId">
+
+      <div class="grid">
+
+        <div class="field">
+          <label>Kode Aset *</label>
+          <input id="assetCode" required>
+        </div>
+
+        <div class="field">
+          <label>Nama Kendaraan *</label>
+          <input id="assetName" required>
+        </div>
+
+        <div class="field">
+          <label>Nomor Polisi</label>
+          <input id="assetPlate">
+        </div>
+
+        <div class="field">
+          <label>Merek</label>
+          <input id="assetBrand">
+        </div>
+
+        <div class="field">
+          <label>Model / Tipe</label>
+          <input id="assetModel">
+        </div>
+
+        <div class="field">
+          <label>Tahun</label>
+          <input id="assetYear" type="number">
+        </div>
+
+        <div class="field">
+          <label>Lokasi</label>
+          <input id="assetLocation">
+        </div>
+
+        <div class="field">
+          <label>Penanggung Jawab</label>
+          <input id="assetResponsible">
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select id="assetStatus">
+            <option>Aktif</option>
+            <option>Perawatan</option>
+            <option>Tidak Aktif</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Tanggal Perolehan</label>
+          <input
+            id="assetPurchaseDate"
+            type="date">
+        </div>
+
+        <div class="field full">
+          <label>Catatan</label>
+          <textarea id="assetNotes"></textarea>
+        </div>
+
+      </div>
+
+      <div
+        class="actions"
+        style="margin-top:12px">
+
+        <button class="btn-primary">
+          💾 Simpan Aset
+        </button>
+
+        <button
+          type="button"
+          class="btn-soft"
+          onclick="resetAssetForm()">
+          Reset
+        </button>
+
+      </div>
+
+    </form>
+
+
+    <div
+      class="table"
+      style="margin-top:15px">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Kendaraan</th>
+            <th>Polisi</th>
+            <th>Merek/Model</th>
+            <th>Tahun</th>
+            <th>Lokasi</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody id="assetRows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- DRIVER ADMIN -->
+
+  <div
+    id="adminDriversTab"
+    class="hidden">
+
+    <button
+      class="btn-primary"
+      onclick="openDriverModal()">
+      ➕ Driver Baru
+    </button>
+
+    <div
+      class="table"
+      style="margin-top:12px">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Driver ID</th>
+            <th>Nama</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Wajah</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody id="driverRows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ADMIN DATA -->
+
+  <div
+    id="adminAdminsTab"
+    class="hidden">
+
+    <div class="table">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Admin ID</th>
+            <th>Nama</th>
+            <th>Role</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody id="adminRows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- INSPECTIONS -->
+
+  <div
+    id="adminInspectionsTab"
+    class="hidden">
+
+    <div class="table">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Inspection ID</th>
+            <th>Waktu</th>
+            <th>Aset</th>
+            <th>Driver</th>
+            <th>KM Start</th>
+            <th>KM Finish</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody id="inspectionRows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- KM -->
+
+  <div
+    id="adminKmTab"
+    class="hidden">
+
+    <div class="table">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>KM ID</th>
+            <th>Timestamp</th>
+            <th>Inspection</th>
+            <th>Aset</th>
+            <th>Kendaraan</th>
+            <th>Driver</th>
+            <th>Start</th>
+            <th>Sebelum BBM</th>
+            <th>Sesudah BBM</th>
+            <th>Finish</th>
+            <th>Total</th>
+            <th>Sejak Oli</th>
+          </tr>
+        </thead>
+
+        <tbody id="kmRows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- CORRECTIONS -->
+
+  <div
+    id="adminCorrectionsTab"
+    class="hidden">
+
+    <div class="warnbox">
+      🔒 Koreksi dilakukan melalui permintaan dan approval Super Admin.
+    </div>
+
+    <div
+      class="table"
+      style="margin-top:12px">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Waktu</th>
+            <th>Inspection</th>
+            <th>Kolom</th>
+            <th>Lama</th>
+            <th>Baru</th>
+            <th>Alasan</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody id="correctionRows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- AUDIT -->
+
+  <div
+    id="adminAuditTab"
+    class="hidden">
+
+    <div class="table">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Waktu</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Action</th>
+            <th>ID</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+
+        <tbody id="auditRows"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- KENDARAAN -->
+
+<section class="panel">
+
+  <div class="panel-head">
+    <h2>🚗 Kendaraan</h2>
+  </div>
+
+  <div class="asset-tools">
+
+    <div class="field">
+      <label>Cari</label>
+      <input
+        id="assetSearch"
+        oninput="renderAssetList()"
+        placeholder="Kode, kendaraan, polisi...">
+    </div>
+
+    <div class="field">
+      <label>Pilih kendaraan</label>
+      <select
+        id="assetSelect"
+        onchange="showAssetCode()">
+      </select>
+    </div>
+
+  </div>
+
+
+  <div
+    id="assetCodeArea"
+    class="code-box hidden">
+
+    <div class="code-item">
+
+      <b>QR PEMERIKSAAN</b>
+
+      <div
+        id="qr"
+        style="margin-top:8px">
+      </div>
+
+    </div>
+
+
+    <div class="code-item">
+
+      <b>BARCODE CODE 128</b>
+
+      <svg
+        id="barcode"
+        style="margin-top:8px">
+      </svg>
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="actions"
+    style="margin-top:12px">
+
+    <button
+      class="btn-primary"
+      onclick="makeCodes()">
+      Tampilkan QR / Barcode
+    </button>
+
+    <button
+      class="btn-ok"
+      onclick="startSelectedInspection()">
+      🔍 Mulai Pemeriksaan
+    </button>
+
+  </div>
+
+
+  <div
+    class="table"
+    style="margin-top:15px">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Kode</th>
+          <th>Kendaraan</th>
+          <th>Polisi</th>
+          <th>Merek</th>
+          <th>Model</th>
+          <th>Tahun</th>
+          <th>Lokasi</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+
+      <tbody id="publicAssetRows"></tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+
+<!-- HISTORY DRIVER -->
+
+<section
+  id="driverHistoryPanel"
+  class="panel hidden">
+
+  <div class="panel-head">
+    <h2>🧾 Pemeriksaan Saya</h2>
+  </div>
+
+  <div class="table">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Inspection ID</th>
+          <th>Waktu</th>
+          <th>Aset</th>
+          <th>KM Start</th>
+          <th>KM Finish</th>
+          <th>Total KM</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody id="driverHistoryRows"></tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+</main>
+</div>
+
+
+<!-- =========================
+     INSPECTION MODAL
+========================= -->
+
+<div
+  id="inspectionModal"
+  class="modal">
+
+  <div class="modalbox">
+
+    <div class="modalhead">
+
+      <h2>🔍 Pemeriksaan Armada</h2>
+
+      <button
+        class="btn-soft"
+        onclick="closeModal('inspectionModal')">
+        Tutup
+      </button>
+
+    </div>
+
+
+    <div
+      id="inspectionAssetInfo"
+      class="notice">
+    </div>
+
+
+    <div
+      class="warnbox"
+      style="margin-top:10px">
+      🔒 Setelah dikirim, pemeriksaan, KM, GPS, foto dan video menjadi data tersimpan.
+    </div>
+
+
+    <form id="inspectionForm">
+
+      <div
+        class="grid"
+        style="margin-top:12px">
+
+        <div class="field">
+          <label>Inspection ID</label>
+          <input
+            id="inspectionId"
+            readonly
+            value="Dibuat server">
+        </div>
+
+        <div class="field">
+          <label>Timestamp</label>
+          <input
+            id="inspectionTimestamp"
+            readonly>
+        </div>
+
+        <div class="field">
+          <label>Driver</label>
+          <input
+            id="inspectionDriver"
+            readonly>
+        </div>
+
+        <div class="field">
+          <label>Waktu Pemeriksaan</label>
+          <input
+            id="inspectionTime"
+            type="datetime-local"
+            required>
+        </div>
+
+      </div>
+
+
+      <h3>🛠️ Checklist Kondisi</h3>
+
+      <div
+        id="conditionGrid"
+        class="checkgrid">
+      </div>
+
+
+      <h3>📸 Foto</h3>
+
+      <div
+        id="photoGrid"
+        class="media-grid">
+      </div>
+
+
+      <h3>🎥 Video</h3>
+
+      <div
+        id="videoGrid"
+        class="media-grid">
+      </div>
+
+
+      <h3>📍 GPS & KM</h3>
+
+      <div class="grid">
+
+        <div class="field">
+          <label>Latitude *</label>
+          <input
+            id="latitude"
+            readonly>
+        </div>
+
+        <div class="field">
+          <label>Longitude *</label>
+          <input
+            id="longitude"
+            readonly>
+        </div>
+
+        <div class="field">
+          <label>Akurasi GPS (m)</label>
+          <input
+            id="gpsAccuracy"
+            readonly>
+        </div>
+
+        <div class="field">
+          <label>Label lokasi</label>
+          <input id="gpsLabel">
+        </div>
+
+        <div class="field">
+          <label>KM Start *</label>
+          <input
+            id="kmStart"
+            type="number"
+            min="0"
+            step="1"
+            required>
+        </div>
+
+        <div class="field">
+          <label>KM Sebelum Isi Bensin</label>
+          <input
+            id="kmBeforeFuel"
+            type="number"
+            min="0"
+            step="1">
+        </div>
+
+        <div class="field">
+          <label>KM Sesudah Isi Bensin</label>
+          <input
+            id="kmAfterFuel"
+            type="number"
+            min="0"
+            step="1">
+        </div>
+
+        <div class="field">
+          <label>KM Finish *</label>
+          <input
+            id="kmFinish"
+            type="number"
+            min="0"
+            step="1"
+            required>
+        </div>
+
+        <div class="field">
+          <label>KM Ganti Oli</label>
+          <input
+            id="kmOilChange"
+            type="number"
+            min="0"
+            step="1">
+        </div>
+
+        <div class="field full">
+          <label>Catatan</label>
+          <textarea id="inspectionNotes"></textarea>
+        </div>
+
+      </div>
+
+
+      <div class="progress">
+        <i id="uploadProgress"></i>
+      </div>
+
+      <div
+        id="uploadText"
+        class="small"
+        style="margin-top:5px">
+      </div>
+
+
+      <div class="sticky-actions actions">
+
+        <button
+          class="btn-ok"
+          id="submitInspection">
+          🔒 Kunci & Kirim
+        </button>
+
+        <button
+          type="button"
+          class="btn-soft"
+          onclick="closeModal('inspectionModal')">
+          Batal
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     DRIVER MODAL
+========================= -->
+
+<div
+  id="driverModal"
+  class="modal">
+
+  <div
+    class="modalbox"
+    style="max-width:650px">
+
+    <div class="modalhead">
+
+      <h2>👤 Driver Baru</h2>
+
+      <button
+        class="btn-soft"
+        onclick="closeModal('driverModal')">
+        Tutup
+      </button>
+
+    </div>
+
+
+    <div class="grid">
+
+      <div class="field">
+        <label>Driver ID</label>
+        <input
+          id="newDriverId"
+          placeholder="Otomatis jika kosong">
+      </div>
+
+      <div class="field">
+        <label>Nama *</label>
+        <input id="newDriverName">
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input
+          id="newDriverEmail"
+          type="email">
+      </div>
+
+      <div class="field">
+        <label>No HP</label>
+        <input id="newDriverPhone">
+      </div>
+
+      <div class="field">
+        <label>Status</label>
+        <select id="newDriverStatus">
+          <option>Aktif</option>
+          <option>Tidak Aktif</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label>Keterangan</label>
+        <textarea id="newDriverNote"></textarea>
+      </div>
+
+    </div>
+
+
+    <div
+      class="actions"
+      style="margin-top:12px">
+
+      <button
+        class="btn-primary"
+        onclick="saveDriver()">
+        Simpan Driver
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     FACE MODAL
+========================= -->
+
+<div
+  id="faceModal"
+  class="modal">
+
+  <div
+    class="modalbox"
+    style="max-width:650px">
+
+    <div class="modalhead">
+
+      <h2>📷 Daftar Foto Wajah Driver</h2>
+
+      <button
+        class="btn-soft"
+        onclick="closeFaceModal()">
+        Tutup
+      </button>
+
+    </div>
+
+
+    <div class="notice">
+      Ambil satu foto wajah yang jelas.
+      Foto disimpan ke Google Drive.
+    </div>
+
+
+    <div
+      class="camera-wrap"
+      style="margin-top:12px">
+
+      <video
+        id="faceVideo"
+        class="camera"
+        autoplay
+        muted
+        playsinline>
+      </video>
+
+    </div>
+
+
+    <div
+      class="actions"
+      style="justify-content:center;margin-top:10px">
+
+      <button
+        class="btn-primary"
+        onclick="startCamera('faceVideo')">
+        Aktifkan Kamera
+      </button>
+
+      <button
+        class="btn-ok"
+        onclick="registerFaceNow()">
+        Simpan Foto Wajah
+      </button>
+
+    </div>
+
+
+    <div
+      id="faceRegisterInfo"
+      class="small"
+      style="margin-top:8px">
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     CORRECTION MODAL
+========================= -->
+
+<div
+  id="correctionModal"
+  class="modal">
+
+  <div
+    class="modalbox"
+    style="max-width:650px">
+
+    <div class="modalhead">
+
+      <h2>✏️ Ajukan Koreksi</h2>
+
+      <button
+        class="btn-soft"
+        onclick="closeModal('correctionModal')">
+        Tutup
+      </button>
+
+    </div>
+
+
+    <div
+      id="correctionInfo"
+      class="notice">
+    </div>
+
+
+    <div
+      class="grid"
+      style="margin-top:12px">
+
+      <div class="field full">
+        <label>Kolom yang dikoreksi</label>
+        <select id="correctionColumn"></select>
+      </div>
+
+      <div class="field">
+        <label>Nilai Lama</label>
+        <input
+          id="correctionOld"
+          readonly>
+      </div>
+
+      <div class="field">
+        <label>Nilai Baru</label>
+        <input id="correctionNew">
+      </div>
+
+      <div class="field full">
+        <label>Alasan</label>
+        <textarea id="correctionReason"></textarea>
+      </div>
+
+    </div>
+
+
+    <div
+      class="actions"
+      style="margin-top:12px">
+
+      <button
+        class="btn-primary"
+        onclick="submitCorrection()">
+        Kirim Koreksi
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
 <div id="toast" class="toast"></div>
+
+
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycby29V9fghZIGV0P1ic3MVwb7811hF9MhRUNqf7Z5p7fZJgJ3LyJ-AIsZRhi-IaRnB96GA/exec';
-const CONDITIONS=[['oliMesin','Oli Mesin'],['oliPowerSteering','Oli Power Steering'],['taliKipasVbelt','Tali Kipas / V-Belt'],['aki','Aki'],['banKiriDepan','Ban Kiri Depan'],['banKiriBelakang','Ban Kiri Belakang'],['banKananDepan','Ban Kanan Depan'],['banKananBelakang','Ban Kanan Belakang'],['banSerep','Ban Serep'],['kunciRodaDongkrak','Kunci Roda & Dongkrak'],['rem','Rem'],['kopling','Kopling'],['setir','Setir'],['klakson','Klakson'],['sabukPengaman','Sabuk Pengaman']];
-const PHOTO_CONFIG={body:['Foto Body Mobil','body'],radiator:['Foto Radiator','radiator'],reservoirRadiator:['Foto Reservoir Radiator','reservoirRadiator'],minyakRem:['Foto Minyak Rem','minyakRem'],stikOli:['Foto Stik Oli','stikOli'],banKiriDepan:['Foto Ban Kiri Depan','banKiriDepan'],banKiriBelakang:['Foto Ban Kiri Belakang','banKiriBelakang'],banKananDepan:['Foto Ban Kanan Depan','banKananDepan'],banKananBelakang:['Foto Ban Kanan Belakang','banKananBelakang'],banSerep:['Foto Ban Serep','banSerep'],kunciRodaDongkrak:['Foto Kunci Roda & Dongkrak','kunciRodaDongkrak'],interiorBox:['Foto Interior Box','interiorBox'],sisiDalamBak:['Foto Sisi Dalam Bak','sisiDalamBak'],kmStart:['Foto KM Start','kmStart'],kmSebelumIsiBensin:['Foto KM Sebelum Isi Bensin','kmSebelumIsiBensin'],kmSesudahIsiBensin:['Foto KM Sesudah Isi Bensin','kmSesudahIsiBensin'],kmFinishAkhir:['Foto KM Finish Akhir','kmFinishAkhir']};
-const VIDEO_CONFIG={lampuUtama:['Video Lampu Utama','lampuUtama'],lampuRem:['Video Lampu Rem','lampuRem'],lampuSein:['Video Lampu Sein','lampuSein'],bodyLecet:['Video Body Mobil Lecet','bodyLecet'],interior:['Video Interior','interior'],kerusakanUrgent:['Video Kerusakan yang Urgent','kerusakanUrgent']};
-let state={assets:[],drivers:[],admins:[],inspections:[],km:[],corrections:[],audit:[],session:null,currentAsset:null,stream:null,faceDriverId:null};
-let correctionInspectionId=null;
-const $=id=>document.getElementById(id),val=id=>$(id)?.value??'',esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),4500)}
-function formatDate(v){if(!v)return'-';const d=new Date(v);return isNaN(d.getTime())?String(v):d.toLocaleString('id-ID')}
-function badge(v){const s=String(v||'').toLowerCase();let c=s.includes('aktif')&&!s.includes('tidak')?'ok':s.includes('perawatan')||s.includes('menunggu')?'warn':s.includes('tidak')||s.includes('ditolak')?'bad':'info';return `<span class="badge ${c}">${esc(v||'-')}</span>`}
-function switchLogin(t){$('driverLoginBox').classList.toggle('hidden',t!=='driver');$('adminLoginBox').classList.toggle('hidden',t!=='admin');$('driverTab').classList.toggle('active',t==='driver');$('adminTab').classList.toggle('active',t==='admin')}
-function nowLocal(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
-async function api(action,payload={},method='GET'){let u=API_URL+'?action='+encodeURIComponent(action)+'&ts='+Date.now();const o={method};if(method==='POST'){o.headers={'Content-Type':'text/plain;charset=utf-8'};o.body=JSON.stringify({...payload,action})}const r=await fetch(u,o);const t=await r.text();let j;try{j=JSON.parse(t)}catch(e){throw new Error('Backend tidak mengembalikan JSON: '+t.slice(0,220))}if(!j.success)throw new Error(j.message||'Permintaan gagal');return j}
-async function boot(){
-  try{const d=await api('drivers');state.drivers=normalizeDrivers(d.drivers);populateDriverLogin();$('loginFaceStatus').value=state.drivers.length?`${state.drivers.length} driver tersedia`:'Belum ada driver';console.log('AssetTrack drivers:',state.drivers)}catch(e){console.error('drivers:',e);$('loginFaceStatus').value='Gagal memuat driver';$('faceMessage').textContent='Gagal memuat Driver ID: '+e.message}
-  try{const a=await api('assets');state.assets=a.assets||[];renderAssetList();renderStats();applyQrAssetFromUrl()}catch(e){toast('Backend aset: '+e.message);console.error('assets:',e)}
+
+/* =========================
+   CONFIG
+========================= */
+
+const API_URL =
+'https://script.google.com/macros/s/AKfycby29V9fghZIGV0P1ic3MVwb7811hF9MhRUNqf7Z5p7fZJgJ3LyJ-AIsZRhi-IaRnB96GA/exec';
+
+
+/* =========================
+   CHECKLIST
+========================= */
+
+const CONDITIONS = [
+
+  ['oliMesin','Oli Mesin'],
+  ['oliPowerSteering','Oli Power Steering'],
+  ['taliKipasVbelt','Tali Kipas / V-Belt'],
+  ['aki','Aki'],
+  ['banKiriDepan','Ban Kiri Depan'],
+  ['banKiriBelakang','Ban Kiri Belakang'],
+  ['banKananDepan','Ban Kanan Depan'],
+  ['banKananBelakang','Ban Kanan Belakang'],
+  ['banSerep','Ban Serep'],
+  ['kunciRodaDongkrak','Kunci Roda & Dongkrak'],
+  ['rem','Rem'],
+  ['kopling','Kopling'],
+  ['setir','Setir'],
+  ['klakson','Klakson'],
+  ['sabukPengaman','Sabuk Pengaman']
+
+];
+
+
+const PHOTO_CONFIG = {
+
+  body:['Foto Body Mobil','body'],
+  radiator:['Foto Radiator','radiator'],
+  reservoirRadiator:['Foto Reservoir Radiator','reservoirRadiator'],
+  minyakRem:['Foto Minyak Rem','minyakRem'],
+  stikOli:['Foto Stik Oli','stikOli'],
+
+  banKiriDepan:[
+    'Foto Ban Kiri Depan',
+    'banKiriDepan'
+  ],
+
+  banKiriBelakang:[
+    'Foto Ban Kiri Belakang',
+    'banKiriBelakang'
+  ],
+
+  banKananDepan:[
+    'Foto Ban Kanan Depan',
+    'banKananDepan'
+  ],
+
+  banKananBelakang:[
+    'Foto Ban Kanan Belakang',
+    'banKananBelakang'
+  ],
+
+  banSerep:[
+    'Foto Ban Serep',
+    'banSerep'
+  ],
+
+  kunciRodaDongkrak:[
+    'Foto Kunci Roda & Dongkrak',
+    'kunciRodaDongkrak'
+  ],
+
+  interiorBox:[
+    'Foto Interior Box',
+    'interiorBox'
+  ],
+
+  sisiDalamBak:[
+    'Foto Sisi Dalam Bak',
+    'sisiDalamBak'
+  ],
+
+  kmStart:[
+    'Foto KM Start',
+    'kmStart'
+  ],
+
+  kmSebelumIsiBensin:[
+    'Foto KM Sebelum Isi Bensin',
+    'kmSebelumIsiBensin'
+  ],
+
+  kmSesudahIsiBensin:[
+    'Foto KM Sesudah Isi Bensin',
+    'kmSesudahIsiBensin'
+  ],
+
+  kmFinishAkhir:[
+    'Foto KM Finish Akhir',
+    'kmFinishAkhir'
+  ]
+
+};
+
+
+const VIDEO_CONFIG = {
+
+  lampuUtama:[
+    'Video Lampu Utama',
+    'lampuUtama'
+  ],
+
+  lampuRem:[
+    'Video Lampu Rem',
+    'lampuRem'
+  ],
+
+  lampuSein:[
+    'Video Lampu Sein',
+    'lampuSein'
+  ],
+
+  bodyLecet:[
+    'Video Body Mobil Lecet',
+    'bodyLecet'
+  ],
+
+  interior:[
+    'Video Interior',
+    'interior'
+  ],
+
+  kerusakanUrgent:[
+    'Video Kerusakan yang Urgent',
+    'kerusakanUrgent'
+  ]
+
+};
+
+
+/* =========================
+   STATE
+========================= */
+
+let state = {
+
+  assets:[],
+  drivers:[],
+  admins:[],
+  inspections:[],
+  km:[],
+  corrections:[],
+  audit:[],
+  session:null,
+  currentAsset:null,
+  stream:null,
+  faceDriverId:null
+
+};
+
+let correctionInspectionId = null;
+
+
+/* =========================
+   HELPERS
+========================= */
+
+const $ =
+id => document.getElementById(id);
+
+const val =
+id => $(id)?.value ?? '';
+
+const esc =
+v =>
+String(v ?? '').replace(
+  /[&<>"']/g,
+  m => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#039;'
+  }[m])
+);
+
+
+function toast(msg){
+
+  const t = $('toast');
+
+  t.textContent = msg;
+
+  t.classList.add('show');
+
+  clearTimeout(window.__toast);
+
+  window.__toast =
+    setTimeout(
+      () => t.classList.remove('show'),
+      4500
+    );
+
 }
-function driverIdOf(d){return String(d?.driverId??d?.id??d?.['Driver ID']??'').trim()}
-function driverNameOf(d){return String(d?.name??d?.namaDriver??d?.['Nama Driver']??'').trim()}
-function driverStatusOf(d){return String(d?.status??d?.statusDriver??d?.['Status']??d?.['Status Driver']??'Aktif').trim()}
-function driverIsActive(d){const s=driverStatusOf(d).toLowerCase().replace(/[ _-]+/g,' ').trim();return !s||['aktif','active','1','true','ya'].includes(s)}
-function driverFaceOf(d){return String(d?.faceStatus??d?.['Face Status']??'Belum Terdaftar').trim()}
-function normalizeDrivers(rows){return (Array.isArray(rows)?rows:[]).map(d=>typeof d==='string'?{driverId:d,name:d,status:'Aktif',faceStatus:'Belum Terdaftar'}:{...d,driverId:driverIdOf(d),name:driverNameOf(d),status:driverStatusOf(d),faceStatus:driverFaceOf(d)}).filter(d=>d.driverId||d.name)}
-function populateDriverLogin(){const s=$('loginDriver');const rows=state.drivers.filter(d=>driverIdOf(d)||driverNameOf(d));s.innerHTML='<option value="">Pilih Driver</option>'+rows.map(d=>{const id=driverIdOf(d),name=driverNameOf(d)||id,status=driverStatusOf(d);return `<option value="${esc(id)}">${esc(id)} — ${esc(name)}${driverIsActive(d)?'':' — '+esc(status)}</option>`}).join('');s.disabled=rows.length===0;s.onchange=()=>{const d=state.drivers.find(x=>driverIdOf(x)===s.value);$('loginFaceStatus').value=d?driverFaceOf(d):'Pilih driver';if(d){$('faceMessage').textContent=`Driver ${driverNameOf(d)||driverIdOf(d)} dipilih. Aktifkan kamera lalu masuk.`;if(!driverIsActive(d))$('faceMessage').textContent+=` Status driver: ${driverStatusOf(d)}.`}}}
-async function loginAdmin(){const id=val('adminId').trim(),name=val('adminName').trim(),pin=val('adminPin').trim();if(!id||!name)return toast('Admin ID dan Nama Admin wajib.');try{const r=await api('adminLogin',{adminId:id,namaAdmin:name,pin},'POST');state.session={...r.admin};enterApp()}catch(e){toast(e.message)}}
-async function loginDriver(){const id=val('loginDriver');if(!id)return toast('Pilih Driver ID.');try{if(!state.stream)await startCamera('loginVideo');const data=captureFrame('loginVideo');const r=await api('driverLogin',{driverId:id,data},'POST');state.session={...r.driver};enterApp()}catch(e){$('faceMessage').textContent=e.message;toast(e.message)}}
-function enterApp(){$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');const role=String(state.session?.role||'').toUpperCase();$('sessionPill').textContent=`${state.session?.name||state.session?.namaAdmin||''} • ${role}`;$('welcome').textContent=`Selamat datang, ${state.session?.name||state.session?.namaAdmin||''}.`;$('adminPanel').classList.toggle('hidden',!['ADMIN','SUPER_ADMIN'].includes(role));$('driverHistoryPanel').classList.toggle('hidden',role!=='DRIVER');$('driverNotice').classList.toggle('hidden',role!=='DRIVER');stopCamera();refreshAll()}
-function logout(){state.session=null;state.currentAsset=null;stopCamera();$('appView').classList.add('hidden');$('loginView').classList.remove('hidden');switchLogin('driver')}
-function isAdmin(){return['ADMIN','SUPER_ADMIN'].includes(String(state.session?.role||'').toUpperCase())}function isSuper(){return String(state.session?.role||'').toUpperCase()==='SUPER_ADMIN'}function isDriver(){return String(state.session?.role||'').toUpperCase()==='DRIVER'}
-async function refreshAll(){try{const a=await api('assets');state.assets=a.assets||[];renderStats();renderAssetList();const d=await api('drivers');state.drivers=normalizeDrivers(d.drivers);populateDriverLogin();if(isAdmin()){state.admins=(await api('admins')).admins||[];state.inspections=(await api('inspections')).rows||[];state.km=(await api('km')).rows||[];state.corrections=(await api('corrections')).rows||[];state.audit=(await api('audit')).rows||[];renderAssetsAdmin();renderDrivers();renderAdmins();renderInspections();renderKM();renderCorrections();renderAudit()}else if(isDriver()){state.inspections=(await api('inspections')).rows||[];renderDriverHistory()}$('statInspections').textContent=state.inspections.length}catch(e){toast(e.message)}}
-function renderStats(){$('statAssets').textContent=state.assets.length;$('statActive').textContent=state.assets.filter(a=>String(a.status).toLowerCase()==='aktif').length;$('statMaint').textContent=state.assets.filter(a=>String(a.status).toLowerCase().includes('perawatan')).length;$('statDrivers').textContent=state.drivers.filter(d=>driverStatusOf(d).toLowerCase()==='aktif').length;$('statInspections').textContent=state.inspections.length}
-function renderAssetList(){const q=val('assetSearch').toLowerCase();const list=state.assets.filter(a=>!q||[a.code,a.name,a.plate,a.location,a.brand,a.model].some(v=>String(v||'').toLowerCase().includes(q)));$('assetSelect').innerHTML='<option value="">Pilih kendaraan</option>'+list.map(a=>`<option value="${esc(a.code)}">${esc(a.code)} — ${esc(a.name)}</option>`).join('');$('publicAssetRows').innerHTML=list.map(a=>`<tr><td><b>${esc(a.code)}</b></td><td>${esc(a.name)}</td><td>${esc(a.plate)}</td><td>${esc(a.brand)}</td><td>${esc(a.model)}</td><td>${esc(a.year)}</td><td>${esc(a.location)}</td><td>${badge(a.status)}</td><td><div class="actions"><button class="btn-primary" onclick="selectAsset('${esc(a.code)}')">Pilih</button><button class="btn-ok" onclick="startInspectionByCode('${esc(a.code)}')">Periksa</button></div></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Tidak ada aset.</td></tr>'}
-function selectAsset(code){$('assetSelect').value=code;showAssetCode()}function getSelectedAsset(){return state.assets.find(a=>a.code===val('assetSelect'))||null}function showAssetCode(){const a=getSelectedAsset();if(!a){$('assetCodeArea').classList.add('hidden');return}state.currentAsset=a;makeCodes()}
-function makeCodes(){const a=getSelectedAsset()||state.currentAsset;if(!a)return toast('Pilih kendaraan.');$('assetCodeArea').classList.remove('hidden');$('qr').innerHTML='';new QRCode($('qr'),{text:location.origin+location.pathname+'?kode='+encodeURIComponent(a.code),width:150,height:150});try{JsBarcode('#barcode',a.code,{format:'CODE128',displayValue:true,width:2,height:65,margin:8})}catch(e){toast(e.message)}}
-function startSelectedInspection(){const a=getSelectedAsset();if(!a)return toast('Pilih kendaraan dulu.');startInspection(a)}function startInspectionByCode(c){const a=state.assets.find(x=>x.code===c);if(a)startInspection(a)}
-function startInspection(a){if(!isDriver())return toast('Pemeriksaan dilakukan oleh Driver setelah login.');state.currentAsset=a;$('inspectionAssetInfo').innerHTML=`<b>${esc(a.code)}</b> — ${esc(a.name)} | Polisi: ${esc(a.plate||'-')}`;$('inspectionDriver').value=`${state.session.driverId||state.session.id} — ${state.session.name||state.session.namaDriver}`;$('inspectionTime').value=nowLocal();$('inspectionTimestamp').value=new Date().toLocaleString('id-ID');buildConditions();buildMedia();$('inspectionModal').classList.add('show');getGPS()}
-function buildConditions(){$('conditionGrid').innerHTML=CONDITIONS.map(([k,l])=>`<div class="checkitem"><b>${esc(l)}</b><select data-condition="${k}"><option value="">Pilih</option><option>Baik</option><option>Perlu Perhatian</option><option>Rusak</option><option>Tidak Ada</option></select></div>`).join('')}
-function buildMedia(){$('photoGrid').innerHTML=Object.entries(PHOTO_CONFIG).map(([k,[l,c]])=>`<div class="media"><b>${esc(l)}</b><input type="file" accept="image/*" capture="environment" data-photo="${c}"><div class="preview" id="p-${c}"></div></div>`).join('');$('videoGrid').innerHTML=Object.entries(VIDEO_CONFIG).map(([k,[l,c]])=>`<div class="media"><b>${esc(l)}</b><input type="file" accept="video/*" capture="environment" data-video="${c}"><div class="preview" id="v-${c}"></div></div>`).join('');document.querySelectorAll('[data-photo]').forEach(x=>x.onchange=()=>previewFile(x,'p-'+x.dataset.photo,false));document.querySelectorAll('[data-video]').forEach(x=>x.onchange=()=>previewFile(x,'v-'+x.dataset.video,true))}
-function previewFile(i,target,video){const f=i.files?.[0],b=$(target);b.innerHTML='';if(!f)return;const u=URL.createObjectURL(f),e=document.createElement(video?'video':'img');e.src=u;if(video){e.controls=true;e.muted=true}b.appendChild(e)}
-function getGPS(){if(!navigator.geolocation)return toast('Browser tidak mendukung GPS.');navigator.geolocation.getCurrentPosition(p=>{$('latitude').value=p.coords.latitude;$('longitude').value=p.coords.longitude;$('gpsAccuracy').value=p.coords.accuracy.toFixed(1)},e=>toast('GPS: '+e.message),{enableHighAccuracy:true,timeout:15000,maximumAge:0})}
-function captureFrame(id){const v=$(id),c=document.createElement('canvas');c.width=v.videoWidth||640;c.height=v.videoHeight||480;c.getContext('2d').drawImage(v,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.82)}
-async function startCamera(id){try{stopCamera();state.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});$(id).srcObject=state.stream;await $(id).play();toast('Kamera aktif.')}catch(e){toast('Kamera gagal: '+e.message)}}function stopCamera(){if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null}}
-async function fileData(f,max){if(!f)return null;if(f.size>max)throw new Error(f.name+' melebihi batas '+Math.round(max/1024/1024)+' MB.');return await new Promise((ok,bad)=>{const r=new FileReader();r.onload=()=>ok({data:r.result,type:f.type||'application/octet-stream',name:f.name});r.onerror=bad;r.readAsDataURL(f)})}
-async function mediaMap(sel,max){const o={};for(const x of document.querySelectorAll(sel)){const f=x.files?.[0];if(f)o[x.dataset.photo||x.dataset.video]=[await fileData(f,max)]}return o}
-$('inspectionForm').addEventListener('submit',async e=>{e.preventDefault();if(!state.currentAsset||!isDriver())return toast('Sesi driver tidak valid.');if(!val('latitude')||!val('longitude'))return toast('GPS wajib tersedia.');if(Number(val('kmFinish'))<Number(val('kmStart')))return toast('KM Finish tidak boleh lebih kecil dari KM Start.');try{const conditions={};document.querySelectorAll('[data-condition]').forEach(x=>conditions[x.dataset.condition]=x.value);const photos=await mediaMap('[data-photo]',8*1024*1024),videos=await mediaMap('[data-video]',20*1024*1024);const r=await api('saveInspection',{kodeAset:state.currentAsset.code,driverId:state.session.driverId||state.session.id,namaDriver:state.session.name||state.session.namaDriver,waktuPemeriksaan:val('inspectionTime'),latitude:val('latitude'),longitude:val('longitude'),gpsAccuracy:val('gpsAccuracy'),gpsLabel:val('gpsLabel'),kmStart:val('kmStart'),kmBeforeFuel:val('kmBeforeFuel'),kmAfterFuel:val('kmAfterFuel'),kmFinishAkhir:val('kmFinish'),kmOilChange:val('kmOilChange'),conditions,statusPemeriksaan:'Selesai',catatan:val('inspectionNotes'),media:{...photos,...videos}},'POST');toast(r.message);closeModal('inspectionModal');refreshAll()}catch(e){toast(e.message)}})
-function closeModal(id){$(id).classList.remove('show');if(id==='inspectionModal')stopCamera()}function adminTab(n,b){['assets','drivers','admins','inspections','km','corrections','audit'].forEach(x=>$('admin'+x[0].toUpperCase()+x.slice(1)+'Tab').classList.toggle('hidden',x!==n));document.querySelectorAll('.side-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
-$('assetForm').addEventListener('submit',async e=>{e.preventDefault();try{const r=await api('saveAsset',{id:val('assetId'),code:val('assetCode'),name:val('assetName'),plate:val('assetPlate'),brand:val('assetBrand'),model:val('assetModel'),year:val('assetYear'),location:val('assetLocation'),responsible:val('assetResponsible'),status:val('assetStatus'),purchaseDate:val('assetPurchaseDate'),notes:val('assetNotes'),userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);resetAssetForm();refreshAll()}catch(e){toast(e.message)}})
-function renderAssetsAdmin(){$('assetRows').innerHTML=state.assets.map(a=>`<tr><td>${esc(a.code)}</td><td>${esc(a.name)}</td><td>${esc(a.plate)}</td><td>${esc(a.brand)} / ${esc(a.model)}</td><td>${esc(a.year)}</td><td>${esc(a.location)}</td><td>${badge(a.status)}</td><td><button class="btn-soft" onclick="editAsset('${esc(a.id)}')">Edit</button> <button class="btn-bad" onclick="deleteAsset('${esc(a.id)}','${esc(a.code)}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan="8" class="empty">Belum ada aset.</td></tr>'}
-function editAsset(id){const a=state.assets.find(x=>x.id===id);if(!a)return;$('assetId').value=a.id;$('assetCode').value=a.code;$('assetName').value=a.name;$('assetPlate').value=a.plate;$('assetBrand').value=a.brand;$('assetModel').value=a.model;$('assetYear').value=a.year;$('assetLocation').value=a.location;$('assetResponsible').value=a.responsible;$('assetStatus').value=a.status||'Aktif';$('assetPurchaseDate').value=(a.purchaseDate||'').slice(0,10);$('assetNotes').value=a.notes||''}function resetAssetForm(){['assetId','assetCode','assetName','assetPlate','assetBrand','assetModel','assetYear','assetLocation','assetResponsible','assetPurchaseDate','assetNotes'].forEach(i=>$(i).value='');$('assetStatus').value='Aktif'}
-async function deleteAsset(id,code){if(!confirm('Hapus aset '+code+'?'))return;try{const r=await api('deleteAsset',{id,code,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}
-function renderDrivers(){$('driverRows').innerHTML=state.drivers.map(d=>{const id=driverIdOf(d),name=driverNameOf(d)||id;return `<tr><td>${esc(id)}</td><td>${esc(name)}</td><td>${esc(d.email??d['Email']??'')}</td><td>${badge(driverStatusOf(d))}</td><td>${badge(driverFaceOf(d))}</td><td><button class="btn-primary" onclick="openFaceModal('${esc(id)}')">📷 Foto Wajah</button></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Belum ada driver.</td></tr>'}
-function renderAdmins(){$('adminRows').innerHTML=state.admins.map(a=>`<tr><td>${esc(a.adminId)}</td><td>${esc(a.name)}</td><td>${esc(a.role)}</td><td>${badge(a.status)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">Belum ada admin.</td></tr>'}
-function renderInspections(){$('inspectionRows').innerHTML=state.inspections.slice().reverse().map(x=>`<tr><td>${esc(x['Inspection ID'])}</td><td>${esc(formatDate(x['Waktu Pemeriksaan']||x['Timestamp']))}</td><td>${esc(x['Kode Aset'])}<br>${esc(x['Nomor Polisi'])}</td><td>${esc(x['Driver ID'])} — ${esc(x['Nama Driver'])}</td><td>${esc(x['KM Start'])}</td><td>${esc(x['KM Finish Akhir'])}</td><td>${esc(x['KM Total Perjalanan'])}</td><td>${badge(x['Status Pemeriksaan'])}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">Belum ada pemeriksaan.</td></tr>'}
-function renderKM(){$('kmRows').innerHTML=state.km.slice().reverse().map(x=>`<tr><td>${esc(x['KM ID'])}</td><td>${esc(formatDate(x['Timestamp']))}</td><td>${esc(x['Inspection ID'])}</td><td>${esc(x['Kode Aset'])}</td><td>${esc(x['Nama Kendaraan'])}</td><td>${esc(x['Driver ID'])} — ${esc(x['Nama Driver'])}</td><td>${esc(x['KM Start'])}</td><td>${esc(x['KM Sebelum Isi Bensin'])}</td><td>${esc(x['KM Sesudah Isi Bensin'])}</td><td>${esc(x['KM Finish Akhir'])}</td><td>${esc(x['KM Total Perjalanan'])}</td><td>${esc(x['KM Sejak Ganti Oli'])}</td></tr>`).join('')||'<tr><td colspan="12" class="empty">Belum ada data KM.</td></tr>'}
-function renderCorrections(){$('correctionRows').innerHTML=state.corrections.slice().reverse().map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(formatDate(x.timestamp))}</td><td>${esc(x.inspectionId)}</td><td>${esc(x['Kolom Koreksi']||x.type)}</td><td>${esc(x.oldValue)}</td><td>${esc(x.newValue)}</td><td>${esc(x.reason)}</td><td>${badge(x.status)}</td><td>${x.status==='Menunggu Approval'&&isSuper()?`<button class="btn-ok" onclick="approveCorrection('${esc(x.id)}')">Setujui</button> <button class="btn-bad" onclick="rejectCorrection('${esc(x.id)}')">Tolak</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">Tidak ada koreksi.</td></tr>'}
-function renderAudit(){$('auditRows').innerHTML=state.audit.slice().reverse().map(x=>`<tr><td>${esc(formatDate(x['Timestamp']))}</td><td>${esc(x['User ID'])} — ${esc(x['User Name'])}</td><td>${esc(x['Role'])}</td><td>${esc(x['Action'])}</td><td>${esc(x['Target ID'])}</td><td>${esc(x['Keterangan'])}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Belum ada audit.</td></tr>'}
-function renderDriverHistory(){const id=state.session?.driverId||state.session?.id;const rows=state.inspections.filter(x=>String(x['Driver ID'])===String(id)).slice().reverse();$('driverHistoryRows').innerHTML=rows.map(x=>`<tr><td>${esc(x['Inspection ID'])}</td><td>${esc(formatDate(x['Waktu Pemeriksaan']||x['Timestamp']))}</td><td>${esc(x['Kode Aset'])} — ${esc(x['Nama Kendaraan'])}</td><td>${esc(x['KM Start'])}</td><td>${esc(x['KM Finish Akhir'])}</td><td>${esc(x['KM Total Perjalanan'])}</td><td>${badge(x['Status Pemeriksaan'])}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">Belum ada pemeriksaan.</td></tr>'}
-function openDriverModal(){$('driverModal').classList.add('show')}function closeFaceModal(){closeModal('faceModal');state.faceDriverId=null}function openFaceModal(id){state.faceDriverId=id;$('faceRegisterInfo').textContent='Driver: '+id;$('faceModal').classList.add('show')}
-async function saveDriver(){try{const r=await api('registerDriver',{driverId:val('newDriverId'),namaDriver:val('newDriverName'),email:val('newDriverEmail'),noHp:val('newDriverPhone'),status:val('newDriverStatus'),keterangan:val('newDriverNote'),userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);closeModal('driverModal');refreshAll()}catch(e){toast(e.message)}}
-async function registerFaceNow(){if(!state.faceDriverId)return toast('Driver tidak dipilih.');if(!state.stream)return toast('Aktifkan kamera.');try{const r=await api('registerDriverFace',{driverId:state.faceDriverId,data:captureFrame('faceVideo')},'POST');toast(r.message);closeFaceModal();refreshAll()}catch(e){toast(e.message)}}
-const CORRECTION_COLUMNS=['Oli Mesin','Oli Power Steering','Tali Kipas / V-Belt','Aki','Ban Kiri Depan','Ban Kiri Belakang','Ban Kanan Depan','Ban Kanan Belakang','Ban Serep','Kunci Roda & Dongkrak','Rem','Kopling','Setir','Klakson','Sabuk Pengaman','KM Start','KM Sebelum Isi Bensin','KM Sesudah Isi Bensin','KM Finish Akhir','KM Ganti Oli','Status Pemeriksaan','Catatan'];
-function openCorrection(id){correctionInspectionId=id;const x=state.inspections.find(r=>String(r['Inspection ID'])===String(id));if(!x)return;$('correctionColumn').innerHTML=CORRECTION_COLUMNS.map(c=>`<option>${esc(c)}</option>`).join('');$('correctionInfo').textContent=`Inspection ${id} — ${x['Kode Aset']} — ${x['Nama Kendaraan']}`;$('correctionOld').value=x[$('correctionColumn').value]||'';$('correctionNew').value='';$('correctionReason').value='';$('correctionModal').classList.add('show')}
-$('correctionColumn').addEventListener('change',()=>{const x=state.inspections.find(r=>String(r['Inspection ID'])===String(correctionInspectionId));if(x)$('correctionOld').value=x[$('correctionColumn').value]||''})
-async function submitCorrection(){if(!correctionInspectionId||!val('correctionReason'))return toast('Alasan wajib diisi.');try{const r=await api('requestCorrection',{inspectionId:correctionInspectionId,driverId:state.session.driverId||state.session.id,namaDriver:state.session.name||state.session.namaDriver,jenisKoreksi:'Data',kolomKoreksi:val('correctionColumn'),nilaiLama:val('correctionOld'),nilaiBaru:val('correctionNew'),alasan:val('correctionReason')},'POST');toast(r.message);closeModal('correctionModal');refreshAll()}catch(e){toast(e.message)}}
-async function approveCorrection(id){if(!isSuper())return toast('Hanya Super Admin.');try{const r=await api('approveCorrection',{correctionId:id,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}async function rejectCorrection(id){if(!isSuper())return toast('Hanya Super Admin.');const n=prompt('Catatan penolakan:','Koreksi ditolak.');try{const r=await api('rejectCorrection',{correctionId:id,userId:state.session.adminId||state.session.id,userName:state.session.name||state.session.namaAdmin,role:state.session.role,catatanAdmin:n||'Koreksi ditolak.'},'POST');toast(r.message);refreshAll()}catch(e){toast(e.message)}}
-function applyQrAssetFromUrl(){const c=new URLSearchParams(location.search).get('kode');if(!c)return;const a=state.assets.find(x=>String(x.code).toUpperCase()===String(c).toUpperCase());if(a){selectAsset(a.code);$('faceMessage').textContent=`QR kendaraan ${a.code} terdeteksi. Pilih Driver ID dan lanjutkan login.`;$('driverNotice').textContent=`Kendaraan ${a.code} — ${a.name} terdeteksi dari QR.`}else{console.warn('QR kendaraan tidak ditemukan:',c);$('faceMessage').textContent=`QR kendaraan ${c} terdeteksi, tetapi kode aset tidak ditemukan di database.`}}
-window.addEventListener('load',boot);window.addEventListener('beforeunload',stopCamera);
-</script></body></html>
+
+
+function formatDate(v){
+
+  if(!v)return '-';
+
+  const d = new Date(v);
+
+  return isNaN(d.getTime())
+    ? String(v)
+    : d.toLocaleString('id-ID');
+
+}
+
+
+function badge(v){
+
+  const s =
+    String(v || '').toLowerCase();
+
+  let c =
+    s.includes('aktif') &&
+    !s.includes('tidak')
+      ? 'ok'
+      : s.includes('perawatan') ||
+        s.includes('menunggu')
+        ? 'warn'
+        : s.includes('tidak') ||
+          s.includes('ditolak')
+          ? 'bad'
+          : 'info';
+
+  return `
+    <span class="badge ${c}">
+      ${esc(v || '-')}
+    </span>
+  `;
+
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+function switchLogin(type){
+
+  $('driverLoginBox')
+    .classList.toggle(
+      'hidden',
+      type !== 'driver'
+    );
+
+  $('adminLoginBox')
+    .classList.toggle(
+      'hidden',
+      type !== 'admin'
+    );
+
+  $('driverTab')
+    .classList.toggle(
+      'active',
+      type === 'driver'
+    );
+
+  $('adminTab')
+    .classList.toggle(
+      'active',
+      type === 'admin'
+    );
+
+}
+
+
+function nowLocal(){
+
+  const d = new Date();
+
+  d.setMinutes(
+    d.getMinutes() -
+    d.getTimezoneOffset()
+  );
+
+  return d.toISOString().slice(0,16);
+
+}
+
+
+/* =========================
+   API
+========================= */
+
+async function api(
+  action,
+  payload = {},
+  method = 'GET'
+){
+
+  let u =
+    API_URL +
+    '?action=' +
+    encodeURIComponent(action) +
+    '&ts=' +
+    Date.now();
+
+  const options = {
+    method
+  };
+
+  if(method === 'POST'){
+
+    options.headers = {
+      'Content-Type':
+        'text/plain;charset=utf-8'
+    };
+
+    options.body =
+      JSON.stringify({
+        ...payload,
+        action
+      });
+
+  }
+
+  const response =
+    await fetch(u,options);
+
+  const text =
+    await response.text();
+
+  let json;
+
+  try{
+
+    json = JSON.parse(text);
+
+  }catch(e){
+
+    throw new Error(
+      'Backend tidak mengembalikan JSON: ' +
+      text.slice(0,220)
+    );
+
+  }
+
+  if(!json.success){
+
+    throw new Error(
+      json.message ||
+      'Permintaan gagal.'
+    );
+
+  }
+
+  return json;
+
+}
+
+
+/* =========================
+   BOOT
+========================= */
+
+async function boot(){
+
+  try{
+
+    const d =
+      await api('drivers');
+
+    state.drivers =
+      normalizeDrivers(d.drivers);
+
+    populateDriverLogin();
+
+    $('loginFaceStatus').value =
+      state.drivers.length
+        ? `${state.drivers.length} driver tersedia`
+        : 'Belum ada driver';
+
+  }catch(e){
+
+    console.error('drivers:',e);
+
+    $('loginFaceStatus').value =
+      'Gagal memuat driver';
+
+    $('faceMessage').textContent =
+      'Gagal memuat Driver ID: ' +
+      e.message;
+
+  }
+
+
+  try{
+
+    const a =
+      await api('assets');
+
+    state.assets =
+      a.assets || [];
+
+    renderAssetList();
+
+    renderStats();
+
+    applyQrAssetFromUrl();
+
+  }catch(e){
+
+    toast(
+      'Backend aset: ' +
+      e.message
+    );
+
+    console.error(
+      'assets:',
+      e
+    );
+
+  }
+
+}
+
+
+/* =========================
+   DRIVER
+========================= */
+
+function driverIdOf(d){
+
+  return String(
+    d?.driverId ??
+    d?.id ??
+    d?.['Driver ID'] ??
+    ''
+  ).trim();
+
+}
+
+
+function driverNameOf(d){
+
+  return String(
+    d?.name ??
+    d?.namaDriver ??
+    d?.['Nama Driver'] ??
+    ''
+  ).trim();
+
+}
+
+
+function driverStatusOf(d){
+
+  return String(
+    d?.status ??
+    d?.statusDriver ??
+    d?.['Status'] ??
+    d?.['Status Driver'] ??
+    'Aktif'
+  ).trim();
+
+}
+
+
+function driverIsActive(d){
+
+  const s =
+    driverStatusOf(d)
+      .toLowerCase()
+      .replace(/[ _-]+/g,' ')
+      .trim();
+
+  return !s ||
+    [
+      'aktif',
+      'active',
+      '1',
+      'true',
+      'ya'
+    ].includes(s);
+
+}
+
+
+function driverFaceOf(d){
+
+  return String(
+    d?.faceStatus ??
+    d?.['Face Status'] ??
+    'Belum Terdaftar'
+  ).trim();
+
+}
+
+
+function normalizeDrivers(rows){
+
+  return (
+    Array.isArray(rows)
+      ? rows
+      : []
+  )
+  .map(d =>
+    typeof d === 'string'
+      ? {
+          driverId:d,
+          name:d,
+          status:'Aktif',
+          faceStatus:'Belum Terdaftar'
+        }
+      : {
+          ...d,
+          driverId:driverIdOf(d),
+          name:driverNameOf(d),
+          status:driverStatusOf(d),
+          faceStatus:driverFaceOf(d)
+        }
+  )
+  .filter(
+    d =>
+      d.driverId ||
+      d.name
+  );
+
+}
+
+
+function populateDriverLogin(){
+
+  const select =
+    $('loginDriver');
+
+  const rows =
+    state.drivers.filter(
+      d =>
+        driverIdOf(d) ||
+        driverNameOf(d)
+    );
+
+  select.innerHTML =
+    '<option value="">Pilih Driver</option>' +
+
+    rows.map(d => {
+
+      const id =
+        driverIdOf(d);
+
+      const name =
+        driverNameOf(d) || id;
+
+      const status =
+        driverStatusOf(d);
+
+      return `
+        <option value="${esc(id)}">
+          ${esc(id)} — ${esc(name)}
+          ${
+            driverIsActive(d)
+              ? ''
+              : ' — ' + esc(status)
+          }
+        </option>
+      `;
+
+    }).join('');
+
+  select.disabled =
+    rows.length === 0;
+
+  select.onchange = () => {
+
+    const driver =
+      state.drivers.find(
+        x =>
+          driverIdOf(x) ===
+          select.value
+      );
+
+    $('loginFaceStatus').value =
+      driver
+        ? driverFaceOf(driver)
+        : 'Pilih driver';
+
+    if(driver){
+
+      $('faceMessage').textContent =
+        `Driver ${
+          driverNameOf(driver) ||
+          driverIdOf(driver)
+        } dipilih. Aktifkan kamera lalu masuk.`;
+
+      if(!driverIsActive(driver)){
+
+        $('faceMessage').textContent +=
+          ` Status driver: ${
+            driverStatusOf(driver)
+          }.`;
+
+      }
+
+    }
+
+  };
+
+}
+
+
+async function loginAdmin(){
+
+  const id =
+    val('adminId').trim();
+
+  const name =
+    val('adminName').trim();
+
+  const pin =
+    val('adminPin').trim();
+
+  if(!id || !name){
+
+    return toast(
+      'Admin ID dan Nama Admin wajib diisi.'
+    );
+
+  }
+
+  try{
+
+    const result =
+      await api(
+        'adminLogin',
+        {
+          adminId:id,
+          namaAdmin:name,
+          pin:pin
+        },
+        'POST'
+      );
+
+    state.session =
+      {
+        ...result.admin
+      };
+
+    enterApp();
+
+  }catch(e){
+
+    toast(e.message);
+
+  }
+
+}
+
+
+async function loginDriver(){
+
+  const id =
+    val('loginDriver');
+
+  if(!id){
+
+    return toast(
+      'Pilih Driver ID.'
+    );
+
+  }
+
+  try{
+
+    if(!state.stream){
+
+      await startCamera(
+        'loginVideo'
+      );
+
+    }
+
+    const data =
+      captureFrame(
+        'loginVideo'
+      );
+
+    const result =
+      await api(
+        'driverLogin',
+        {
+          driverId:id,
+          data:data
+        },
+        'POST'
+      );
+
+    state.session =
+      {
+        ...result.driver
+      };
+
+    enterApp();
+
+  }catch(e){
+
+    $('faceMessage').textContent =
+      e.message;
+
+    toast(e.message);
+
+  }
+
+}
+
+
+/* =========================
+   SESSION
+========================= */
+
+function enterApp(){
+
+  $('loginView')
+    .classList.add('hidden');
+
+  $('appView')
+    .classList.remove('hidden');
+
+  const role =
+    String(
+      state.session?.role || ''
+    ).toUpperCase();
+
+  const name =
+    state.session?.name ||
+    state.session?.namaAdmin ||
+    state.session?.namaDriver ||
+    '';
+
+  $('sessionPill').textContent =
+    `${name} • ${role}`;
+
+  $('welcome').textContent =
+    `Selamat datang, ${name}.`;
+
+  $('adminPanel')
+    .classList.toggle(
+      'hidden',
+      ![
+        'ADMIN',
+        'SUPER_ADMIN'
+      ].includes(role)
+    );
+
+  $('driverHistoryPanel')
+    .classList.toggle(
+      'hidden',
+      role !== 'DRIVER'
+    );
+
+  $('driverNotice')
+    .classList.toggle(
+      'hidden',
+      role !== 'DRIVER'
+    );
+
+  stopCamera();
+
+  refreshAll();
+
+}
+
+
+function logout(){
+
+  state.session = null;
+
+  state.currentAsset = null;
+
+  stopCamera();
+
+  $('appView')
+    .classList.add('hidden');
+
+  $('loginView')
+    .classList.remove('hidden');
+
+  switchLogin('driver');
+
+}
+
+
+function isAdmin(){
+
+  return [
+    'ADMIN',
+    'SUPER_ADMIN'
+  ].includes(
+    String(
+      state.session?.role || ''
+    ).toUpperCase()
+  );
+
+}
+
+
+function isSuper(){
+
+  return String(
+    state.session?.role || ''
+  ).toUpperCase() ===
+    'SUPER_ADMIN';
+
+}
+
+
+function isDriver(){
+
+  return String(
+    state.session?.role || ''
+  ).toUpperCase() ===
+    'DRIVER';
+
+}
+
+
+/* =========================
+   REFRESH
+========================= */
+
+async function refreshAll(){
+
+  try{
+
+    const assets =
+      await api('assets');
+
+    state.assets =
+      assets.assets || [];
+
+    renderStats();
+
+    renderAssetList();
+
+
+    const drivers =
+      await api('drivers');
+
+    state.drivers =
+      normalizeDrivers(
+        drivers.drivers
+      );
+
+    populateDriverLogin();
+
+
+    if(isAdmin()){
+
+      state.admins =
+        (
+          await api('admins')
+        ).admins || [];
+
+      state.inspections =
+        (
+          await api('inspections')
+        ).rows || [];
+
+      state.km =
+        (
+          await api('km')
+        ).rows || [];
+
+      state.corrections =
+        (
+          await api('corrections')
+        ).rows || [];
+
+      state.audit =
+        (
+          await api('audit')
+        ).rows || [];
+
+      renderAssetsAdmin();
+      renderDrivers();
+      renderAdmins();
+      renderInspections();
+      renderKM();
+      renderCorrections();
+      renderAudit();
+
+    }else if(isDriver()){
+
+      state.inspections =
+        (
+          await api('inspections')
+        ).rows || [];
+
+      renderDriverHistory();
+
+    }
+
+    $('statInspections').textContent =
+      state.inspections.length;
+
+  }catch(e){
+
+    toast(e.message);
+
+  }
+
+}
+
+
+/* =========================
+   STATISTICS
+========================= */
+
+function renderStats(){
+
+  $('statAssets').textContent =
+    state.assets.length;
+
+  $('statActive').textContent =
+    state.assets.filter(
+      a =>
+        String(a.status)
+          .toLowerCase() ===
+        'aktif'
+    ).length;
+
+  $('statMaint').textContent =
+    state.assets.filter(
+      a =>
+        String(a.status)
+          .toLowerCase()
+          .includes('perawatan')
+    ).length;
+
+  $('statDrivers').textContent =
+    state.drivers.filter(
+      d =>
+        driverStatusOf(d)
+          .toLowerCase() ===
+        'aktif'
+    ).length;
+
+  $('statInspections').textContent =
+    state.inspections.length;
+
+}
+
+
+/* =========================
+   ASSET
+========================= */
+
+function renderAssetList(){
+
+  const q =
+    val('assetSearch')
+      .toLowerCase();
+
+  const list =
+    state.assets.filter(
+      a =>
+        !q ||
+        [
+          a.code,
+          a.name,
+          a.plate,
+          a.location,
+          a.brand,
+          a.model
+        ].some(
+          v =>
+            String(v || '')
+              .toLowerCase()
+              .includes(q)
+        )
+    );
+
+
+  $('assetSelect').innerHTML =
+    '<option value="">Pilih kendaraan</option>' +
+
+    list.map(
+      a =>
+        `<option value="${esc(a.code)}">
+          ${esc(a.code)} — ${esc(a.name)}
+        </option>`
+    ).join('');
+
+
+  $('publicAssetRows').innerHTML =
+    list.map(
+      a =>
+        `<tr>
+          <td><b>${esc(a.code)}</b></td>
+          <td>${esc(a.name)}</td>
+          <td>${esc(a.plate)}</td>
+          <td>${esc(a.brand)}</td>
+          <td>${esc(a.model)}</td>
+          <td>${esc(a.year)}</td>
+          <td>${esc(a.location)}</td>
+          <td>${badge(a.status)}</td>
+          <td>
+            <div class="actions">
+              <button
+                class="btn-primary"
+                onclick="selectAsset('${esc(a.code)}')">
+                Pilih
+              </button>
+
+              <button
+                class="btn-ok"
+                onclick="startInspectionByCode('${esc(a.code)}')">
+                Periksa
+              </button>
+            </div>
+          </td>
+        </tr>`
+    ).join('') ||
+
+    `<tr>
+      <td
+        colspan="9"
+        class="empty">
+        Tidak ada aset.
+      </td>
+    </tr>`;
+
+}
+
+
+function selectAsset(code){
+
+  $('assetSelect').value =
+    code;
+
+  showAssetCode();
+
+}
+
+
+function getSelectedAsset(){
+
+  return state.assets.find(
+    a =>
+      a.code ===
+      val('assetSelect')
+  ) || null;
+
+}
+
+
+function showAssetCode(){
+
+  const asset =
+    getSelectedAsset();
+
+  if(!asset){
+
+    $('assetCodeArea')
+      .classList.add('hidden');
+
+    return;
+
+  }
+
+  state.currentAsset =
+    asset;
+
+  makeCodes();
+
+}
+
+
+function makeCodes(){
+
+  const asset =
+    getSelectedAsset() ||
+    state.currentAsset;
+
+  if(!asset){
+
+    return toast(
+      'Pilih kendaraan.'
+    );
+
+  }
+
+  $('assetCodeArea')
+    .classList.remove('hidden');
+
+  $('qr').innerHTML = '';
+
+  new QRCode(
+    $('qr'),
+    {
+      text:
+        location.origin +
+        location.pathname +
+        '?kode=' +
+        encodeURIComponent(
+          asset.code
+        ),
+
+      width:150,
+      height:150
+    }
+  );
+
+  try{
+
+    JsBarcode(
+      '#barcode',
+      asset.code,
+      {
+        format:'CODE128',
+        displayValue:true,
+        width:2,
+        height:65,
+        margin:8
+      }
+    );
+
+  }catch(e){
+
+    toast(e.message);
+
+  }
+
+}
+
+
+/* =========================
+   INSPECTION
+========================= */
+
+function startSelectedInspection(){
+
+  const asset =
+    getSelectedAsset();
+
+  if(!asset){
+
+    return toast(
+      'Pilih kendaraan dulu.'
+    );
+
+  }
+
+  startInspection(asset);
+
+}
+
+
+function startInspectionByCode(code){
+
+  const asset =
+    state.assets.find(
+      x =>
+        x.code === code
+    );
+
+  if(asset){
+
+    startInspection(asset);
+
+  }
+
+}
+
+
+function startInspection(asset){
+
+  if(!isDriver()){
+
+    return toast(
+      'Pemeriksaan dilakukan oleh Driver setelah login.'
+    );
+
+  }
+
+  state.currentAsset =
+    asset;
+
+  $('inspectionAssetInfo').innerHTML =
+    `<b>${esc(asset.code)}</b>
+     — ${esc(asset.name)}
+     | Polisi: ${esc(asset.plate || '-')}
+    `;
+
+  $('inspectionDriver').value =
+    `${
+      state.session.driverId ||
+      state.session.id
+    } — ${
+      state.session.name ||
+      state.session.namaDriver
+    }`;
+
+  $('inspectionTime').value =
+    nowLocal();
+
+  $('inspectionTimestamp').value =
+    new Date().toLocaleString(
+      'id-ID'
+    );
+
+  buildConditions();
+
+  buildMedia();
+
+  $('inspectionModal')
+    .classList.add('show');
+
+  getGPS();
+
+}
+
+
+function buildConditions(){
+
+  $('conditionGrid').innerHTML =
+    CONDITIONS.map(
+      ([key,label]) =>
+        `<div class="checkitem">
+
+          <b>${esc(label)}</b>
+
+          <select
+            data-condition="${key}">
+
+            <option value="">
+              Pilih
+            </option>
+
+            <option>
+              Baik
+            </option>
+
+            <option>
+              Perlu Perhatian
+            </option>
+
+            <option>
+              Rusak
+            </option>
+
+            <option>
+              Tidak Ada
+            </option>
+
+          </select>
+
+        </div>`
+    ).join('');
+
+}
+
+
+function buildMedia(){
+
+  $('photoGrid').innerHTML =
+    Object.entries(
+      PHOTO_CONFIG
+    ).map(
+      ([key,[label,category]]) =>
+        `<div class="media">
+
+          <b>${esc(label)}</b>
+
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            data-photo="${category}">
+
+          <div
+            class="preview"
+            id="p-${category}">
+          </div>
+
+        </div>`
+    ).join('');
+
+
+  $('videoGrid').innerHTML =
+    Object.entries(
+      VIDEO_CONFIG
+    ).map(
+      ([key,[label,category]]) =>
+        `<div class="media">
+
+          <b>${esc(label)}</b>
+
+          <input
+            type="file"
+            accept="video/*"
+            capture="environment"
+            data-video="${category}">
+
+          <div
+            class="preview"
+            id="v-${category}">
+          </div>
+
+        </div>`
+    ).join('');
+
+
+  document
+    .querySelectorAll('[data-photo]')
+    .forEach(
+      input =>
+        input.onchange =
+          () =>
+            previewFile(
+              input,
+              'p-' +
+              input.dataset.photo,
+              false
+            )
+    );
+
+
+  document
+    .querySelectorAll('[data-video]')
+    .forEach(
+      input =>
+        input.onchange =
+          () =>
+            previewFile(
+              input,
+              'v-' +
+              input.dataset.video,
+              true
+            )
+    );
+
+}
+
+
+function previewFile(
+  input,
+  target,
+  video
+){
+
+  const file =
+    input.files?.[0];
+
+  const box =
+    $(target);
+
+  box.innerHTML = '';
+
+  if(!file)return;
+
+  const url =
+    URL.createObjectURL(
+      file
+    );
+
+  const element =
+    document.createElement(
+      video
+        ? 'video'
+        : 'img'
+    );
+
+  element.src =
+    url;
+
+  if(video){
+
+    element.controls = true;
+
+    element.muted = true;
+
+  }
+
+  box.appendChild(
+    element
+  );
+
+}
+
+
+/* =========================
+   GPS
+========================= */
+
+function getGPS(){
+
+  if(!navigator.geolocation){
+
+    return toast(
+      'Browser tidak mendukung GPS.'
+    );
+
+  }
+
+  navigator.geolocation.getCurrentPosition(
+
+    position => {
+
+      $('latitude').value =
+        position.coords.latitude;
+
+      $('longitude').value =
+        position.coords.longitude;
+
+      $('gpsAccuracy').value =
+        position.coords.accuracy
+          .toFixed(1);
+
+    },
+
+    error =>
+      toast(
+        'GPS: ' +
+        error.message
+      ),
+
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    }
+
+  );
+
+}
+
+
+/* =========================
+   CAMERA
+========================= */
+
+function captureFrame(id){
+
+  const video =
+    $(id);
+
+  const canvas =
+    document.createElement(
+      'canvas'
+    );
+
+  canvas.width =
+    video.videoWidth ||
+    640;
+
+  canvas.height =
+    video.videoHeight ||
+    480;
+
+  canvas
+    .getContext('2d')
+    .drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+  return canvas.toDataURL(
+    'image/jpeg',
+    .82
+  );
+
+}
+
+
+async function startCamera(id){
+
+  try{
+
+    stopCamera();
+
+    state.stream =
+      await navigator
+        .mediaDevices
+        .getUserMedia({
+          video:{
+            facingMode:'user',
+            width:{
+              ideal:640
+            },
+            height:{
+              ideal:480
+            }
+          },
+          audio:false
+        });
+
+    $(id).srcObject =
+      state.stream;
+
+    await $(id).play();
+
+    toast(
+      'Kamera aktif.'
+    );
+
+  }catch(e){
+
+    toast(
+      'Kamera gagal: ' +
+      e.message
+    );
+
+  }
+
+}
+
+
+function stopCamera(){
+
+  if(state.stream){
+
+    state.stream
+      .getTracks()
+      .forEach(
+        track =>
+          track.stop()
+      );
+
+    state.stream = null;
+
+  }
+
+}
+
+
+/* =========================
+   MEDIA DATA
+========================= */
+
+async function fileData(
+  file,
+  max
+){
+
+  if(!file)return null;
+
+  if(file.size > max){
+
+    throw new Error(
+      file.name +
+      ' melebihi batas ' +
+      Math.round(
+        max / 1024 / 1024
+      ) +
+      ' MB.'
+    );
+
+  }
+
+  return await new Promise(
+    (resolve,reject) => {
+
+      const reader =
+        new FileReader();
+
+      reader.onload =
+        () =>
+          resolve({
+            data:reader.result,
+            type:
+              file.type ||
+              'application/octet-stream',
+            name:file.name
+          });
+
+      reader.onerror =
+        reject;
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
+}
+
+
+async function mediaMap(
+  selector,
+  max
+){
+
+  const result = {};
+
+  for(
+    const input of
+    document.querySelectorAll(
+      selector
+    )
+  ){
+
+    const file =
+      input.files?.[0];
+
+    if(file){
+
+      result[
+        input.dataset.photo ||
+        input.dataset.video
+      ] = [
+        await fileData(
+          file,
+          max
+        )
+      ];
+
+    }
+
+  }
+
+  return result;
+
+}
+
+
+/* =========================
+   SAVE INSPECTION
+========================= */
+
+$('inspectionForm')
+  .addEventListener(
+    'submit',
+    async event => {
+
+      event.preventDefault();
+
+      if(
+        !state.currentAsset ||
+        !isDriver()
+      ){
+
+        return toast(
+          'Sesi driver tidak valid.'
+        );
+
+      }
+
+      if(
+        !val('latitude') ||
+        !val('longitude')
+      ){
+
+        return toast(
+          'GPS wajib tersedia.'
+        );
+
+      }
+
+      if(
+        Number(val('kmFinish')) <
+        Number(val('kmStart'))
+      ){
+
+        return toast(
+          'KM Finish tidak boleh lebih kecil dari KM Start.'
+        );
+
+      }
+
+      try{
+
+        const conditions = {};
+
+        document
+          .querySelectorAll(
+            '[data-condition]'
+          )
+          .forEach(
+            input =>
+              conditions[
+                input.dataset.condition
+              ] =
+                input.value
+          );
+
+
+        const photos =
+          await mediaMap(
+            '[data-photo]',
+            8 * 1024 * 1024
+          );
+
+
+        const videos =
+          await mediaMap(
+            '[data-video]',
+            20 * 1024 * 1024
+          );
+
+
+        $('uploadProgress')
+          .style.width =
+          '70%';
+
+        $('uploadText').textContent =
+          'Mengirim pemeriksaan dan media...';
+
+
+        const result =
+          await api(
+            'saveInspection',
+            {
+              kodeAset:
+                state.currentAsset.code,
+
+              driverId:
+                state.session.driverId ||
+                state.session.id,
+
+              namaDriver:
+                state.session.name ||
+                state.session.namaDriver,
+
+              waktuPemeriksaan:
+                val('inspectionTime'),
+
+              latitude:
+                val('latitude'),
+
+              longitude:
+                val('longitude'),
+
+              gpsAccuracy:
+                val('gpsAccuracy'),
+
+              gpsLabel:
+                val('gpsLabel'),
+
+              kmStart:
+                val('kmStart'),
+
+              kmBeforeFuel:
+                val('kmBeforeFuel'),
+
+              kmAfterFuel:
+                val('kmAfterFuel'),
+
+              kmFinishAkhir:
+                val('kmFinish'),
+
+              kmOilChange:
+                val('kmOilChange'),
+
+              conditions:
+
+                conditions,
+
+              statusPemeriksaan:
+                'Selesai',
+
+              catatan:
+                val('inspectionNotes'),
+
+              media:{
+                ...photos,
+                ...videos
+              }
+
+            },
+            'POST'
+          );
+
+
+        $('uploadProgress')
+          .style.width =
+          '100%';
+
+        $('uploadText').textContent =
+          'Pemeriksaan berhasil disimpan.';
+
+
+        toast(
+          result.message
+        );
+
+
+        closeModal(
+          'inspectionModal'
+        );
+
+
+        refreshAll();
+
+
+      }catch(e){
+
+        $('uploadProgress')
+          .style.width =
+          '0%';
+
+        $('uploadText').textContent =
+          '';
+
+        toast(
+          e.message
+        );
+
+      }
+
+    }
+  );
+
+
+/* =========================
+   MODALS
+========================= */
+
+function closeModal(id){
+
+  $(id)
+    .classList
+    .remove('show');
+
+  if(
+    id ===
+    'inspectionModal'
+  ){
+
+    stopCamera();
+
+  }
+
+}
+
+
+function adminTab(
+  name,
+  button
+){
+
+  [
+    'assets',
+    'drivers',
+    'admins',
+    'inspections',
+    'km',
+    'corrections',
+    'audit'
+  ].forEach(
+    x =>
+      $(
+        'admin' +
+        x[0].toUpperCase() +
+        x.slice(1) +
+        'Tab'
+      )
+      .classList
+      .toggle(
+        'hidden',
+        x !== name
+      )
+  );
+
+
+  document
+    .querySelectorAll(
+      '.side-tabs button'
+    )
+    .forEach(
+      x =>
+        x.classList
+          .remove('active')
+    );
+
+  button
+    .classList
+    .add('active');
+
+}
+
+
+/* =========================
+   ASSET ADMIN
+========================= */
+
+$('assetForm')
+  .addEventListener(
+    'submit',
+    async event => {
+
+      event.preventDefault();
+
+      try{
+
+        const result =
+          await api(
+            'saveAsset',
+            {
+              id:
+                val('assetId'),
+
+              code:
+                val('assetCode'),
+
+              name:
+                val('assetName'),
+
+              plate:
+                val('assetPlate'),
+
+              brand:
+                val('assetBrand'),
+
+              model:
+                val('assetModel'),
+
+              year:
+                val('assetYear'),
+
+              location:
+                val('assetLocation'),
+
+              responsible:
+                val('assetResponsible'),
+
+              status:
+                val('assetStatus'),
+
+              purchaseDate:
+                val('assetPurchaseDate'),
+
+              notes:
+                val('assetNotes'),
+
+              userId:
+                state.session.adminId ||
+                state.session.id,
+
+              userName:
+                state.session.name ||
+                state.session.namaAdmin,
+
+              role:
+                state.session.role
+
+            },
+            'POST'
+          );
+
+
+        toast(
+          result.message
+        );
+
+        resetAssetForm();
+
+        refreshAll();
+
+      }catch(e){
+
+        toast(
+          e.message
+        );
+
+      }
+
+    }
+  );
+
+
+function renderAssetsAdmin(){
+
+  $('assetRows').innerHTML =
+    state.assets.map(
+      asset =>
+        `<tr>
+
+          <td>${esc(asset.code)}</td>
+
+          <td>${esc(asset.name)}</td>
+
+          <td>${esc(asset.plate)}</td>
+
+          <td>
+            ${esc(asset.brand)}
+            /
+            ${esc(asset.model)}
+          </td>
+
+          <td>${esc(asset.year)}</td>
+
+          <td>${esc(asset.location)}</td>
+
+          <td>${badge(asset.status)}</td>
+
+          <td>
+
+            <button
+              class="btn-soft"
+              onclick="editAsset('${esc(asset.id)}')">
+              Edit
+            </button>
+
+            <button
+              class="btn-bad"
+              onclick="deleteAsset('${esc(asset.id)}','${esc(asset.code)}')">
+              Hapus
+            </button>
+
+          </td>
+
+        </tr>`
+    ).join('') ||
+
+    `<tr>
+      <td
+        colspan="8"
+        class="empty">
+        Belum ada aset.
+      </td>
+    </tr>`;
+
+}
+
+
+function editAsset(id){
+
+  const asset =
+    state.assets.find(
+      x =>
+        x.id === id
+    );
+
+  if(!asset)return;
+
+  $('assetId').value =
+    asset.id;
+
+  $('assetCode').value =
+    asset.code;
+
+  $('assetName').value =
+    asset.name;
+
+  $('assetPlate').value =
+    asset.plate;
+
+  $('assetBrand').value =
+    asset.brand;
+
+  $('assetModel').value =
+    asset.model;
+
+  $('assetYear').value =
+    asset.year;
+
+  $('assetLocation').value =
+    asset.location;
+
+  $('assetResponsible').value =
+    asset.responsible;
+
+  $('assetStatus').value =
+    asset.status ||
+    'Aktif';
+
+  $('assetPurchaseDate').value =
+    (
+      asset.purchaseDate ||
+      ''
+    ).slice(0,10);
+
+  $('assetNotes').value =
+    asset.notes || '';
+
+}
+
+
+function resetAssetForm(){
+
+  [
+    'assetId',
+    'assetCode',
+    'assetName',
+    'assetPlate',
+    'assetBrand',
+    'assetModel',
+    'assetYear',
+    'assetLocation',
+    'assetResponsible',
+    'assetPurchaseDate',
+    'assetNotes'
+  ]
+  .forEach(
+    id =>
+      $(id).value = ''
+  );
+
+  $('assetStatus').value =
+    'Aktif';
+
+}
+
+
+async function deleteAsset(
+  id,
+  code
+){
+
+  if(
+    !confirm(
+      'Hapus aset ' +
+      code +
+      '?'
+    )
+  ){
+
+    return;
+
+  }
+
+  try{
+
+    const result =
+      await api(
+        'deleteAsset',
+        {
+          id,
+          code,
+
+          userId:
+            state.session.adminId ||
+            state.session.id,
+
+          userName:
+            state.session.name ||
+            state.session.namaAdmin,
+
+          role:
+            state.session.role
+
+        },
+        'POST'
+      );
+
+    toast(
+      result.message
+    );
+
+    refreshAll();
+
+  }catch(e){
+
+    toast(
+      e.message
+    );
+
+  }
+
+}
+
+
+/* =========================
+   DRIVER ADMIN
+========================= */
+
+function renderDrivers(){
+
+  $('driverRows').innerHTML =
+    state.drivers.map(
+      driver => {
+
+        const id =
+          driverIdOf(driver);
+
+        const name =
+          driverNameOf(driver) ||
+          id;
+
+        return `
+          <tr>
+
+            <td>${esc(id)}</td>
+
+            <td>${esc(name)}</td>
+
+            <td>
+              ${esc(
+                driver.email ??
+                driver['Email'] ??
+                ''
+              )}
+            </td>
+
+            <td>
+              ${badge(
+                driverStatusOf(driver)
+              )}
+            </td>
+
+            <td>
+              ${badge(
+                driverFaceOf(driver)
+              )}
+            </td>
+
+            <td>
+
+              <button
+                class="btn-primary"
+                onclick="openFaceModal('${esc(id)}')">
+                📷 Foto Wajah
+              </button>
+
+            </td>
+
+          </tr>
+        `;
+
+      }
+    ).join('') ||
+
+    `<tr>
+      <td
+        colspan="6"
+        class="empty">
+        Belum ada driver.
+      </td>
+    </tr>`;
+
+}
+
+
+function openDriverModal(){
+
+  $('driverModal')
+    .classList
+    .add('show');
+
+}
+
+
+function openFaceModal(id){
+
+  state.faceDriverId =
+    id;
+
+  $('faceRegisterInfo')
+    .textContent =
+    'Driver: ' +
+    id;
+
+  $('faceModal')
+    .classList
+    .add('show');
+
+}
+
+
+function closeFaceModal(){
+
+  closeModal(
+    'faceModal'
+  );
+
+  state.faceDriverId =
+    null;
+
+}
+
+
+async function saveDriver(){
+
+  try{
+
+    const result =
+      await api(
+        'registerDriver',
+        {
+          driverId:
+            val('newDriverId'),
+
+          namaDriver:
+            val('newDriverName'),
+
+          email:
+            val('newDriverEmail'),
+
+          noHp:
+            val('newDriverPhone'),
+
+          status:
+            val('newDriverStatus'),
+
+          keterangan:
+            val('newDriverNote'),
+
+          userId:
+            state.session.adminId ||
+            state.session.id,
+
+          userName:
+            state.session.name ||
+            state.session.namaAdmin,
+
+          role:
+            state.session.role
+
+        },
+        'POST'
+      );
+
+    toast(
+      result.message
+    );
+
+    closeModal(
+      'driverModal'
+    );
+
+    refreshAll();
+
+  }catch(e){
+
+    toast(
+      e.message
+    );
+
+  }
+
+}
+
+
+async function registerFaceNow(){
+
+  if(
+    !state.faceDriverId
+  ){
+
+    return toast(
+      'Driver tidak dipilih.'
+    );
+
+  }
+
+  if(
+    !state.stream
+  ){
+
+    return toast(
+      'Aktifkan kamera.'
+    );
+
+  }
+
+  try{
+
+    const result =
+      await api(
+        'registerDriverFace',
+        {
+          driverId:
+            state.faceDriverId,
+
+          data:
+            captureFrame(
+              'faceVideo'
+            )
+
+        },
+        'POST'
+      );
+
+    toast(
+      result.message
+    );
+
+    closeFaceModal();
+
+    refreshAll();
+
+  }catch(e){
+
+    toast(
+      e.message
+    );
+
+  }
+
+}
+
+
+/* =========================
+   ADMIN TABLE
+========================= */
+
+function renderAdmins(){
+
+  $('adminRows').innerHTML =
+    state.admins.map(
+      admin =>
+        `<tr>
+
+          <td>
+            ${esc(admin.adminId)}
+          </td>
+
+          <td>
+            ${esc(admin.name)}
+          </td>
+
+          <td>
+            ${esc(admin.role)}
+          </td>
+
+          <td>
+            ${badge(admin.status)}
+          </td>
+
+        </tr>`
+    ).join('') ||
+
+    `<tr>
+      <td
+        colspan="4"
+        class="empty">
+        Belum ada admin.
+      </td>
+    </tr>`;
+
+}
+
+
+/* =========================
+   INSPECTION TABLE
+========================= */
+
+function renderInspections(){
+
+  $('inspectionRows').innerHTML =
+    state.inspections
+      .slice()
+      .reverse()
+      .map(
+        row =>
+          `<tr>
+
+            <td>
+              ${esc(
+                row['Inspection ID']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                formatDate(
+                  row['Waktu Pemeriksaan'] ||
+                  row['Timestamp']
+                )
+              )}
+            </td>
+
+            <td>
+              ${esc(row['Kode Aset'])}
+              <br>
+              ${esc(row['Nomor Polisi'])}
+            </td>
+
+            <td>
+              ${esc(row['Driver ID'])}
+              —
+              ${esc(row['Nama Driver'])}
+            </td>
+
+            <td>
+              ${esc(row['KM Start'])}
+            </td>
+
+            <td>
+              ${esc(row['KM Finish Akhir'])}
+            </td>
+
+            <td>
+              ${esc(
+                row['KM Total Perjalanan']
+              )}
+            </td>
+
+            <td>
+              ${badge(
+                row['Status Pemeriksaan']
+              )}
+            </td>
+
+          </tr>`
+      ).join('') ||
+
+      `<tr>
+        <td
+          colspan="8"
+          class="empty">
+          Belum ada pemeriksaan.
+        </td>
+      </tr>`;
+
+}
+
+
+/* =========================
+   KM
+========================= */
+
+function renderKM(){
+
+  $('kmRows').innerHTML =
+    state.km
+      .slice()
+      .reverse()
+      .map(
+        row =>
+          `<tr>
+
+            <td>${esc(row['KM ID'])}</td>
+
+            <td>
+              ${esc(
+                formatDate(
+                  row['Timestamp']
+                )
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['Inspection ID']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['Kode Aset']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['Nama Kendaraan']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['Driver ID']
+              )}
+              —
+              ${esc(
+                row['Nama Driver']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['KM Start']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row[
+                  'KM Sebelum Isi Bensin'
+                ]
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row[
+                  'KM Sesudah Isi Bensin'
+                ]
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['KM Finish Akhir']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row[
+                  'KM Total Perjalanan'
+                ]
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row[
+                  'KM Sejak Ganti Oli'
+                ]
+              )}
+            </td>
+
+          </tr>`
+      ).join('') ||
+
+      `<tr>
+        <td
+          colspan="12"
+          class="empty">
+          Belum ada data KM.
+        </td>
+      </tr>`;
+
+}
+
+
+/* =========================
+   CORRECTIONS
+========================= */
+
+function renderCorrections(){
+
+  $('correctionRows').innerHTML =
+    state.corrections
+      .slice()
+      .reverse()
+      .map(
+        row =>
+          `<tr>
+
+            <td>
+              ${esc(row.id)}
+            </td>
+
+            <td>
+              ${esc(
+                formatDate(
+                  row.timestamp
+                )
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row.inspectionId
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['Kolom Koreksi'] ||
+                row.type
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row.oldValue
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row.newValue
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row.reason
+              )}
+            </td>
+
+            <td>
+              ${badge(
+                row.status
+              )}
+            </td>
+
+            <td>
+
+              ${
+                row.status ===
+                  'Menunggu Approval' &&
+                isSuper()
+
+                ? `
+
+                  <button
+                    class="btn-ok"
+                    onclick="approveCorrection('${esc(row.id)}')">
+                    Setujui
+                  </button>
+
+                  <button
+                    class="btn-bad"
+                    onclick="rejectCorrection('${esc(row.id)}')">
+                    Tolak
+                  </button>
+
+                `
+                : ''
+              }
+
+            </td>
+
+          </tr>`
+      ).join('') ||
+
+      `<tr>
+        <td
+          colspan="9"
+          class="empty">
+          Tidak ada koreksi.
+        </td>
+      </tr>`;
+
+}
+
+
+/* =========================
+   AUDIT
+========================= */
+
+function renderAudit(){
+
+  $('auditRows').innerHTML =
+    state.audit
+      .slice()
+      .reverse()
+      .map(
+        row =>
+          `<tr>
+
+            <td>
+              ${esc(
+                formatDate(
+                  row['Timestamp']
+                )
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['User ID']
+              )}
+              —
+              ${esc(
+                row['User Name']
+              )}
+            </td>
+
+            <td>
+              ${esc(row['Role'])}
+            </td>
+
+            <td>
+              ${esc(row['Action'])}
+            </td>
+
+            <td>
+              ${esc(
+                row['Target ID']
+              )}
+            </td>
+
+            <td>
+              ${esc(
+                row['Keterangan']
+              )}
+            </td>
+
+          </tr>`
+      ).join('') ||
+
+      `<tr>
+        <td
+          colspan="6"
+          class="empty">
+          Belum ada audit.
+        </td>
+      </tr>`;
+
+}
+
+
+/* =========================
+   DRIVER HISTORY
+========================= */
+
+function renderDriverHistory(){
+
+  const id =
+    state.session?.driverId ||
+    state.session?.id;
+
+  const rows =
+    state.inspections
+      .filter(
+        row =>
+          String(
+            row['Driver ID']
+          ) === String(id)
+      )
+      .slice()
+      .reverse();
+
+
+  $('driverHistoryRows').innerHTML =
+    rows.map(
+      row =>
+        `<tr>
+
+          <td>
+            ${esc(
+              row['Inspection ID']
+            )}
+          </td>
+
+          <td>
+            ${esc(
+              formatDate(
+                row['Waktu Pemeriksaan'] ||
+                row['Timestamp']
+              )
+            )}
+          </td>
+
+          <td>
+            ${esc(
+              row['Kode Aset']
+            )}
+            —
+            ${esc(
+              row['Nama Kendaraan']
+            )}
+          </td>
+
+          <td>
+            ${esc(
+              row['KM Start']
+            )}
+          </td>
+
+          <td>
+            ${esc(
+              row['KM Finish Akhir']
+            )}
+          </td>
+
+          <td>
+            ${esc(
+              row[
+                'KM Total Perjalanan'
+              ]
+            )}
+          </td>
+
+          <td>
+            ${badge(
+              row[
+                'Status Pemeriksaan'
+              ]
+            )}
+          </td>
+
+        </tr>`
+    ).join('') ||
+
+    `<tr>
+      <td
+        colspan="7"
+        class="empty">
+        Belum ada pemeriksaan.
+      </td>
+    </tr>`;
+
+}
+
+
+/* =========================
+   CORRECTION FORM
+========================= */
+
+const CORRECTION_COLUMNS = [
+
+  'Oli Mesin',
+  'Oli Power Steering',
+  'Tali Kipas / V-Belt',
+  'Aki',
+  'Ban Kiri Depan',
+  'Ban Kiri Belakang',
+  'Ban Kanan Depan',
+  'Ban Kanan Belakang',
+  'Ban Serep',
+  'Kunci Roda & Dongkrak',
+  'Rem',
+  'Kopling',
+  'Setir',
+  'Klakson',
+  'Sabuk Pengaman',
+  'KM Start',
+  'KM Sebelum Isi Bensin',
+  'KM Sesudah Isi Bensin',
+  'KM Finish Akhir',
+  'KM Ganti Oli',
+  'Status Pemeriksaan',
+  'Catatan'
+
+];
+
+
+function openCorrection(id){
+
+  correctionInspectionId =
+    id;
+
+  const row =
+    state.inspections.find(
+      x =>
+        String(
+          x['Inspection ID']
+        ) === String(id)
+    );
+
+  if(!row)return;
+
+  $('correctionColumn')
+    .innerHTML =
+      CORRECTION_COLUMNS
+        .map(
+          column =>
+            `<option>
+              ${esc(column)}
+            </option>`
+        )
+        .join('');
+
+
+  $('correctionInfo')
+    .textContent =
+      `Inspection ${id} — ${
+        row['Kode Aset']
+      } — ${
+        row['Nama Kendaraan']
+      }`;
+
+
+  $('correctionOld').value =
+    row[
+      $('correctionColumn')
+        .value
+    ] || '';
+
+  $('correctionNew').value =
+    '';
+
+  $('correctionReason').value =
+    '';
+
+  $('correctionModal')
+    .classList
+    .add('show');
+
+}
+
+
+$('correctionColumn')
+  .addEventListener(
+    'change',
+    () => {
+
+      const row =
+        state.inspections.find(
+          x =>
+            String(
+              x['Inspection ID']
+            ) ===
+            String(
+              correctionInspectionId
+            )
+        );
+
+      if(row){
+
+        $('correctionOld')
+          .value =
+          row[
+            $('correctionColumn')
+              .value
+          ] || '';
+
+      }
+
+    }
+  );
+
+
+async function submitCorrection(){
+
+  if(
+    !correctionInspectionId ||
+    !val('correctionReason')
+  ){
+
+    return toast(
+      'Alasan wajib diisi.'
+    );
+
+  }
+
+  try{
+
+    const result =
+      await api(
+        'requestCorrection',
+        {
+          inspectionId:
+            correctionInspectionId,
+
+          driverId:
+            state.session.driverId ||
+            state.session.id,
+
+          namaDriver:
+            state.session.name ||
+            state.session.namaDriver,
+
+          jenisKoreksi:
+            'Data',
+
+          kolomKoreksi:
+            val('correctionColumn'),
+
+          nilaiLama:
+            val('correctionOld'),
+
+          nilaiBaru:
+            val('correctionNew'),
+
+          alasan:
+            val('correctionReason')
+
+        },
+        'POST'
+      );
+
+    toast(
+      result.message
+    );
+
+    closeModal(
+      'correctionModal'
+    );
+
+    refreshAll();
+
+  }catch(e){
+
+    toast(
+      e.message
+    );
+
+  }
+
+}
+
+
+/* =========================
+   APPROVAL
+========================= */
+
+async function approveCorrection(id){
+
+  if(!isSuper()){
+
+    return toast(
+      'Hanya Super Admin.'
+    );
+
+  }
+
+  try{
+
+    const result =
+      await api(
+        'approveCorrection',
+        {
+          correctionId:id,
+
+          userId:
+            state.session.adminId ||
+            state.session.id,
+
+          userName:
+            state.session.name ||
+            state.session.namaAdmin,
+
+          role:
+            state.session.role
+
+        },
+        'POST'
+      );
+
+    toast(
+      result.message
+    );
+
+    refreshAll();
+
+  }catch(e){
+
+    toast(
+      e.message
+    );
+
+  }
+
+}
+
+
+async function rejectCorrection(id){
+
+  if(!isSuper()){
+
+    return toast(
+      'Hanya Super Admin.'
+    );
+
+  }
+
+  const note =
+    prompt(
+      'Catatan penolakan:',
+      'Koreksi ditolak.'
+    );
+
+  try{
+
+    const result =
+      await api(
+        'rejectCorrection',
+        {
+          correctionId:id,
+
+          userId:
+            state.session.adminId ||
+            state.session.id,
+
+          userName:
+            state.session.name ||
+            state.session.namaAdmin,
+
+          role:
+            state.session.role,
+
+          catatanAdmin:
+            note ||
+            'Koreksi ditolak.'
+
+        },
+        'POST'
+      );
+
+    toast(
+      result.message
+    );
+
+    refreshAll();
+
+  }catch(e){
+
+    toast(
+      e.message
+    );
+
+  }
+
+}
+
+
+/* =========================
+   QR
+========================= */
+
+function applyQrAssetFromUrl(){
+
+  const code =
+    new URLSearchParams(
+      location.search
+    ).get('kode');
+
+  if(!code)return;
+
+  const asset =
+    state.assets.find(
+      x =>
+        String(x.code)
+          .toUpperCase() ===
+        String(code)
+          .toUpperCase()
+    );
+
+  if(asset){
+
+    selectAsset(
+      asset.code
+    );
+
+    $('faceMessage').textContent =
+      `QR kendaraan ${
+        asset.code
+      } terdeteksi. Pilih Driver ID dan lanjutkan login.`;
+
+    $('driverNotice').textContent =
+      `Kendaraan ${
+        asset.code
+      } — ${
+        asset.name
+      } terdeteksi dari QR.`;
+
+  }else{
+
+    console.warn(
+      'QR kendaraan tidak ditemukan:',
+      code
+    );
+
+    $('faceMessage').textContent =
+      `QR kendaraan ${
+        code
+      } terdeteksi, tetapi kode aset tidak ditemukan di database.`;
+
+  }
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+window.addEventListener(
+  'load',
+  boot
+);
+
+window.addEventListener(
+  'beforeunload',
+  stopCamera
+);
+
+</script>
+
+</body>
+</html>
+```
