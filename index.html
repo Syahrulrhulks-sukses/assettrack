@@ -827,14 +827,29 @@ tr:hover td{
     <div id="driverLoginPanel" class="login-panel">
 
       <div class="info-box">
-        Login Driver menggunakan Driver ID dan foto wajah langsung dari kamera.
+        Login Driver menggunakan <b>Driver ID, Nama Driver, dan selfie langsung dari kamera</b>.
+        Driver wajib melakukan pendaftaran satu kali terlebih dahulu agar foto wajah awal
+        tersimpan sebagai data verifikasi.
       </div>
 
       <div class="form-group">
-        <label>Driver</label>
-        <select id="loginDriverId" required>
-          <option value="">Memuat Driver...</option>
-        </select>
+        <label>Driver ID</label>
+        <input
+          id="loginDriverId"
+          type="text"
+          required
+          autocomplete="username"
+          placeholder="Masukkan Driver ID">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Driver</label>
+        <input
+          id="loginDriverName"
+          type="text"
+          required
+          autocomplete="name"
+          placeholder="Masukkan Nama Driver">
       </div>
 
       <div class="camera-box">
@@ -869,6 +884,14 @@ tr:hover td{
         class="primary-btn"
         onclick="loginDriver()">
         Masuk sebagai Driver
+      </button>
+
+      <button
+        type="button"
+        class="secondary-btn"
+        style="margin-top:10px;width:100%"
+        onclick="openDriverSelfRegistration()">
+        📝 Daftar Driver Baru
       </button>
 
     </div>
@@ -2170,6 +2193,7 @@ function switchLogin(type){
   const adminPanel=document.getElementById('adminLoginPanel');
 
   document.getElementById('loginDriverId').value='';
+  document.getElementById('loginDriverName').value='';
   document.getElementById('loginAdminId').value='';
   document.getElementById('loginAdminName').value='';
   document.getElementById('loginAdminPin').value='';
@@ -2181,7 +2205,6 @@ function switchLogin(type){
   });
 
   if(type==='driver'){
-    populateDriverLogin();
     driverTab.classList.add('active');
     adminTab.classList.remove('active');
     driverPanel.classList.remove('hidden');
@@ -2513,18 +2536,39 @@ async function loginDriver(){
     state.loginGPS=null;
 
     const driverId=document.getElementById('loginDriverId').value.trim();
+    const driverName=document.getElementById('loginDriverName').value.trim();
 
     if(!driverId){
-      toast('Pilih Driver terlebih dahulu.','error');
+      toast('Driver ID wajib diisi.','error');
       return;
     }
 
-    const selectedDriver=state.drivers.find(
+    if(!driverName){
+      toast('Nama Driver wajib diisi.','error');
+      return;
+    }
+
+    let selectedDriver=state.drivers.find(
       d=>driverIdOf(d).toUpperCase()===driverId.toUpperCase()
     );
 
+    // Pastikan data terbaru bila Driver baru saja selesai mendaftar.
     if(!selectedDriver){
-      toast('Driver tidak ditemukan di Data Driver.','error');
+      const latest=await apiGet('drivers');
+      state.drivers=latest.drivers || [];
+      selectedDriver=state.drivers.find(
+        d=>driverIdOf(d).toUpperCase()===driverId.toUpperCase()
+      );
+    }
+
+    if(!selectedDriver){
+      toast('Driver ID tidak ditemukan. Silakan daftar Driver terlebih dahulu.','error');
+      return;
+    }
+
+    if(driverNameOf(selectedDriver).trim().toLowerCase()!==driverName.toLowerCase()){
+      toast('Driver ID dan Nama Driver tidak cocok.','error');
+      setLoginStatus('Driver ID dan Nama Driver tidak cocok.',true);
       return;
     }
 
@@ -2536,13 +2580,13 @@ async function loginDriver(){
     }
 
     if(!state.loginPhoto.driverLogin){
-      toast('Foto wajah wajib diambil langsung dari kamera.','error');
+      toast('Selfie wajib diambil langsung dari kamera.','error');
       return;
     }
 
     if(!selectedDriver.faceDescriptor){
-      toast('Foto wajah Driver belum memiliki data verifikasi. Admin harus mendaftarkan ulang foto wajah Driver.','error');
-      setLoginStatus('Wajah Driver belum siap untuk verifikasi. Minta Admin mendaftarkan ulang foto wajah.',true);
+      toast('Data foto wajah awal belum tersedia. Silakan lakukan pendaftaran Driver terlebih dahulu.','error');
+      setLoginStatus('Foto wajah awal belum terdaftar. Silakan pilih Daftar Driver Baru.',true);
       return;
     }
 
@@ -2558,7 +2602,7 @@ async function loginDriver(){
 
     if(localDistance>FACE_MATCH_THRESHOLD){
       throw new Error(
-        'Verifikasi wajah gagal. Wajah tidak cocok dengan foto Driver yang terdaftar.'
+        'Verifikasi wajah gagal. Wajah tidak cocok dengan foto wajah awal yang terdaftar.'
       );
     }
 
@@ -2572,6 +2616,7 @@ async function loginDriver(){
     const result=await apiPost({
       action:'driverLogin',
       driverId:driverId,
+      namaDriver:driverName,
       data:state.loginPhoto.driverLogin,
       mimeType:'image/jpeg',
       faceDescriptor:Array.from(liveDescriptor),
@@ -2585,8 +2630,8 @@ async function loginDriver(){
       ...result.driver,
       id:driverIdOf(result.driver)||driverId,
       driverId:driverIdOf(result.driver)||driverId,
-      name:driverNameOf(result.driver)||driverNameOf(selectedDriver),
-      namaDriver:driverNameOf(result.driver)||driverNameOf(selectedDriver),
+      name:driverNameOf(result.driver)||driverName,
+      namaDriver:driverNameOf(result.driver)||driverName,
       role:'DRIVER',
       loginPhoto:result.loginPhoto,
       loginGPS:gps
@@ -2803,7 +2848,7 @@ function clearApplicationState(){
 }
 
 function resetLoginForm(){
-  ['loginDriverId','loginAdminId','loginAdminName','loginAdminPin'].forEach(id=>{
+  ['loginDriverId','loginDriverName','loginAdminId','loginAdminName','loginAdminPin'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.value='';
   });
@@ -4688,6 +4733,127 @@ async function saveDriverForm(event){
 
 
 /* =========================================================
+   DRIVER SELF REGISTRATION
+========================================================= */
+
+function openDriverSelfRegistration(){
+  driverFaceData=null;
+  openModal(
+    'Daftar Driver Baru',
+    `
+      <div class="info-box">
+        Isi <b>Driver ID</b> (boleh dikosongkan untuk dibuat otomatis),
+        <b>Nama Driver</b>, <b>Email</b>, lalu ambil <b>selfie langsung dari kamera</b>.
+        Setelah berhasil, Driver otomatis berstatus <b>Aktif</b> dan foto ini menjadi
+        data wajah awal untuk verifikasi login berikutnya.
+      </div>
+
+      <form id="driverSelfRegistrationForm">
+        <div class="form-group">
+          <label>Driver ID</label>
+          <input id="driverSelfId" placeholder="Kosongkan untuk ID otomatis" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label>Nama Driver *</label>
+          <input id="driverSelfName" required autocomplete="name" placeholder="Nama lengkap Driver">
+        </div>
+
+        <div class="form-group">
+          <label>Email *</label>
+          <input id="driverSelfEmail" type="email" required autocomplete="email" placeholder="nama@email.com">
+        </div>
+
+        <div class="camera-box">
+          <video id="driverFaceVideo" autoplay playsinline></video>
+          <canvas id="driverFaceCanvas" class="hidden"></canvas>
+          <img id="driverFacePreview" class="photo-preview">
+
+          <div class="camera-buttons">
+            <button class="secondary-btn" type="button" onclick="startDriverFaceCamera()">
+              📷 Buka Kamera
+            </button>
+            <button class="secondary-btn" type="button" onclick="captureDriverFace()">
+              📸 Ambil Selfie
+            </button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="secondary-btn" type="button" onclick="closeModal()">Batal</button>
+          <button class="primary-btn" type="submit" style="width:auto">
+            ✅ Daftar & Aktifkan Driver
+          </button>
+        </div>
+      </form>
+    `
+  );
+
+  document
+    .getElementById('driverSelfRegistrationForm')
+    .addEventListener('submit',saveDriverSelfRegistration);
+}
+
+async function saveDriverSelfRegistration(event){
+  event.preventDefault();
+
+  try{
+    const driverId=document.getElementById('driverSelfId').value.trim();
+    const name=document.getElementById('driverSelfName').value.trim();
+    const email=document.getElementById('driverSelfEmail').value.trim();
+
+    if(!name){ throw new Error('Nama Driver wajib diisi.'); }
+    if(!email){ throw new Error('Email wajib diisi.'); }
+    if(!driverFaceData){
+      throw new Error('Selfie wajah awal wajib diambil langsung dari kamera.');
+    }
+
+    toast('Membuat data verifikasi wajah awal...','info');
+    const descriptor=await getFaceDescriptorFromDataUrl(driverFaceData);
+
+    const result=await apiPost({
+      action:'registerDriver',
+      driverId:driverId,
+      namaDriver:name,
+      email:email,
+      data:driverFaceData,
+      faceDescriptor:descriptor,
+      mimeType:'image/jpeg'
+    });
+
+    if(driverFaceStream){
+      driverFaceStream.getTracks().forEach(t=>t.stop());
+      driverFaceStream=null;
+    }
+    driverFaceData=null;
+
+    closeModal();
+
+    // Muat ulang daftar driver supaya data pendaftaran langsung tersedia.
+    const latest=await apiGet('drivers');
+    state.drivers=latest.drivers || [];
+
+    const registeredId=result.driverId || result.driver?.id || '';
+    const registeredName=result.driver?.name || name;
+    document.getElementById('loginDriverId').value=registeredId;
+    document.getElementById('loginDriverName').value=registeredName;
+
+    setLoginStatus(
+      'Pendaftaran berhasil. Driver '+registeredId+' aktif. Sekarang ambil selfie login untuk masuk.',
+      false
+    );
+    toast(
+      'Driver berhasil didaftarkan dan otomatis Aktif. ID: '+registeredId+'. Silakan lanjut login.',
+      'success'
+    );
+
+  }catch(error){
+    toast(error.message,'error');
+  }
+}
+
+
+/* =========================================================
    DRIVER FACE REGISTRATION
 ========================================================= */
 
@@ -6044,8 +6210,8 @@ document.addEventListener(
       getCurrentDateTimeLocal();
 
     /*
-      Muat hanya daftar Driver untuk login.
-      Data Admin/Aset/Laporan tidak diambil sebelum login berhasil.
+      Muat data Driver untuk memeriksa ID/Nama saat login.
+      Pendaftaran Driver baru dilakukan langsung dari panel login.
     */
     apiGet('drivers')
       .then(result=>{
