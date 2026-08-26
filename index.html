@@ -1012,7 +1012,7 @@ tr:hover td{
       </button>
 
       <div class="brand">
-        🚗 Aset Aqiqah Plus
+        🚗 AssetTrack
       </div>
 
     </div>
@@ -1143,7 +1143,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Dashboard</h2>
-        <p>Ringkasan Aset Aqiqah Plus</p>
+        <p>Ringkasan AssetTrack</p>
       </div>
 
       <div class="cards">
@@ -1323,7 +1323,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pemeriksaan Armada</h2>
-        <p>Form pemeriksaan kendaraan sesuai database Aset Aqiqah Plus</p>
+        <p>Form pemeriksaan kendaraan sesuai database AssetTrack</p>
       </div>
 
       <div class="panel">
@@ -1815,7 +1815,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Audit Log</h2>
-        <p>Catatan aktivitas sistem Aset Aqiqah Plus</p>
+        <p>Catatan aktivitas sistem AssetTrack</p>
       </div>
 
       <div class="panel">
@@ -1905,7 +1905,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pengaturan</h2>
-        <p>Pengaturan Super Admin Aset Aqiqah Plus</p>
+        <p>Pengaturan Super Admin AssetTrack</p>
       </div>
 
       <div class="panel">
@@ -2398,6 +2398,11 @@ async function ensureFaceModels(){
   }
 }
 
+function preloadFaceModels(){
+  if(typeof faceapi==='undefined') return;
+  ensureFaceModels().catch(()=>{});
+}
+
 function loadImageFromDataUrl(dataUrl){
   return new Promise((resolve,reject)=>{
     const img=new Image();
@@ -2506,7 +2511,7 @@ function requestLoginLocation(){
         let message='Akses lokasi GPS diperlukan untuk login Driver.';
 
         if(error && error.code===1){
-          message='Izin lokasi ditolak. Izinkan akses lokasi untuk Aset Aqiqah Plus, lalu tekan Masuk sebagai Driver lagi.';
+          message='Izin lokasi ditolak. Izinkan akses lokasi untuk AssetTrack, lalu tekan Masuk sebagai Driver lagi.';
         }else if(error && error.code===2){
           message='Lokasi GPS tidak tersedia. Aktifkan GPS/lokasi perangkat lalu coba lagi.';
         }else if(error && error.code===3){
@@ -2529,6 +2534,8 @@ function requestLoginLocation(){
 ========================================================= */
 
 async function loginDriver(){
+  if(state.loginBusy)return;
+  state.loginBusy=true;
   try{
     state.user=null;
     state.loginToken=null;
@@ -2590,10 +2597,13 @@ async function loginDriver(){
       return;
     }
 
-    setLoginStatus('Memeriksa wajah Driver...');
-    const liveDescriptor=await getFaceDescriptorFromDataUrl(
+    setLoginStatus('Memeriksa wajah dan lokasi...');
+    const gpsPromise=requestLoginLocation();
+    const facePromise=getFaceDescriptorFromDataUrl(
       state.loginPhoto.driverLogin
     );
+
+    const [liveDescriptor,gps]=await Promise.all([facePromise,gpsPromise]);
 
     const localDistance=faceDistance(
       liveDescriptor,
@@ -2606,11 +2616,7 @@ async function loginDriver(){
       );
     }
 
-    setLoginStatus('Meminta izin lokasi GPS...');
-
-    const gps=await requestLoginLocation();
     state.loginGPS=gps;
-
     setLoginStatus('Memverifikasi login Driver...');
 
     const result=await apiPost({
@@ -2650,6 +2656,8 @@ async function loginDriver(){
     state.loginGPS=null;
     setLoginStatus(error.message,true);
     toast(error.message,'error');
+  }finally{
+    state.loginBusy=false;
   }
 }
 
@@ -2659,6 +2667,8 @@ async function loginDriver(){
 ========================================================= */
 
 async function loginAdmin(){
+  if(state.loginBusy)return;
+  state.loginBusy=true;
   try{
     state.user=null;
     state.loginToken=null;
@@ -2764,6 +2774,8 @@ async function loginAdmin(){
     state.loginToken=null;
     setLoginStatus(error.message,true);
     toast(error.message,'error');
+  }finally{
+    state.loginBusy=false;
   }
 }
 
@@ -2817,10 +2829,19 @@ async function enterApplication(){
   document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
   document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!isSuperAdmin);
 
-  await refreshAll();
   setInspectionGPS(state.loginGPS);
   showPage('dashboard');
-  if(state.pendingAssetCode) openPendingAsset();
+  refreshAll().catch(error=>{
+    document.getElementById('systemStatus').innerHTML=
+      '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
+  });
+  if(state.pendingAssetCode){
+    const waitForAsset=()=>{
+      if(state.assets && state.assets.length)openPendingAsset();
+      else setTimeout(waitForAsset,150);
+    };
+    waitForAsset();
+  }
 }
 
 function openPendingAsset(){
@@ -2887,7 +2908,7 @@ function resetToLogin(showToast=true){
     populateDriverLogin();
   });
 
-  if(showToast) toast('Anda telah keluar dari Aset Aqiqah Plus.','info');
+  if(showToast) toast('Anda telah keluar dari AssetTrack.','info');
 }
 
 
@@ -3053,7 +3074,7 @@ async function refreshAll(){
 
     document.getElementById('systemStatus').innerHTML=
       '<span class="badge green">ONLINE</span> '+
-      'Aset Aqiqah Plus berhasil terhubung dengan Google Apps Script.';
+      'AssetTrack berhasil terhubung dengan Google Apps Script.';
 
   }catch(error){
     document.getElementById('systemStatus').innerHTML=
@@ -3565,8 +3586,8 @@ function printBarcode(){
   const code=document.getElementById('barcodeAssetSelect').value;if(!code){toast('Pilih aset terlebih dahulu.','error');return;}
   const asset=state.assets.find(x=>String(x.code)===String(code));if(!asset)return;
   const qr=document.getElementById('qrCode');const qrHtml=qr?qr.innerHTML:'';const qrUrl=buildInspectionUrl(asset.code);
-  const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk Aset Aqiqah Plus.','error');return;}
-  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>Aset Aqiqah Plus</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
+  const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk AssetTrack.','error');return;}
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>AssetTrack</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
   win.document.close();win.focus();setTimeout(()=>win.print(),500);
 }
 
@@ -3891,7 +3912,7 @@ function getGPS(){
       let message='GPS gagal: '+error.message;
 
       if(error && error.code===1){
-        message='Izin lokasi ditolak. Izinkan lokasi untuk Aset Aqiqah Plus.';
+        message='Izin lokasi ditolak. Izinkan lokasi untuk AssetTrack.';
       }
 
       toast(message,'error');
@@ -6193,6 +6214,7 @@ document.addEventListener(
     clearApplicationState();
     resetLoginForm();
     document.getElementById('appPage').style.display='none';
+    setTimeout(preloadFaceModels,300);
     document.getElementById('loginPage').style.display='flex';
     document.getElementById('driverTab')?.classList.add('active');
     document.getElementById('adminTab')?.classList.remove('active');
