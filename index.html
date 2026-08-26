@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aset Aqiqah Plus — Manajemen & Pemeriksaan Armada</title>
+<title>AssetTrack — Manajemen & Pemeriksaan Armada</title>
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -808,7 +808,7 @@ tr:hover td{
 
     <div class="logo">
       <div class="logo-icon">🚗</div>
-      <h1>Aset Aqiqah Plus</h1>
+      <h1>AssetTrack</h1>
       <p>Sistem Manajemen & Pemeriksaan Armada</p>
     </div>
 
@@ -903,30 +903,6 @@ tr:hover td{
       <div class="info-box">
         Login Admin menggunakan ID, Nama Admin, dan PIN. Setelah data benar,
         kamera wajib digunakan untuk verifikasi foto login.
-      </div>
-
-      <div class="form-group">
-        <label>Divisi Login</label>
-        <select id="loginAdminDivision">
-          <option value="">Pilih Divisi</option>
-          <option value="SUPER_ADMIN">SUPER ADMIN</option>
-          <option value="DIREKTUR">DIREKTUR</option>
-          <option value="HRD">HRD</option>
-          <option value="OPERASIONAL">OPERASIONAL</option>
-          <option value="KEUANGAN">KEUANGAN</option>
-          <option value="CS">CS</option>
-          <option value="MARKETING ONLINE">MARKETING ONLINE</option>
-          <option value="MARKETING OFFLINE">MARKETING OFFLINE</option>
-          <option value="ASET">ASET</option>
-          <option value="PRODUKSI">PRODUKSI</option>
-          <option value="BAHAN BAKU">BAHAN BAKU</option>
-          <option value="AGRO">AGRO</option>
-        </select>
-      </div>
-
-      <div class="info-box" style="margin-top:8px;">
-        <strong>Struktur:</strong> Super Admin berada di atas Direktur.
-        Login mengikuti divisi dan hak akses pengguna.
       </div>
 
       <div class="form-group">
@@ -1036,7 +1012,7 @@ tr:hover td{
       </button>
 
       <div class="brand">
-        🚗 Aset Aqiqah Plus
+        🚗 AssetTrack
       </div>
 
     </div>
@@ -1086,15 +1062,6 @@ tr:hover td{
       data-page="barcode"
       onclick="showPage('barcode')">
       ▣ Barcode
-    </button>
-
-    <div class="nav-section">Aset Aqiqah Catering</div>
-
-    <button
-      class="nav-btn"
-      data-page="catering-assets"
-      onclick="showPage('catering-assets')">
-      🍱 Peralatan Catering
     </button>
 
     <button
@@ -1176,7 +1143,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Dashboard</h2>
-        <p>Ringkasan Aset Aqiqah Plus</p>
+        <p>Ringkasan AssetTrack</p>
       </div>
 
       <div class="cards">
@@ -1257,7 +1224,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Data Aset</h2>
-        <p>Manajemen seluruh aset Aset Aqiqah Plus: armada, produksi, catering, dan operasional.</p>
+        <p>Manajemen kendaraan dan aset armada</p>
       </div>
 
       <div class="panel">
@@ -1266,7 +1233,7 @@ tr:hover td{
 
           <input
             id="assetSearch"
-            placeholder="Cari kode, nama aset, kategori, nopol..."
+            placeholder="Cari kode, kendaraan, nopol..."
             oninput="renderAssets()">
 
           <button
@@ -1285,11 +1252,10 @@ tr:hover td{
             <thead>
               <tr>
                 <th>Kode Aset</th>
-                <th>Nama Aset</th>
-                <th>Jenis</th>
-                <th>Kategori</th>
-                <th>Jumlah</th>
-                <th>Kondisi</th>
+                <th>Kendaraan</th>
+                <th>No Polisi</th>
+                <th>Merek</th>
+                <th>Tahun</th>
                 <th>Lokasi</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -1350,92 +1316,6 @@ tr:hover td{
 
 
     <!-- =====================================================
-         ASET AQIQAH CATERING
-    ====================================================== -->
-
-    <div id="page-catering-assets" class="page">
-
-      <div class="page-title">
-        <h2>🍱 Aset Aqiqah Catering</h2>
-        <p>Daftar kategori peralatan dan aset operasional Aset Aqiqah Plus.</p>
-      </div>
-
-      <div class="panel">
-        <h3>🔥 Peralatan Produksi</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:15px;">
-          <div class="stat-card">🔥 Kompor</div>
-          <div class="stat-card">🛢️ Tabung Gas</div>
-          <div class="stat-card">🍲 Panci / Kuali</div>
-          <div class="stat-card">🔪 Pisau</div>
-          <div class="stat-card">🪵 Talenan</div>
-          <div class="stat-card">🍚 Rice Cooker</div>
-          <div class="stat-card">❄️ Freezer</div>
-          <div class="stat-card">🧊 Kulkas</div>
-          <div class="stat-card">⚖️ Timbangan</div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:18px;">
-        <h3>🍽️ Peralatan Catering</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:15px;">
-          <div class="stat-card">📦 Kotak Makanan</div>
-          <div class="stat-card">🍱 Nampan</div>
-          <div class="stat-card">🍽️ Piring</div>
-          <div class="stat-card">🥛 Gelas</div>
-          <div class="stat-card">🥄 Sendok</div>
-          <div class="stat-card">🪑 Meja</div>
-          <div class="stat-card">💺 Kursi</div>
-          <div class="stat-card">⛺ Tenda</div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:18px;">
-        <h3>🚚 Peralatan Operasional</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:15px;">
-          <div class="stat-card">🏍️ Motor</div>
-          <div class="stat-card">🚗 Mobil</div>
-          <div class="stat-card">🖨️ Printer</div>
-          <div class="stat-card">💻 Laptop / Komputer</div>
-          <div class="stat-card">📱 HP</div>
-          <div class="stat-card">🧾 Mesin Kasir</div>
-          <div class="stat-card">📦 Peralatan Lainnya</div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:18px;">
-        <h3>➕ Tambah ke Database Aset</h3>
-        <p style="color:#607d8b;line-height:1.6;">Klik kategori untuk menambahkan aset individual. Data akan masuk ke <strong>Data Aset</strong> yang sama, bukan database terpisah.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;">
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN PRODUKSI','Kompor')">+ Kompor</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN PRODUKSI','Tabung Gas')">+ Tabung Gas</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN PRODUKSI','Panci / Kuali')">+ Panci / Kuali</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN PRODUKSI','Freezer')">+ Freezer</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN PRODUKSI','Kulkas')">+ Kulkas</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN PRODUKSI','Timbangan')">+ Timbangan</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN CATERING','Kotak Makanan')">+ Kotak Makanan</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN CATERING','Nampan')">+ Nampan</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN CATERING','Tenda')">+ Tenda</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN OPERASIONAL','Printer')">+ Printer</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN OPERASIONAL','Laptop / Komputer')">+ Laptop / Komputer</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN OPERASIONAL','HP')">+ HP</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN OPERASIONAL','Mesin Kasir')">+ Mesin Kasir</button>
-          <button class="primary-btn" style="width:auto" onclick="openAssetForm('','PERALATAN OPERASIONAL','Peralatan Lainnya')">+ Lainnya</button>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:18px;">
-        <h3>📌 Catatan</h3>
-        <p style="color:#607d8b;line-height:1.6;">
-          Daftar ini menjadi kategori awal aset Aqiqah Catering.
-          Data aset individual nantinya dapat diberi kode aset, barcode/QR,
-          foto, lokasi, penanggung jawab, kondisi, dan riwayat pemeriksaan.
-        </p>
-      </div>
-
-    </div>
-
-
-    <!-- =====================================================
          INSPECTION
     ====================================================== -->
 
@@ -1443,7 +1323,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pemeriksaan Armada</h2>
-        <p>Form pemeriksaan kendaraan sesuai database Aset Aqiqah Plus</p>
+        <p>Form pemeriksaan kendaraan sesuai database AssetTrack</p>
       </div>
 
       <div class="panel">
@@ -1935,7 +1815,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Audit Log</h2>
-        <p>Catatan aktivitas sistem Aset Aqiqah Plus</p>
+        <p>Catatan aktivitas sistem AssetTrack</p>
       </div>
 
       <div class="panel">
@@ -2025,7 +1905,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pengaturan</h2>
-        <p>Pengaturan Super Admin Aset Aqiqah Plus</p>
+        <p>Pengaturan Super Admin AssetTrack</p>
       </div>
 
       <div class="panel">
@@ -2212,11 +2092,6 @@ async function apiGet(action,params={}){
 
 async function apiPost(data){
 
-  const payload={...data};
-  if(state && state.user && state.user.sessionToken){
-    payload.sessionToken=state.user.sessionToken;
-  }
-
   const response = await fetch(
     API_URL,
     {
@@ -2224,7 +2099,7 @@ async function apiPost(data){
       headers:{
         'Content-Type':'text/plain;charset=utf-8'
       },
-      body:JSON.stringify(payload)
+      body:JSON.stringify(data)
     }
   );
 
@@ -2631,7 +2506,7 @@ function requestLoginLocation(){
         let message='Akses lokasi GPS diperlukan untuk login Driver.';
 
         if(error && error.code===1){
-          message='Izin lokasi ditolak. Izinkan akses lokasi untuk Aset Aqiqah Plus, lalu tekan Masuk sebagai Driver lagi.';
+          message='Izin lokasi ditolak. Izinkan akses lokasi untuk AssetTrack, lalu tekan Masuk sebagai Driver lagi.';
         }else if(error && error.code===2){
           message='Lokasi GPS tidak tersedia. Aktifkan GPS/lokasi perangkat lalu coba lagi.';
         }else if(error && error.code===3){
@@ -2805,8 +2680,7 @@ async function loginAdmin(){
       action:'adminLogin',
       adminId:id,
       namaAdmin:name,
-      pin:pin,
-      division:document.getElementById('loginAdminDivision').value
+      pin:pin
     });
 
     state.loginToken=login.loginToken || null;
@@ -2871,9 +2745,6 @@ async function loginAdmin(){
     state.user={
       ...photoLogin.admin,
       role:String(photoLogin.admin.role || login.admin.role || 'ADMIN').toUpperCase(),
-      division:String(photoLogin.admin.division || login.admin.division || '').toUpperCase(),
-      divisi:String(photoLogin.admin.division || login.admin.division || '').toUpperCase(),
-      sessionToken:photoLogin.sessionToken || null,
       loginPhoto:photoLogin.loginPhoto
     };
     state.loginToken=null;
@@ -2933,8 +2804,7 @@ async function enterApplication(){
 
   document.getElementById('currentUserName').textContent=
     user.name || user.namaAdmin || user.namaDriver || '-';
-  document.getElementById('currentUserRole').textContent =
-    user.division ? role+' • '+user.division : role;
+  document.getElementById('currentUserRole').textContent=role;
 
   const initial=(
     user.name || user.namaAdmin || user.namaDriver || 'A'
@@ -2953,42 +2823,10 @@ async function enterApplication(){
   if(state.pendingAssetCode) openPendingAsset();
 }
 
-
-function applyDivisionMenuPermissions(user){
-  const division=String(user&&(user.division||user.divisi||user.role)||'').trim().toUpperCase();
-
-  const rules={
-    SUPER_ADMIN:['dashboard','assets','barcode','catering-assets','inspection','drivers','km','corrections','reports','audit','admins','settings'],
-    DIREKTUR:['dashboard','assets','barcode','catering-assets','inspection','drivers','km','corrections','reports','audit'],
-    HRD:['dashboard','drivers','audit'],
-    OPERASIONAL:['dashboard','assets','barcode','catering-assets','inspection','drivers','km','corrections','reports'],
-    KEUANGAN:['dashboard','reports'],
-    CS:['dashboard','reports'],
-    'MARKETING ONLINE':['dashboard','reports'],
-    'MARKETING OFFLINE':['dashboard','reports'],
-    ASET:['dashboard','assets','barcode','catering-assets','inspection','reports','corrections'],
-    PRODUKSI:['dashboard','assets','catering-assets','inspection','reports'],
-    'BAHAN BAKU':['dashboard','assets','reports'],
-    AGRO:['dashboard','assets','inspection','reports']
-  };
-
-  const allowed=rules[division]||['dashboard'];
-  document.querySelectorAll('.nav-btn[data-page]').forEach(btn=>{
-    btn.classList.toggle('hidden',!allowed.includes(btn.getAttribute('data-page')));
-  });
-}
 function openPendingAsset(){
   const code=String(state.pendingAssetCode || '').trim();if(!code)return;
   const asset=state.assets.find(a=>String(a.code).toUpperCase()===code.toUpperCase());
   if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');state.pendingAssetCode='';return;}
-  if(!isVehicleAssetClient(asset)){
-    showPage('assets');
-    document.getElementById('assetSearch').value=asset.code;
-    renderAssets();
-    toast('QR/Barcode '+asset.code+' terhubung ke Data Aset. Aset ini bukan kendaraan, jadi tidak membuka form pemeriksaan armada.','info');
-    state.pendingAssetCode='';
-    return;
-  }
   showPage('inspection');
   const assetSelect=document.getElementById('inspectionAsset');
   if(assetSelect){assetSelect.value=asset.code;onInspectionAssetChange();}
@@ -3010,7 +2848,7 @@ function clearApplicationState(){
 }
 
 function resetLoginForm(){
-  ['loginDriverId','loginDriverName','loginAdminId','loginAdminName','loginAdminPin','loginAdminDivision'].forEach(id=>{
+  ['loginDriverId','loginDriverName','loginAdminId','loginAdminName','loginAdminPin'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.value='';
   });
@@ -3049,7 +2887,7 @@ function resetToLogin(showToast=true){
     populateDriverLogin();
   });
 
-  if(showToast) toast('Anda telah keluar dari Aset Aqiqah Plus.','info');
+  if(showToast) toast('Anda telah keluar dari AssetTrack.','info');
 }
 
 
@@ -3215,7 +3053,7 @@ async function refreshAll(){
 
     document.getElementById('systemStatus').innerHTML=
       '<span class="badge green">ONLINE</span> '+
-      'Aset Aqiqah Plus berhasil terhubung dengan Google Apps Script.';
+      'AssetTrack berhasil terhubung dengan Google Apps Script.';
 
   }catch(error){
     document.getElementById('systemStatus').innerHTML=
@@ -3286,186 +3124,340 @@ function updateDashboard(){
 ========================================================= */
 
 function renderAssets(){
-  const body=document.getElementById('assetBody');
+
+  const body=document.getElementById(
+    'assetBody'
+  );
+
   if(!body)return;
-  const search=(document.getElementById('assetSearch')?.value||'').toLowerCase();
+
+  const search=(
+    document.getElementById(
+      'assetSearch'
+    )?.value || ''
+  ).toLowerCase();
+
   const rows=state.assets.filter(a=>{
-    const text=[a.code,a.name,a.plate,a.brand,a.model,a.location,a.jenisAset,a.category,a.subcategory,a.condition,a.serialNumber].join(' ').toLowerCase();
+
+    const text=[
+      a.code,
+      a.name,
+      a.plate,
+      a.brand,
+      a.model,
+      a.location
+    ].join(' ').toLowerCase();
+
     return text.includes(search);
+
   });
+
   body.innerHTML='';
+
   rows.forEach(asset=>{
+
     const tr=document.createElement('tr');
+
     tr.innerHTML=`
-      <td><strong>${escapeHtml(asset.code)}</strong></td>
-      <td>${escapeHtml(asset.name)}${asset.plate?'<br><small>'+escapeHtml(asset.plate)+'</small>':''}</td>
-      <td>${escapeHtml(asset.jenisAset||'LAINNYA')}</td>
-      <td>${escapeHtml(asset.category||'-')}${asset.subcategory?'<br><small>'+escapeHtml(asset.subcategory)+'</small>':''}</td>
-      <td>${escapeHtml(String(asset.quantity ?? 1))} ${escapeHtml(asset.unit||'Unit')}</td>
-      <td>${escapeHtml(asset.condition||'Baik')}</td>
-      <td>${escapeHtml(asset.location)}</td>
-      <td>${statusBadge(asset.status)}</td>
+
       <td>
-        <button class="secondary-btn" onclick="openAssetForm('${escapeJs(asset.id)}')">Edit</button>
-        <button class="danger-btn" onclick="deleteAsset('${escapeJs(asset.id)}','${escapeJs(asset.code)}')">Hapus</button>
-      </td>`;
+        <strong>${escapeHtml(asset.code)}</strong>
+      </td>
+
+      <td>
+        ${escapeHtml(asset.name)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.plate)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.brand)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.year)}
+      </td>
+
+      <td>
+        ${escapeHtml(asset.location)}
+      </td>
+
+      <td>
+        ${statusBadge(asset.status)}
+      </td>
+
+      <td>
+
+        <button
+          class="secondary-btn"
+          onclick="openAssetForm('${escapeJs(asset.id)}')">
+          Edit
+        </button>
+
+        <button
+          class="danger-btn"
+          onclick="deleteAsset('${escapeJs(asset.id)}','${escapeJs(asset.code)}')">
+          Hapus
+        </button>
+
+      </td>
+    `;
+
     body.appendChild(tr);
+
   });
+
 }
 
-function openAssetForm(id='',presetCategory='',presetSubcategory=''){
-  const asset=state.assets.find(x=>String(x.id)===String(id))||{};
-  const category=asset.category||presetCategory||'';
-  const subcategory=asset.subcategory||presetSubcategory||'';
-  const jenis=asset.jenisAset||((category==='ARMADA')?'ARMADA':(category?'PERALATAN':'LAINNYA'));
-  openModal(id?'Edit Aset':'Tambah Aset',`
+
+function openAssetForm(id=''){
+
+  const asset=
+    state.assets.find(
+      x=>String(x.id)===String(id)
+    ) || {};
+
+  openModal(
+    id
+      ? 'Edit Aset'
+      : 'Tambah Aset',
+
+    `
+
     <form id="assetForm">
-      <input type="hidden" id="assetId" value="${escapeHtml(asset.id||'')}">
+
+      <input
+        type="hidden"
+        id="assetId"
+        value="${escapeHtml(asset.id || '')}">
+
       <div class="form-grid">
+
         <div class="form-group">
           <label>Kode Aset *</label>
-          <input id="assetCode" required value="${escapeHtml(asset.code||'')}">
+          <input
+            id="assetCode"
+            required
+            value="${escapeHtml(asset.code || '')}">
         </div>
+
         <div class="form-group">
-          <label>Nama Aset *</label>
-          <input id="assetName" required value="${escapeHtml(asset.name||'')}">
+          <label>Nama Kendaraan *</label>
+          <input
+            id="assetName"
+            required
+            value="${escapeHtml(asset.name || '')}">
         </div>
-        <div class="form-group">
-          <label>Jenis Aset *</label>
-          <select id="assetType">
-            <option value="ARMADA" ${jenis==='ARMADA'?'selected':''}>ARMADA / KENDARAAN</option>
-            <option value="PERALATAN" ${jenis==='PERALATAN'?'selected':''}>PERALATAN</option>
-            <option value="LAINNYA" ${jenis==='LAINNYA'?'selected':''}>LAINNYA</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Kategori Aset *</label>
-          <select id="assetCategory">
-            <option value="" ${!category?'selected':''}>Pilih kategori</option>
-            <option value="ARMADA" ${category==='ARMADA'?'selected':''}>Armada</option>
-            <option value="PERALATAN PRODUKSI" ${category==='PERALATAN PRODUKSI'?'selected':''}>Peralatan Produksi</option>
-            <option value="PERALATAN CATERING" ${category==='PERALATAN CATERING'?'selected':''}>Peralatan Catering</option>
-            <option value="PERALATAN OPERASIONAL" ${category==='PERALATAN OPERASIONAL'?'selected':''}>Peralatan Operasional</option>
-            <option value="LAINNYA" ${category==='LAINNYA'?'selected':''}>Lainnya</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Subkategori</label>
-          <input id="assetSubcategory" value="${escapeHtml(subcategory)}" placeholder="Contoh: Freezer, Kompor, Mobil">
-        </div>
+
         <div class="form-group">
           <label>Nomor Polisi</label>
-          <input id="assetPlate" value="${escapeHtml(asset.plate||'')}">
+          <input
+            id="assetPlate"
+            value="${escapeHtml(asset.plate || '')}">
         </div>
+
         <div class="form-group">
           <label>Merek</label>
-          <input id="assetBrand" value="${escapeHtml(asset.brand||'')}">
+          <input
+            id="assetBrand"
+            value="${escapeHtml(asset.brand || '')}">
         </div>
+
         <div class="form-group">
           <label>Model / Tipe</label>
-          <input id="assetModel" value="${escapeHtml(asset.model||'')}">
+          <input
+            id="assetModel"
+            value="${escapeHtml(asset.model || '')}">
         </div>
+
         <div class="form-group">
           <label>Tahun</label>
-          <input id="assetYear" value="${escapeHtml(asset.year||'')}">
+          <input
+            id="assetYear"
+            value="${escapeHtml(asset.year || '')}">
         </div>
-        <div class="form-group">
-          <label>Jumlah</label>
-          <input id="assetQuantity" type="number" min="0" step="1" value="${escapeHtml(String(asset.quantity??1))}">
-        </div>
-        <div class="form-group">
-          <label>Satuan</label>
-          <select id="assetUnit">
-            <option ${(!asset.unit||asset.unit==='Unit')?'selected':''}>Unit</option>
-            <option ${asset.unit==='Set'?'selected':''}>Set</option>
-            <option ${asset.unit==='Buah'?'selected':''}>Buah</option>
-            <option ${asset.unit==='Pcs'?'selected':''}>Pcs</option>
-            <option ${asset.unit==='Pasang'?'selected':''}>Pasang</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Kondisi</label>
-          <select id="assetCondition">
-            <option ${(!asset.condition||asset.condition==='Baik')?'selected':''}>Baik</option>
-            <option ${asset.condition==='Perlu Perbaikan'?'selected':''}>Perlu Perbaikan</option>
-            <option ${asset.condition==='Rusak'?'selected':''}>Rusak</option>
-            <option ${asset.condition==='Hilang'?'selected':''}>Hilang</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Nomor Seri</label>
-          <input id="assetSerial" value="${escapeHtml(asset.serialNumber||'')}">
-        </div>
+
         <div class="form-group">
           <label>Lokasi Aset</label>
-          <input id="assetLocation" value="${escapeHtml(asset.location||'')}">
+          <input
+            id="assetLocation"
+            value="${escapeHtml(asset.location || '')}">
         </div>
+
         <div class="form-group">
           <label>Penanggung Jawab</label>
-          <input id="assetResponsible" value="${escapeHtml(asset.responsible||'')}">
+          <input
+            id="assetResponsible"
+            value="${escapeHtml(asset.responsible || '')}">
         </div>
+
         <div class="form-group">
           <label>Status</label>
+
           <select id="assetStatus">
-            <option ${asset.status==='Aktif'?'selected':''}>Aktif</option>
-            <option ${asset.status==='Tidak Aktif'?'selected':''}>Tidak Aktif</option>
+
+            <option
+              ${asset.status==='Aktif'?'selected':''}>
+              Aktif
+            </option>
+
+            <option
+              ${asset.status==='Tidak Aktif'?'selected':''}>
+              Tidak Aktif
+            </option>
+
           </select>
+
         </div>
+
         <div class="form-group">
           <label>Tanggal Perolehan</label>
-          <input id="assetPurchaseDate" type="date" value="${escapeHtml(toDateInput(asset.purchaseDate||''))}">
+
+          <input
+            id="assetPurchaseDate"
+            type="date"
+            value="${escapeHtml(toDateInput(asset.purchaseDate || ''))}">
         </div>
+
         <div class="form-group full-width">
           <label>Catatan</label>
-          <textarea id="assetNotes">${escapeHtml(asset.notes||'')}</textarea>
+
+          <textarea
+            id="assetNotes">${escapeHtml(asset.notes || '')}</textarea>
+
         </div>
+
       </div>
-      <div class="info-box" style="margin-top:10px;">
-        Barcode/QR otomatis menggunakan <strong>Kode Aset</strong>. Semua aset tersimpan di satu sheet <strong>Data Aset</strong>.
-      </div>
+
       <div class="form-actions">
-        <button type="button" class="secondary-btn" onclick="closeModal()">Batal</button>
-        <button class="primary-btn" type="submit" style="width:auto">Simpan Aset</button>
+
+        <button
+          type="button"
+          class="secondary-btn"
+          onclick="closeModal()">
+          Batal
+        </button>
+
+        <button
+          class="primary-btn"
+          type="submit"
+          style="width:auto">
+          Simpan
+        </button>
+
       </div>
-    </form>`);
-  document.getElementById('assetForm').addEventListener('submit',saveAsset);
+
+    </form>
+
+    `
+  );
+
+  document
+    .getElementById('assetForm')
+    .addEventListener(
+      'submit',
+      saveAsset
+    );
+
 }
 
+
 async function saveAsset(event){
+
   event.preventDefault();
+
   try{
+
+    const id=document
+      .getElementById('assetId')
+      .value.trim();
+
     const data={
+
       action:'saveAsset',
-      id:document.getElementById('assetId').value.trim(),
-      code:document.getElementById('assetCode').value.trim(),
-      name:document.getElementById('assetName').value.trim(),
-      jenisAset:document.getElementById('assetType').value,
-      kategoriAset:document.getElementById('assetCategory').value,
-      subkategori:document.getElementById('assetSubcategory').value.trim(),
-      plate:document.getElementById('assetPlate').value.trim(),
-      brand:document.getElementById('assetBrand').value.trim(),
-      model:document.getElementById('assetModel').value.trim(),
-      year:document.getElementById('assetYear').value.trim(),
-      jumlah:document.getElementById('assetQuantity').value,
-      satuan:document.getElementById('assetUnit').value,
-      kondisi:document.getElementById('assetCondition').value,
-      nomorSeri:document.getElementById('assetSerial').value.trim(),
-      location:document.getElementById('assetLocation').value.trim(),
-      responsible:document.getElementById('assetResponsible').value.trim(),
-      status:document.getElementById('assetStatus').value,
-      purchaseDate:document.getElementById('assetPurchaseDate').value,
-      notes:document.getElementById('assetNotes').value,
-      userId:state.user?.id||state.user?.adminId||state.user?.driverId,
-      userName:state.user?.name||state.user?.namaAdmin||state.user?.namaDriver,
-      role:state.user?.role,
-      division:state.user?.division||state.user?.divisi
+
+      id:id,
+
+      code:document
+        .getElementById('assetCode')
+        .value.trim(),
+
+      name:document
+        .getElementById('assetName')
+        .value.trim(),
+
+      plate:document
+        .getElementById('assetPlate')
+        .value.trim(),
+
+      brand:document
+        .getElementById('assetBrand')
+        .value.trim(),
+
+      model:document
+        .getElementById('assetModel')
+        .value.trim(),
+
+      year:document
+        .getElementById('assetYear')
+        .value.trim(),
+
+      location:document
+        .getElementById('assetLocation')
+        .value.trim(),
+
+      responsible:document
+        .getElementById('assetResponsible')
+        .value.trim(),
+
+      status:document
+        .getElementById('assetStatus')
+        .value,
+
+      purchaseDate:document
+        .getElementById('assetPurchaseDate')
+        .value,
+
+      notes:document
+        .getElementById('assetNotes')
+        .value,
+
+      userId:state.user.id ||
+        state.user.adminId ||
+        state.user.driverId,
+
+      userName:state.user.name ||
+        state.user.namaAdmin ||
+        state.user.namaDriver,
+
+      role:state.user.role
+
     };
+
     const result=await apiPost(data);
+
     closeModal();
-    toast(result.message,'success');
+
+    toast(
+      result.message,
+      'success'
+    );
+
     await refreshAll();
-  }catch(error){toast(error.message,'error');}
+
+  }catch(error){
+
+    toast(
+      error.message,
+      'error'
+    );
+
+  }
+
 }
+
 
 async function deleteAsset(id,code){
 
@@ -3529,7 +3521,7 @@ function populateBarcodeAssets(){
   select.innerHTML=
     '<option value="">Pilih aset</option>';
 
-  state.assets.filter(isVehicleAssetClient).forEach(asset=>{
+  state.assets.forEach(asset=>{
 
     const option=document.createElement('option');
 
@@ -3562,7 +3554,7 @@ function generateSelectedBarcode(){
   if(!code){box.innerHTML='<p>Pilih aset untuk menampilkan QR Code.</p>';return;}
   const asset=state.assets.find(x=>String(x.code)===String(code));if(!asset)return;
   const qrUrl=buildInspectionUrl(asset.code);
-  box.innerHTML=`<div><strong>${escapeHtml(asset.name)}</strong></div><div class="qr-wrap"><div id="qrCode" class="qr-code"></div><div class="barcode-info">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><small style="color:#607d8b">Scan QR untuk membuka data aset. Jika aset adalah kendaraan, QR dapat diarahkan ke pemeriksaan armada.</small></div>`;
+  box.innerHTML=`<div><strong>${escapeHtml(asset.name)}</strong></div><div class="qr-wrap"><div id="qrCode" class="qr-code"></div><div class="barcode-info">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><small style="color:#607d8b">Scan QR untuk membuka pemeriksaan aset.</small></div>`;
   const qr=document.getElementById('qrCode');
   if(!window.QRCode){qr.innerHTML='<span style="color:#c62828">Library QR Code belum termuat.</span>';return;}
   new QRCode(qr,{text:qrUrl,width:200,height:200,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
@@ -3573,8 +3565,8 @@ function printBarcode(){
   const code=document.getElementById('barcodeAssetSelect').value;if(!code){toast('Pilih aset terlebih dahulu.','error');return;}
   const asset=state.assets.find(x=>String(x.code)===String(code));if(!asset)return;
   const qr=document.getElementById('qrCode');const qrHtml=qr?qr.innerHTML:'';const qrUrl=buildInspectionUrl(asset.code);
-  const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk Aset Aqiqah Plus.','error');return;}
-  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>Aset Aqiqah Plus</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
+  const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk AssetTrack.','error');return;}
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>AssetTrack</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
   win.document.close();win.focus();setTimeout(()=>win.print(),500);
 }
 
@@ -3582,12 +3574,6 @@ function printBarcode(){
 /* =========================================================
    SELECT ASSET
 ========================================================= */
-
-function isVehicleAssetClient(asset){
-  const t=String(asset?.jenisAset||asset?.assetType||'').trim().toUpperCase();
-  const c=String(asset?.category||asset?.kategoriAset||'').trim().toUpperCase();
-  return t==='ARMADA'||t==='KENDARAAN'||c==='ARMADA'||c==='KENDARAAN'||!!String(asset?.plate||'').trim();
-}
 
 function populateAssetSelects(){
 
@@ -3905,7 +3891,7 @@ function getGPS(){
       let message='GPS gagal: '+error.message;
 
       if(error && error.code===1){
-        message='Izin lokasi ditolak. Izinkan lokasi untuk Aset Aqiqah Plus.';
+        message='Izin lokasi ditolak. Izinkan lokasi untuk AssetTrack.';
       }
 
       toast(message,'error');
@@ -5747,31 +5733,6 @@ function openAdminForm(){
             </option>
 
           </select>
-      <div class="form-group">
-        <label>Divisi</label>
-        <select id="adminFormDivision">
-          <option value="DIREKTUR">DIREKTUR</option>
-          <option value="HRD">HRD</option>
-          <option value="OPERASIONAL">OPERASIONAL</option>
-          <option value="KEUANGAN">KEUANGAN</option>
-          <option value="CS">CS</option>
-          <option value="MARKETING ONLINE">MARKETING ONLINE</option>
-          <option value="MARKETING OFFLINE">MARKETING OFFLINE</option>
-          <option value="ASET">ASET</option>
-          <option value="PRODUKSI">PRODUKSI</option>
-          <option value="BAHAN BAKU">BAHAN BAKU</option>
-          <option value="AGRO">AGRO</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Jabatan</label>
-        <input id="adminFormJabatan" placeholder="Contoh: Kepala Aset">
-      </div>
-      <div class="form-group">
-        <label>Atasan ID</label>
-        <input id="adminFormAtasan" placeholder="ID atasan">
-      </div>
-
 
         </div>
 
