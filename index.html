@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AssetTrack — Manajemen & Pemeriksaan Armada</title>
+<title>Aset Aqiqah Plus — Manajemen & Pemeriksaan Armada</title>
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -808,7 +808,7 @@ tr:hover td{
 
     <div class="logo">
       <div class="logo-icon">🚗</div>
-      <h1>AssetTrack</h1>
+      <h1>Aset Aqiqah Plus</h1>
       <p>Sistem Manajemen & Pemeriksaan Armada</p>
     </div>
 
@@ -1012,7 +1012,7 @@ tr:hover td{
       </button>
 
       <div class="brand">
-        🚗 AssetTrack
+        🚗 Aset Aqiqah Plus
       </div>
 
     </div>
@@ -1143,7 +1143,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Dashboard</h2>
-        <p>Ringkasan AssetTrack</p>
+        <p>Ringkasan Aset Aqiqah Plus</p>
       </div>
 
       <div class="cards">
@@ -1323,7 +1323,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pemeriksaan Armada</h2>
-        <p>Form pemeriksaan kendaraan sesuai database AssetTrack</p>
+        <p>Form pemeriksaan kendaraan sesuai database Aset Aqiqah Plus</p>
       </div>
 
       <div class="panel">
@@ -1815,7 +1815,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Audit Log</h2>
-        <p>Catatan aktivitas sistem AssetTrack</p>
+        <p>Catatan aktivitas sistem Aset Aqiqah Plus</p>
       </div>
 
       <div class="panel">
@@ -1905,7 +1905,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pengaturan</h2>
-        <p>Pengaturan Super Admin AssetTrack</p>
+        <p>Pengaturan Super Admin Aset Aqiqah Plus</p>
       </div>
 
       <div class="panel">
@@ -2506,7 +2506,7 @@ function requestLoginLocation(){
         let message='Akses lokasi GPS diperlukan untuk login Driver.';
 
         if(error && error.code===1){
-          message='Izin lokasi ditolak. Izinkan akses lokasi untuk AssetTrack, lalu tekan Masuk sebagai Driver lagi.';
+          message='Izin lokasi ditolak. Izinkan akses lokasi untuk Aset Aqiqah Plus, lalu tekan Masuk sebagai Driver lagi.';
         }else if(error && error.code===2){
           message='Lokasi GPS tidak tersedia. Aktifkan GPS/lokasi perangkat lalu coba lagi.';
         }else if(error && error.code===3){
@@ -2887,7 +2887,7 @@ function resetToLogin(showToast=true){
     populateDriverLogin();
   });
 
-  if(showToast) toast('Anda telah keluar dari AssetTrack.','info');
+  if(showToast) toast('Anda telah keluar dari Aset Aqiqah Plus.','info');
 }
 
 
@@ -3053,7 +3053,7 @@ async function refreshAll(){
 
     document.getElementById('systemStatus').innerHTML=
       '<span class="badge green">ONLINE</span> '+
-      'AssetTrack berhasil terhubung dengan Google Apps Script.';
+      'Aset Aqiqah Plus berhasil terhubung dengan Google Apps Script.';
 
   }catch(error){
     document.getElementById('systemStatus').innerHTML=
@@ -3565,8 +3565,8 @@ function printBarcode(){
   const code=document.getElementById('barcodeAssetSelect').value;if(!code){toast('Pilih aset terlebih dahulu.','error');return;}
   const asset=state.assets.find(x=>String(x.code)===String(code));if(!asset)return;
   const qr=document.getElementById('qrCode');const qrHtml=qr?qr.innerHTML:'';const qrUrl=buildInspectionUrl(asset.code);
-  const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk AssetTrack.','error');return;}
-  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>AssetTrack</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
+  const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk Aset Aqiqah Plus.','error');return;}
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>Aset Aqiqah Plus</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
   win.document.close();win.focus();setTimeout(()=>win.print(),500);
 }
 
@@ -3891,7 +3891,7 @@ function getGPS(){
       let message='GPS gagal: '+error.message;
 
       if(error && error.code===1){
-        message='Izin lokasi ditolak. Izinkan lokasi untuk AssetTrack.';
+        message='Izin lokasi ditolak. Izinkan lokasi untuk Aset Aqiqah Plus.';
       }
 
       toast(message,'error');
