@@ -369,19 +369,54 @@ textarea{
 }
 
 /* =========================================================
-   DRIVER MODE — hanya menu Pemeriksaan
+   DYNAMIC MENU — visibility dikendalikan Super Admin
    ========================================================= */
-.sidebar.driver-mode .nav-section{
-  display:none;
+.sidebar .nav-btn.menu-hidden,
+.sidebar .nav-section.menu-hidden{
+  display:none !important;
 }
-.sidebar.driver-mode .nav-btn:not([data-page="inspection"]){
-  display:none;
-}
-.sidebar.driver-mode .nav-btn[data-page="inspection"]{
+.sidebar.driver-mode .nav-btn{
   display:block;
 }
 .menu-btn.driver-hidden{
   display:none;
+}
+.menu-config-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.menu-config-table th,
+.menu-config-table td{
+  padding:10px 8px;
+  border-bottom:1px solid #eee;
+  vertical-align:middle;
+}
+.menu-config-table th{
+  text-align:left;
+  background:#fff7fa;
+}
+.menu-config-table input[type="text"]{
+  min-width:150px;
+}
+.menu-check{
+  width:20px;
+  height:20px;
+}
+.menu-order{
+  width:70px !important;
+  min-width:70px !important;
+}
+.menu-icon{
+  width:70px !important;
+  min-width:70px !important;
+}
+.menu-settings-note{
+  padding:12px 14px;
+  border-radius:10px;
+  background:#f8f9fa;
+  color:#546e7a;
+  font-size:13px;
+  margin-bottom:14px;
 }
 .driver-qr-notice{
   margin:0 0 14px;
@@ -1973,6 +2008,44 @@ tr:hover td{
 
       <div class="panel">
 
+        <h3>🎛️ Pengaturan Tampilan Menu</h3>
+
+        <div class="menu-settings-note">
+          Super Admin dapat mengatur menu yang terlihat tanpa mengedit kode aplikasi.
+          Pengaturan ini disimpan di konfigurasi aplikasi dan berlaku setelah pengguna masuk kembali.
+          Untuk Driver, default-nya hanya <strong>Pemeriksaan</strong>.
+        </div>
+
+        <div class="table-wrap">
+          <table class="menu-config-table">
+            <thead>
+              <tr>
+                <th>Menu</th>
+                <th>Label</th>
+                <th>Ikon</th>
+                <th>Urutan</th>
+                <th>Driver</th>
+                <th>Admin</th>
+                <th>Super Admin</th>
+              </tr>
+            </thead>
+            <tbody id="menuConfigBody"></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="primary-btn" style="width:auto" onclick="saveMenuSettings()">
+            💾 Simpan Tampilan Menu
+          </button>
+          <button class="secondary-btn" style="width:auto" onclick="resetMenuSettings()">
+            ↩️ Kembalikan Default
+          </button>
+        </div>
+
+      </div>
+
+      <div class="panel">
+
         <h3>Informasi API</h3>
 
         <p>
@@ -2067,6 +2140,7 @@ const state = {
   km:[],
   corrections:[],
   audit:[],
+  menuConfig:[],
 
   selectedAsset:null,
   pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim(),
@@ -2855,10 +2929,20 @@ async function enterApplication(){
   const adminNavigation=document.getElementById('adminNavigation');
   if(adminNavigation) adminNavigation.style.display=isAdmin ? 'block' : 'none';
 
+  try{
+    const menuResult=await apiGet('menuConfig',{role:role});
+    state.menuConfig=menuResult.menuConfig || [];
+  }catch(error){
+    console.warn('Menu config gagal dimuat, memakai default:',error.message);
+    state.menuConfig=[];
+  }
+
+  applyMenuConfig();
+
   const sidebar=document.getElementById('sidebar');
   const menuButton=document.querySelector('.menu-btn');
   if(sidebar) sidebar.classList.toggle('driver-mode', role==='DRIVER');
-  if(menuButton) menuButton.classList.toggle('driver-hidden', role==='DRIVER');
+  if(menuButton) menuButton.classList.remove('driver-hidden');
 
   document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
   document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!isSuperAdmin);
@@ -2905,6 +2989,7 @@ function clearApplicationState(){
   state.km=[];
   state.corrections=[];
   state.audit=[];
+  state.menuConfig=[];
 }
 
 function resetLoginForm(){
@@ -2962,6 +3047,187 @@ function logout(){
 
 
 /* =========================================================
+   DYNAMIC MENU CONFIGURATION
+========================================================= */
+
+const DEFAULT_MENU_CONFIG_CLIENT=[
+  {id:'dashboard',section:'Utama',label:'Dashboard',icon:'📊',order:10,driver:false,admin:true,superAdmin:true},
+  {id:'assets',section:'Utama',label:'Data Aset',icon:'🚗',order:20,driver:false,admin:true,superAdmin:true},
+  {id:'barcode',section:'Utama',label:'Barcode',icon:'▣',order:30,driver:false,admin:true,superAdmin:true},
+  {id:'inspection',section:'Utama',label:'Pemeriksaan',icon:'🔍',order:40,driver:true,admin:true,superAdmin:true},
+  {id:'drivers',section:'Data',label:'Data Driver',icon:'👨‍✈️',order:50,driver:false,admin:true,superAdmin:true},
+  {id:'km',section:'Data',label:'Data KM',icon:'📏',order:60,driver:false,admin:true,superAdmin:true},
+  {id:'corrections',section:'Data',label:'Koreksi',icon:'✏️',order:70,driver:false,admin:true,superAdmin:true},
+  {id:'reports',section:'Laporan',label:'Laporan Pemeriksaan',icon:'📋',order:80,driver:false,admin:true,superAdmin:true},
+  {id:'audit',section:'Laporan',label:'Audit Log',icon:'📝',order:90,driver:false,admin:true,superAdmin:true},
+  {id:'admins',section:'Administrasi',label:'Data Admin',icon:'👑',order:100,driver:false,admin:true,superAdmin:true},
+  {id:'settings',section:'Administrasi',label:'Pengaturan',icon:'⚙️',order:110,driver:false,admin:false,superAdmin:true}
+];
+
+function getMenuItem(page){
+  const item=(state.menuConfig||[]).find(x=>String(x.id)===String(page));
+  if(item)return item;
+  return DEFAULT_MENU_CONFIG_CLIENT.find(x=>x.id===page)||null;
+}
+
+function isMenuVisibleForRole(page,role){
+  const item=getMenuItem(page);
+  if(!item)return false;
+  const r=String(role||'').toUpperCase();
+  if(r==='SUPER_ADMIN')return item.superAdmin!==false;
+  if(r==='ADMIN')return item.admin!==false;
+  if(r==='DRIVER')return item.driver===true;
+  return false;
+}
+
+function applyMenuConfig(){
+  const role=String(state.user?.role||'').toUpperCase();
+  const config=(state.menuConfig&&state.menuConfig.length)
+    ? state.menuConfig
+    : DEFAULT_MENU_CONFIG_CLIENT;
+
+  const buttons=[...document.querySelectorAll('.nav-btn[data-page]')];
+  buttons.forEach(btn=>{
+    const id=btn.dataset.page;
+    const item=config.find(x=>x.id===id) || DEFAULT_MENU_CONFIG_CLIENT.find(x=>x.id===id);
+    const visible=!!item && isMenuVisibleForRole(id,role);
+    btn.classList.toggle('menu-hidden',!visible);
+    btn.dataset.menuVisible=visible?'true':'false';
+    if(item){
+      btn.innerHTML=escapeHtml(String(item.icon||''))+' '+escapeHtml(String(item.label||id));
+      btn.dataset.menuOrder=String(Number(item.order)||999);
+    }
+  });
+
+  // Terapkan urutan menu sesuai pengaturan Super Admin.
+  document.querySelectorAll('.nav-section').forEach(section=>{
+    const group=[];
+    let next=section.nextElementSibling;
+    while(next && !next.classList.contains('nav-section')){
+      if(next.classList.contains('nav-btn')) group.push(next);
+      next=next.nextElementSibling;
+    }
+    group.sort((a,b)=>(Number(a.dataset.menuOrder)||999)-(Number(b.dataset.menuOrder)||999));
+    group.forEach(btn=>section.parentElement.appendChild(btn));
+  });
+
+  document.querySelectorAll('.nav-section').forEach(section=>{
+    const text=String(section.textContent||'').trim().toLowerCase();
+    let hasVisible=false;
+    let next=section.nextElementSibling;
+    while(next && !next.classList.contains('nav-section')){
+      if(next.classList.contains('nav-btn') && !next.classList.contains('menu-hidden')){
+        hasVisible=true; break;
+      }
+      next=next.nextElementSibling;
+    }
+    section.classList.toggle('menu-hidden',!hasVisible);
+  });
+
+  const settings=document.querySelector('[data-page="settings"]');
+  if(settings) settings.classList.toggle('menu-hidden',role!=='SUPER_ADMIN');
+
+  if(role==='DRIVER'){
+    const visibleCount=buttons.filter(b=>!b.classList.contains('menu-hidden')).length;
+    const menuButton=document.querySelector('.menu-btn');
+    if(menuButton) menuButton.classList.toggle('driver-hidden',visibleCount<=1);
+  }
+}
+
+function renderMenuSettings(){
+  const body=document.getElementById('menuConfigBody');
+  if(!body)return;
+  const config=(state.menuConfig&&state.menuConfig.length)
+    ? state.menuConfig
+    : DEFAULT_MENU_CONFIG_CLIENT;
+  const sorted=[...config].sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999));
+  body.innerHTML=sorted.map(item=>`
+    <tr data-menu-id="${escapeHtml(item.id)}">
+      <td><strong>${escapeHtml(item.id)}</strong><br><small>${escapeHtml(item.section||'')}</small></td>
+      <td><input class="menu-label" type="text" value="${escapeHtml(item.label||'')}" maxlength="60"></td>
+      <td><input class="menu-icon" type="text" value="${escapeHtml(item.icon||'')}" maxlength="8"></td>
+      <td><input class="menu-order" type="number" value="${Number(item.order)||999}" min="1" max="999"></td>
+      <td style="text-align:center"><input class="menu-check menu-driver" type="checkbox" ${item.driver?'checked':''}></td>
+      <td style="text-align:center"><input class="menu-check menu-admin" type="checkbox" ${item.admin?'checked':''}></td>
+      <td style="text-align:center"><input class="menu-check menu-super" type="checkbox" ${item.superAdmin?'checked':''}></td>
+    </tr>
+  `).join('');
+}
+
+async function loadMenuSettings(){
+  if(!isSuperAdmin())return;
+  try{
+    const result=await apiGet('menuConfig',{role:'SUPER_ADMIN'});
+    state.menuConfig=result.menuConfig || DEFAULT_MENU_CONFIG_CLIENT;
+    renderMenuSettings();
+  }catch(error){
+    toast('Gagal memuat pengaturan menu: '+error.message,'error');
+  }
+}
+
+async function saveMenuSettings(){
+  if(!isSuperAdmin()){
+    toast('Hanya Super Admin yang dapat mengubah menu.','error');
+    return;
+  }
+  const rows=[...document.querySelectorAll('#menuConfigBody tr[data-menu-id]')];
+  const menuConfig=rows.map(row=>({
+    id:row.dataset.menuId,
+    section:(getMenuItem(row.dataset.menuId)||{}).section||'',
+    label:row.querySelector('.menu-label')?.value.trim() || row.dataset.menuId,
+    icon:row.querySelector('.menu-icon')?.value.trim() || '•',
+    order:Number(row.querySelector('.menu-order')?.value)||999,
+    driver:!!row.querySelector('.menu-driver')?.checked,
+    admin:!!row.querySelector('.menu-admin')?.checked,
+    superAdmin:!!row.querySelector('.menu-super')?.checked
+  }));
+
+  const inspection=menuConfig.find(x=>x.id==='inspection');
+  if(!inspection.driver){
+    inspection.driver=true;
+    toast('Pemeriksaan wajib tetap tersedia untuk Driver.','info');
+  }
+  const settings=menuConfig.find(x=>x.id==='settings');
+  if(settings)settings.superAdmin=true;
+
+  try{
+    const result=await apiPost({
+      action:'saveMenuConfig',
+      menuConfig:menuConfig,
+      userId:state.user.id || state.user.adminId,
+      userName:state.user.name || state.user.namaAdmin,
+      role:'SUPER_ADMIN'
+    });
+    state.menuConfig=result.menuConfig || menuConfig;
+    renderMenuSettings();
+    applyMenuConfig();
+    toast(result.message || 'Tampilan menu berhasil disimpan.','success');
+    showPage('settings');
+  }catch(error){
+    toast(error.message,'error');
+  }
+}
+
+async function resetMenuSettings(){
+  if(!isSuperAdmin())return;
+  if(!confirm('Kembalikan tampilan menu ke pengaturan default?'))return;
+  try{
+    const result=await apiPost({
+      action:'resetMenuConfig',
+      userId:state.user.id || state.user.adminId,
+      userName:state.user.name || state.user.namaAdmin,
+      role:'SUPER_ADMIN'
+    });
+    state.menuConfig=result.menuConfig || DEFAULT_MENU_CONFIG_CLIENT;
+    renderMenuSettings();
+    applyMenuConfig();
+    toast(result.message || 'Menu dikembalikan ke default.','success');
+  }catch(error){
+    toast(error.message,'error');
+  }
+}
+
+/* =========================================================
    NAVIGATION
 ========================================================= */
 
@@ -2984,8 +3250,14 @@ function showPage(page){
   }
 
   const role=String(state.user.role || '').toUpperCase();
-  if(role==='DRIVER' && page!=='inspection'){
-    page='inspection';
+  const menuItem=getMenuItem(page);
+  if(menuItem && !menuItem.visible){
+    toast('Menu ini disembunyikan oleh pengaturan Super Admin.','error');
+    return;
+  }
+  if(role==='DRIVER' && !isMenuVisibleForRole(page,role)){
+    toast('Menu ini tidak tersedia untuk Driver.','error');
+    return;
   }
   if(page==='admins' && !['ADMIN','SUPER_ADMIN'].includes(role)){
     toast('Halaman Admin hanya dapat diakses oleh Admin.','error');
@@ -3053,6 +3325,10 @@ function showPage(page){
 
   if(page==='admins'){
     renderAdmins();
+  }
+
+  if(page==='settings' && role==='SUPER_ADMIN'){
+    renderMenuSettings();
   }
 
 }
