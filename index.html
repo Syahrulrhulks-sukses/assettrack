@@ -2012,7 +2012,7 @@ tr:hover td{
 
         <div class="menu-settings-note">
           Super Admin dapat mengatur menu yang terlihat tanpa mengedit kode aplikasi.
-          Pengaturan ini disimpan di konfigurasi aplikasi dan berlaku setelah pengguna masuk kembali.
+          Pengaturan ini tersimpan di konfigurasi aplikasi. Menu langsung diperbarui setelah disimpan dan tetap berlaku saat login berikutnya.
           Untuk Driver, default-nya hanya <strong>Pemeriksaan</strong>.
         </div>
 
@@ -2949,7 +2949,18 @@ async function enterApplication(){
 
   setInspectionGPS(state.loginGPS);
   setDriverInspectionMode();
-  showPage(role==='DRIVER' ? 'inspection' : 'dashboard');
+
+  // Driver selalu diarahkan ke Pemeriksaan setelah login.
+  // Admin/Super Admin diarahkan ke Dashboard hanya jika Dashboard tersedia;
+  // jika tidak, buka menu pertama yang terlihat.
+  if(role==='DRIVER'){
+    showPage('inspection');
+  }else if(isMenuVisibleForRole('dashboard',role)){
+    showPage('dashboard');
+  }else{
+    const firstVisible=document.querySelector('.nav-btn[data-menu-visible="true"]');
+    showPage(firstVisible?.dataset.page || 'inspection');
+  }
   refreshAll().catch(error=>{
     document.getElementById('systemStatus').innerHTML=
       '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
@@ -3100,15 +3111,28 @@ function applyMenuConfig(){
   });
 
   // Terapkan urutan menu sesuai pengaturan Super Admin.
+  // Penting: jangan append() ke parent secara langsung karena dapat
+  // memindahkan tombol melewati section lain / adminNavigation.
   document.querySelectorAll('.nav-section').forEach(section=>{
     const group=[];
     let next=section.nextElementSibling;
-    while(next && !next.classList.contains('nav-section')){
+    while(next && !next.classList.contains('nav-section') && next.id!=='adminNavigation'){
       if(next.classList.contains('nav-btn')) group.push(next);
       next=next.nextElementSibling;
     }
-    group.sort((a,b)=>(Number(a.dataset.menuOrder)||999)-(Number(b.dataset.menuOrder)||999));
-    group.forEach(btn=>section.parentElement.appendChild(btn));
+
+    if(group.length < 2) return;
+
+    group.sort((a,b)=>
+      (Number(a.dataset.menuOrder)||999) -
+      (Number(b.dataset.menuOrder)||999)
+    );
+
+    const boundary = next || null;
+    group.forEach(btn=>{
+      if(boundary) section.parentElement.insertBefore(btn,boundary);
+      else section.parentElement.appendChild(btn);
+    });
   });
 
   document.querySelectorAll('.nav-section').forEach(section=>{
@@ -3251,12 +3275,19 @@ function showPage(page){
 
   const role=String(state.user.role || '').toUpperCase();
   const menuItem=getMenuItem(page);
-  if(menuItem && !menuItem.visible){
-    toast('Menu ini disembunyikan oleh pengaturan Super Admin.','error');
-    return;
-  }
-  if(role==='DRIVER' && !isMenuVisibleForRole(page,role)){
-    toast('Menu ini tidak tersedia untuk Driver.','error');
+  const menuVisible=isMenuVisibleForRole(page,role);
+
+  // Jangan gunakan property `visible` karena konfigurasi menu menyimpan
+  // visibilitas per-role (driver/admin/superAdmin).
+  // Jika menu disembunyikan, halaman juga tidak boleh dibuka lewat
+  // pemanggilan showPage() secara langsung.
+  if(menuItem && !menuVisible){
+    toast(
+      role==='DRIVER'
+        ? 'Menu ini tidak tersedia untuk Driver.'
+        : 'Menu ini disembunyikan oleh pengaturan Super Admin.',
+      'error'
+    );
     return;
   }
   if(page==='admins' && !['ADMIN','SUPER_ADMIN'].includes(role)){
