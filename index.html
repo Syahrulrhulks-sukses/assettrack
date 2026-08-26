@@ -1436,7 +1436,10 @@ tr:hover td{
               <label>Waktu Pemeriksaan</label>
               <input
                 id="inspectionTime"
-                type="datetime-local">
+                type="datetime-local"
+                readonly
+                tabindex="-1"
+                aria-readonly="true">
             </div>
 
             <div class="form-group">
@@ -2126,7 +2129,9 @@ const state = {
   },
 
   loginGPS:null,
+  loginLocationPromise:null,
   faceModelsReady:null,
+  driverCacheVersion:'v2',
 
   camera:{
     driverLogin:null,
@@ -2289,6 +2294,7 @@ function switchLogin(type){
   state.loginPhoto.adminLogin=null;
   state.loginToken=null;
   state.loginGPS=null;
+  state.loginLocationPromise=null;
 
   const driverTab=document.getElementById('driverTab');
   const adminTab=document.getElementById('adminTab');
@@ -2342,8 +2348,11 @@ async function startCamera(type){
 
       video:{
         facingMode:'user',
-        width:{ideal:1280},
-        height:{ideal:720}
+        width:{ideal:640},
+        height:{ideal:480},
+        advanced:[{
+          resizeMode:'crop-and-scale'
+        }]
       },
 
       audio:false
@@ -2353,6 +2362,10 @@ async function startCamera(type){
     video.srcObject=stream;
 
     state.camera[type]=stream;
+
+    // Mulai ambil GPS sejak kamera dibuka agar saat tombol Login ditekan
+    // lokasi biasanya sudah tersedia dari cache/perangkat.
+    if(type==='driverLogin') warmLoginLocation();
 
     await video.play();
 
@@ -2471,6 +2484,53 @@ function isDriverActive(value){
 }
 
 /* =========================================================
+   FAST DRIVER CACHE / GPS WARM-UP
+========================================================= */
+
+const DRIVER_CACHE_KEY='assettrack_driver_auth_cache_v2';
+
+function saveDriverCache(drivers){
+  try{
+    const compact=(drivers||[]).map(d=>({
+      id:driverIdOf(d),
+      driverId:driverIdOf(d),
+      name:driverNameOf(d),
+      namaDriver:driverNameOf(d),
+      email:d.email||'',
+      status:driverStatusOf(d),
+      facePhoto:d.facePhoto||d.fotoWajah||'',
+      faceStatus:d.faceStatus||d.statusWajah||'',
+      faceDescriptor:d.faceDescriptor||''
+    }));
+    localStorage.setItem(DRIVER_CACHE_KEY,JSON.stringify({
+      savedAt:Date.now(),drivers:compact
+    }));
+  }catch(_){ }
+}
+
+function loadDriverCache(){
+  try{
+    const raw=localStorage.getItem(DRIVER_CACHE_KEY);
+    if(!raw)return [];
+    const parsed=JSON.parse(raw);
+    return Array.isArray(parsed?.drivers)?parsed.drivers:[];
+  }catch(_){ return []; }
+}
+
+function warmLoginLocation(){
+  if(state.loginGPS){
+    return Promise.resolve(state.loginGPS);
+  }
+  if(state.loginLocationPromise){
+    return state.loginLocationPromise;
+  }
+  state.loginLocationPromise=requestLoginLocation()
+    .then(gps=>{ state.loginGPS=gps; return gps; })
+    .catch(error=>{ state.loginLocationPromise=null; throw error; });
+  return state.loginLocationPromise;
+}
+
+/* =========================================================
    FACE VERIFICATION
 ========================================================= */
 
@@ -2524,7 +2584,7 @@ async function getFaceDescriptorFromDataUrl(dataUrl){
     .detectAllFaces(
       image,
       new faceapi.TinyFaceDetectorOptions({
-        inputSize:224,
+        inputSize:160,
         scoreThreshold:0.5
       })
     )
@@ -2625,8 +2685,8 @@ function requestLoginLocation(){
       },
       {
         enableHighAccuracy:true,
-        timeout:20000,
-        maximumAge:0
+        timeout:5000,
+        maximumAge:30000
       }
     );
   });
@@ -2700,8 +2760,11 @@ async function loginDriver(){
       return;
     }
 
-    setLoginStatus('Memeriksa wajah dan lokasi...');
-    const gpsPromise=requestLoginLocation();
+    setLoginStatus('Verifikasi wajah...');
+
+    // GPS sudah dipanaskan sejak kamera dibuka. Jika belum siap,
+    // permintaan yang sama dipakai sehingga tidak terjadi request ganda.
+    const gpsPromise=warmLoginLocation();
     const facePromise=getFaceDescriptorFromDataUrl(
       state.loginPhoto.driverLogin
     );
@@ -2991,6 +3054,7 @@ function clearApplicationState(){
   state.user=null;
   state.loginToken=null;
   state.loginGPS=null;
+  state.loginLocationPromise=null;
   state.loginPhoto={driverLogin:null,adminLogin:null};
   state.selectedAsset=null;
   state.qrAssetCode='';
@@ -3382,6 +3446,7 @@ async function refreshAll(){
 
     state.assets=bootstrap.assets || [];
     state.drivers=bootstrap.drivers || [];
+    saveDriverCache(state.drivers);
     state.inspections=bootstrap.inspections || [];
     populateDriverLogin();
 
@@ -4011,9 +4076,24 @@ function setDriverInspectionMode(){
     if(assetSelect){
       assetSelect.disabled=true;
     }
+    const timeInput=document.getElementById('inspectionTime');
+    if(timeInput){
+      timeInput.readOnly=true;
+      timeInput.setAttribute('readonly','readonly');
+      timeInput.tabIndex=-1;
+      timeInput.title='Waktu pemeriksaan ditentukan otomatis oleh server.';
+    }
   }else{
     if(notice)notice.style.display='none';
     if(assetSelect)assetSelect.disabled=false;
+    const timeInput=document.getElementById('inspectionTime');
+    if(timeInput){
+      timeInput.readOnly=false;
+      timeInput.removeAttribute('readonly');
+      timeInput.removeAttribute('aria-readonly');
+      timeInput.tabIndex=0;
+      timeInput.title='Admin dapat mengoreksi waktu pemeriksaan bila diperlukan.';
+    }
   }
 }
 
@@ -6621,9 +6701,16 @@ document.addEventListener(
       Muat data Driver untuk memeriksa ID/Nama saat login.
       Pendaftaran Driver baru dilakukan langsung dari panel login.
     */
+    // Cache lokal membuat ID/Nama + descriptor tersedia seketika saat
+    // halaman dibuka kembali. Server tetap melakukan verifikasi final.
+    state.drivers=loadDriverCache();
+    populateDriverLogin();
+
+    // Sinkronisasi terbaru berjalan di belakang layar, tanpa menahan login.
     apiGet('drivers')
       .then(result=>{
         state.drivers=result.drivers || [];
+        saveDriverCache(state.drivers);
         populateDriverLogin();
         if(state.drivers.length===0) setLoginStatus('Belum ada Driver pada Data Driver.',true);
       })
