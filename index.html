@@ -2162,10 +2162,10 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pengaturan</h2>
-        <p>Pengaturan Super Admin Aset Aqiqah Plus</p>
+        <p id="settingsDescription">Pengaturan Aset Aqiqah Plus</p>
       </div>
 
-      <div class="panel">
+      <div class="panel" id="superAdminPinPanel">
 
         <h3>Ganti PIN Super Admin</h3>
 
@@ -2202,7 +2202,7 @@ tr:hover td{
 
       <div class="panel">
         <h3>Pengaturan Tampilan Menu</h3>
-        <p style="color:#607d8b;font-size:13px">Super Admin dapat menentukan menu apa yang terlihat untuk Driver, Admin, dan Super Admin. Pengaturan disimpan di Script Properties, bukan membuat sheet baru.</p>
+        <p id="menuSettingsDescription" style="color:#607d8b;font-size:13px">Super Admin dapat menentukan menu yang terlihat untuk Driver, Admin, dan Super Admin. Admin hanya dapat menentukan menu yang terlihat untuk Driver.</p>
         <div id="menuDisplaySettings" class="menu-display-settings">Memuat pengaturan tampilan...</div>
         <div class="form-actions" style="margin-top:12px">
           <button type="button" class="secondary-btn" onclick="loadMenuDisplaySettings()">↻ Muat</button>
@@ -2982,11 +2982,16 @@ async function loadMenuDisplaySettings(){
   try{
     const result=await apiGet('menuConfig');
     const items=result.menuConfig||[];
-    box.innerHTML=`<div class="menu-display-row menu-display-head"><div>Menu</div><label>Driver</label><label>Admin</label><label>Super Admin</label></div>`+items.map((x,i)=>`<div class="menu-display-row" data-menu-id="${escapeHtml(x.id)}"><div class="menu-name">${escapeHtml(x.icon||'')} ${escapeHtml(x.label||x.id)}</div><label><input type="checkbox" data-role="driver" ${x.driver?'checked':''}></label><label><input type="checkbox" data-role="admin" ${x.admin?'checked':''}></label><label><input type="checkbox" data-role="superAdmin" ${x.superAdmin?'checked':''}></label></div>`).join('');
+    const role=String(state.user?.role||'').toUpperCase();
+    const isSuper=role==='SUPER_ADMIN';
+    const isAdmin=role==='ADMIN';
+    const head=isSuper?`<div class="menu-display-row menu-display-head"><div>Menu</div><label>Driver</label><label>Admin</label><label>Super Admin</label></div>`:`<div class="menu-display-row menu-display-head"><div>Menu</div><label>Driver</label></div>`;
+    box.innerHTML=head+items.map(x=>`<div class="menu-display-row" data-menu-id="${escapeHtml(x.id)}"><div class="menu-name">${escapeHtml(x.icon||'')} ${escapeHtml(x.label||x.id)}</div><label><input type="checkbox" data-role="driver" ${x.driver?'checked':''}></label>${isSuper?`<label><input type="checkbox" data-role="admin" ${x.admin?'checked':''}></label><label><input type="checkbox" data-role="superAdmin" ${x.superAdmin?'checked':''}></label>`:''}</div>`).join('');
   }catch(e){box.textContent='Gagal memuat pengaturan: '+e.message;}
 }
 async function saveMenuDisplaySettings(){
-  if(!isSuperAdmin()){toast('Hanya Super Admin yang dapat mengubah tampilan.','error');return;}
+  const role=String(state.user?.role||'').toUpperCase();
+  if(role!=='ADMIN' && role!=='SUPER_ADMIN'){toast('Hanya Admin atau Super Admin yang dapat mengubah tampilan.','error');return;}
   const box=document.getElementById('menuDisplaySettings'); if(!box)return;
   try{
     const current=await apiGet('menuConfig');
@@ -2994,10 +2999,12 @@ async function saveMenuDisplaySettings(){
     box.querySelectorAll('.menu-display-row[data-menu-id]').forEach(row=>{
       const id=row.getAttribute('data-menu-id'),x=byId[id];if(!x)return;
       x.driver=!!row.querySelector('[data-role="driver"]')?.checked;
-      x.admin=!!row.querySelector('[data-role="admin"]')?.checked;
-      x.superAdmin=!!row.querySelector('[data-role="superAdmin"]')?.checked;
+      if(role==='SUPER_ADMIN'){
+        x.admin=!!row.querySelector('[data-role="admin"]')?.checked;
+        x.superAdmin=!!row.querySelector('[data-role="superAdmin"]')?.checked;
+      }
     });
-    const result=await apiPost({action:'saveMenuConfig',menuConfig:Object.values(byId),userId:state.user.adminId||state.user.id,userName:state.user.name||state.user.namaAdmin,role:'SUPER_ADMIN'});
+    const result=await apiPost({action:'saveMenuConfig',menuConfig:Object.values(byId),userId:state.user.adminId||state.user.id,userName:state.user.name||state.user.namaAdmin,role:role});
     toast(result.message||'Tampilan berhasil disimpan.','success');applyMenuConfig(result.menuConfig||Object.values(byId));
   }catch(e){toast(e.message||'Gagal menyimpan tampilan.','error');}
 }
@@ -3007,7 +3014,7 @@ function applyMenuConfig(config){
     const el=document.querySelector(`[data-page="${String(x.id).replace(/"/g,'\\"')}"]`);
     if(!el)return;
     const visible=role==='SUPER_ADMIN'?!!x.superAdmin:role==='ADMIN'?!!x.admin:!!x.driver;
-    if(x.id==='settings'&&role==='SUPER_ADMIN')return;
+    if(x.id==='settings'&&(role==='ADMIN'||role==='SUPER_ADMIN'))return;
     el.classList.toggle('hidden',!visible);
   });
 }
@@ -3044,7 +3051,9 @@ async function enterApplication(){
   if(adminNavigation) adminNavigation.style.display=isAdmin ? 'block' : 'none';
 
   document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
-  document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!isSuperAdmin);
+  document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!(isAdmin||isSuperAdmin));
+  const pinPanel=document.getElementById('superAdminPinPanel'); if(pinPanel) pinPanel.style.display=isSuperAdmin?'':'none';
+  const desc=document.getElementById('settingsDescription'); if(desc) desc.textContent=isSuperAdmin?'Pengaturan Super Admin Aset Aqiqah Plus':'Pengaturan tampilan menu Driver';
   apiGet('menuConfig').then(r=>applyMenuConfig(r.menuConfig||[])).catch(()=>{});
 
   setInspectionGPS(state.loginGPS);
@@ -3167,8 +3176,8 @@ function showPage(page){
     toast('Halaman Admin hanya dapat diakses oleh Admin.','error');
     return;
   }
-  if(page==='settings' && role!=='SUPER_ADMIN'){
-    toast('Pengaturan hanya dapat diakses oleh Super Admin.','error');
+  if(page==='settings' && !['ADMIN','SUPER_ADMIN'].includes(role)){
+    toast('Pengaturan tampilan hanya dapat diakses oleh Admin atau Super Admin.','error');
     return;
   }
 
