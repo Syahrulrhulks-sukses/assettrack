@@ -1167,6 +1167,8 @@ tr:hover td{
 .menu-display-row label{text-align:center;font-size:12px;}
 .menu-display-row .menu-name{font-weight:700;font-size:13px;}
 
+
+.login-refresh-btn{display:block;width:100%;margin:10px 0 0;padding:12px 16px;border:2px solid #c90068;border-radius:14px;background:#fff;color:#c90068;font-weight:700;font-size:15px;cursor:pointer}.login-refresh-btn.hidden{display:none}.login-refresh-btn:active{transform:scale(.99)}
 </style>
 </head>
 
@@ -1212,6 +1214,7 @@ tr:hover td{
         <div id="driverFaceCheck" class="face-check hidden">✓</div>
       </div>
       <div id="loginStatus" class="login-status"></div>
+      <button type="button" id="driverLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('driver')">📸 Ambil Ulang Foto / Refresh Kamera</button>
       <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
       <button type="button" class="secondary-btn register-driver-btn" onclick="openDriverSelfRegistration()">📝 Daftar Driver Baru</button>
     </div>
@@ -1240,6 +1243,7 @@ tr:hover td{
         <div id="adminFaceCheck" class="face-check hidden">✓</div>
       </div>
       <div id="adminLoginStatus" class="login-status"></div>
+      <button type="button" id="adminLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('admin')">📸 Ambil Ulang Foto / Refresh Kamera</button>
       <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
     </div>
 
@@ -2539,20 +2543,62 @@ function setFaceUI(status,locked=false,role='driver'){
   const guide=document.getElementById(p+'FaceGuide');
   const box=document.getElementById(p+'FaceStatus');
   const check=document.getElementById(p+'FaceCheck');
+  const retry=document.getElementById(p+'LoginRefreshBtn');
   if(guide) guide.classList.toggle('locked',!!locked);
   if(box){box.classList.toggle('locked',!!locked);box.textContent=status||'';}
   if(check) check.classList.toggle('hidden',!locked);
+  if(retry && !locked) retry.classList.add('hidden');
+  if(retry && locked) retry.classList.add('hidden');
+}
+
+function showLoginRefresh(role){
+  const p=role==='admin'?'admin':'driver';
+  const btn=document.getElementById(p+'LoginRefreshBtn');
+  if(btn) btn.classList.remove('hidden');
+}
+function hideLoginRefresh(role){
+  const p=role==='admin'?'admin':'driver';
+  const btn=document.getElementById(p+'LoginRefreshBtn');
+  if(btn) btn.classList.add('hidden');
+}
+
+async function refreshLoginCamera(role){
+  const p=role==='admin'?'admin':'driver';
+  if(role==='admin'){adminFaceAttempts=0;adminFaceLocked=false;}else{driverFaceAttempts=0;driverFaceLocked=false;}
+  const btn=document.getElementById(p+'LoginRefreshBtn');
+  if(btn){btn.classList.add('hidden');btn.disabled=true;}
+  if(role==='admin'){
+    adminStableSince=0;adminStableBox=null;adminStableFrames=0;autoAdminBusy=false;
+  }else{
+    stableSince=0;stableBox=null;stableFrames=0;autoFaceBusy=false;
+  }
+  try{
+    stopCamera(p+'Login');
+    await ensureFaceModels();
+    const ok=await startCamera(p+'Login',true);
+    if(!ok) throw new Error('Kamera tidak dapat diaktifkan.');
+    const video=document.getElementById(p+'LoginVideo');
+    if(video) await video.play().catch(()=>{});
+    setFaceUI('Kamera siap. Posisikan wajah dan jangan bergerak.',false,role);
+    setLoginStatus('Silakan coba foto wajah kembali.',false,role);
+  }catch(e){
+    setFaceUI(e.message||'Kamera gagal diaktifkan.',false,role);
+    setLoginStatus(e.message||'Kamera gagal diaktifkan.',true,role);
+    showLoginRefresh(role);
+  }finally{if(btn)btn.disabled=false;}
 }
 
 let autoFaceTimer=null,autoFaceBusy=false,autoFaceCandidate=null;
 let stableSince=0,stableBox=null,stableFrames=0;
+let driverFaceAttempts=0,driverFaceLocked=false;
 let autoAdminTimer=null,autoAdminBusy=false,autoAdminCandidate=null;
 let adminStableSince=0,adminStableBox=null,adminStableFrames=0;
+let adminFaceAttempts=0,adminFaceLocked=false;
 
 function onDriverNameInput(){
   const name=(document.getElementById('loginDriverName')?.value||'').trim();
   const idEl=document.getElementById('loginDriverId'),badge=document.getElementById('autoDriverId');
-  autoFaceCandidate=null;stableSince=0;stableBox=null;stableFrames=0;
+  autoFaceCandidate=null;stableSince=0;stableBox=null;stableFrames=0;driverFaceAttempts=0;driverFaceLocked=false;hideLoginRefresh('driver');
   if(idEl) idEl.value=''; if(badge){badge.textContent='';badge.classList.remove('show');}
   if(!name){setFaceUI('Menunggu nama...',false,'driver');return;}
   const exact=state.drivers.find(d=>driverNameOf(d).trim().toLowerCase()===name.toLowerCase() && driverIsActive(d));
@@ -2566,7 +2612,7 @@ function onDriverNameInput(){
 function onAdminNameInput(){
   const name=(document.getElementById('loginAdminName')?.value||'').trim();
   const idEl=document.getElementById('loginAdminId'),badge=document.getElementById('autoAdminId');
-  autoAdminCandidate=null;adminStableSince=0;adminStableBox=null;adminStableFrames=0;
+  autoAdminCandidate=null;adminStableSince=0;adminStableBox=null;adminStableFrames=0;adminFaceAttempts=0;adminFaceLocked=false;hideLoginRefresh('admin');
   if(idEl) idEl.value='';if(badge){badge.textContent='';badge.classList.remove('show');}
   if(!name){setFaceUI('Menunggu nama...',false,'admin');return;}
   const exact=(state.admins||[]).find(a=>String(a.name||a.namaAdmin||'').trim().toLowerCase()===name.toLowerCase() && isDriverActive(a.status));
@@ -2624,8 +2670,43 @@ async function getFaceDescriptorFromVideo(video){
   return Array.from(result.descriptor);
 }
 
+function isFrameClear(video){
+  try{
+    if(!video||!video.videoWidth||!video.videoHeight)return false;
+    const c=document.createElement('canvas');c.width=96;c.height=72;
+    const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,96,72);
+    const d=ctx.getImageData(0,0,96,72).data;
+    const g=new Float32Array(96*72);let mean=0,n=0;
+    for(let y=0;y<72;y++)for(let x=0;x<96;x++){
+      const i=(y*96+x)*4;const v=.299*d[i]+.587*d[i+1]+.114*d[i+2];g[y*96+x]=v;mean+=v;n++;
+    }
+    mean/=n;
+    if(mean<45||mean>225)return false;
+    let lm=0,lm2=0,ln=0;
+    // Laplacian variance: reject genuinely blurred frames before locking.
+    for(let y=1;y<71;y++)for(let x=1;x<95;x++){
+      const i=y*96+x;
+      const lap=4*g[i]-g[i-1]-g[i+1]-g[i-96]-g[i+96];
+      lm+=lap;lm2+=lap*lap;ln++;
+    }
+    const lv=lm2/ln-Math.pow(lm/ln,2);
+    return lv>=18;
+  }catch(e){return true;}
+}
+
+function retryFaceAttempt(role){
+  if(role==='admin'){
+    adminStableSince=0;adminStableBox=null;adminStableFrames=0;adminFaceLocked=false;
+    const v=document.getElementById('adminLoginVideo');if(v)v.play().catch(()=>{});
+  }else{
+    stableSince=0;stableBox=null;stableFrames=0;driverFaceLocked=false;
+    const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});
+  }
+  if((role==='admin'?adminFaceAttempts:driverFaceAttempts)>=3) showLoginRefresh(role);
+}
+
 async function autoFaceCheck(){
-  if(autoFaceBusy||state.loginBusy||!autoFaceCandidate||!state.camera.driverLogin)return;
+  if(autoFaceBusy||state.loginBusy||!autoFaceCandidate||!state.camera.driverLogin||driverFaceLocked||driverFaceAttempts>=3)return;
   const name=(document.getElementById('loginDriverName')?.value||'').trim();if(!name)return;
   if(!autoFaceCandidate.faceDescriptor){setFaceUI('Data wajah Driver belum terdaftar.',false,'driver');return;}
   autoFaceBusy=true;
@@ -2633,17 +2714,31 @@ async function autoFaceCheck(){
     const video=document.getElementById('driverLoginVideo');
     const stable=await detectStableFace(video,'driver');
     if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'driver');return;}
-    setFaceUI('Wajah diam. Mengunci gambar...',false,'driver');
+    if(!isFrameClear(video)){
+      setFaceUI('Gambar belum cukup jernih. Tunggu sebentar...',false,'driver');
+      stableSince=0;stableFrames=0;return;
+    }
+    setFaceUI('Gambar jernih. Verifikasi cepat...',false,'driver');
+    driverFaceAttempts++;
     const live=await getFaceDescriptorFromVideo(video);
     const dist=faceDistance(live,autoFaceCandidate.faceDescriptor);
-    if(dist>FACE_MATCH_THRESHOLD){stableSince=0;stableFrames=0;const v=document.getElementById('driverLoginVideo');if(v) v.play().catch(()=>{});setFaceUI('Wajah tidak cocok. Coba lagi.',false,'driver');return;}
+    if(dist>FACE_MATCH_THRESHOLD){
+      retryFaceAttempt('driver');
+      if(driverFaceAttempts<3)setFaceUI('Wajah tidak cocok. Percobaan '+driverFaceAttempts+'/3, silakan tetap diam.',false,'driver');
+      else setFaceUI('Verifikasi gagal 3 kali. Tekan Ambil Ulang.',false,'driver');
+      return;
+    }
     const data=await captureLiveFrame('driverLogin');
+    if(!data){retryFaceAttempt('driver');return;}
     state.loginPhoto.driverLogin=data;
-    const driverVideo=document.getElementById('driverLoginVideo'); if(driverVideo) driverVideo.pause();
+    driverFaceLocked=true;
+    const driverVideo=document.getElementById('driverLoginVideo');if(driverVideo)driverVideo.pause();
     setFaceUI('Wajah terkunci ✓ Verifikasi berhasil',true,'driver');
     await loginDriverAutomatic(autoFaceCandidate,live,dist);
-  }catch(e){setFaceUI(e.message||'Verifikasi gagal.',false,'driver');}
-  finally{autoFaceBusy=false;}
+  }catch(e){
+    if(driverFaceAttempts<3)retryFaceAttempt('driver');else showLoginRefresh('driver');
+    setFaceUI(e.message||'Verifikasi gagal.',false,'driver');
+  }finally{autoFaceBusy=false;}
 }
 
 async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
@@ -2655,7 +2750,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
     const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps};
     stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
-  }catch(error){setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');}
+  }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
   finally{state.loginBusy=false;}
 }
 
@@ -2679,7 +2774,7 @@ function stopAutoFaceLogin(){if(autoFaceTimer){clearInterval(autoFaceTimer);auto
 
 /* ===== AUTO ADMIN / SUPER ADMIN FACE LOGIN ===== */
 async function autoAdminFaceCheck(){
-  if(autoAdminBusy||state.loginBusy||!autoAdminCandidate||!state.camera.adminLogin)return;
+  if(autoAdminBusy||state.loginBusy||!autoAdminCandidate||!state.camera.adminLogin||adminFaceLocked||adminFaceAttempts>=3)return;
   const name=(document.getElementById('loginAdminName')?.value||'').trim();
   const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
   if(!name||!/^[0-9]{6}$/.test(pin))return;
@@ -2688,16 +2783,25 @@ async function autoAdminFaceCheck(){
     const video=document.getElementById('adminLoginVideo');
     const stable=await detectStableFace(video,'admin');
     if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'admin');return;}
-    setFaceUI('Wajah diam. Mengunci gambar...',false,'admin');
+    if(!isFrameClear(video)){
+      setFaceUI('Gambar belum cukup jernih. Tunggu sebentar...',false,'admin');
+      adminStableSince=0;adminStableFrames=0;return;
+    }
+    setFaceUI('Gambar jernih. Verifikasi cepat...',false,'admin');
+    adminFaceAttempts++;
     const live=await getFaceDescriptorFromVideo(video);
     const data=await captureLiveFrame('adminLogin');
-    state.loginPhoto.adminLogin=data;
-    const adminVideo=document.getElementById('adminLoginVideo'); if(adminVideo) adminVideo.pause();
+    if(!data){retryFaceAttempt('admin');return;}
+    adminFaceLocked=true;
+    const adminVideo=document.getElementById('adminLoginVideo');if(adminVideo)adminVideo.pause();
     setFaceUI('Wajah terkunci ✓ Verifikasi...',true,'admin');
     await loginAdminAutomatic(autoAdminCandidate,live,data);
-  }catch(e){const v=document.getElementById('adminLoginVideo');if(v) v.play().catch(()=>{});setFaceUI(e.message||'Verifikasi gagal.',false,'admin');}
-  finally{autoAdminBusy=false;}
+  }catch(e){
+    if(adminFaceAttempts<3)retryFaceAttempt('admin');else showLoginRefresh('admin');
+    setFaceUI(e.message||'Verifikasi gagal.',false,'admin');
+  }finally{autoAdminBusy=false;}
 }
+
 async function loginAdminAutomatic(candidate,liveDescriptor,data){
   if(state.loginBusy)return;
   state.loginBusy=true;
@@ -2707,7 +2811,7 @@ async function loginAdminAutomatic(candidate,liveDescriptor,data){
     state.user={...result.admin,role:String(result.admin.role||'ADMIN').toUpperCase(),loginPhoto:result.loginPhoto||''};
     state.loginToken=null;
     stopAutoAdminFaceLogin();stopCamera('adminLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login '+state.user.role+' berhasil.','success');
-  }catch(error){setFaceUI(error.message||'Login gagal.',false,'admin');setLoginStatus(error.message||'Login gagal.',true,'admin');}
+  }catch(error){const v=document.getElementById('adminLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'admin');setLoginStatus(error.message||'Login gagal.',true,'admin');showLoginRefresh('admin');}
   finally{state.loginBusy=false;}
 }
 async function startAutoAdminFaceLogin(){
