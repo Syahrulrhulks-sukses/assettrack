@@ -923,32 +923,38 @@ tr:hover td{
         Login Driver sekarang <b>otomatis melalui kamera</b>. Hadapkan satu wajah ke kamera; sistem akan mengenali Driver terdaftar dan langsung masuk. Foto selfie login <b>tidak disimpan</b>.
       </div>
 
-      <div class="form-group hidden">
-        <label>Driver ID</label>
+      <div class="form-group">
+        <label>Driver ID <small>(terdeteksi otomatis)</small></label>
         <input
           id="loginDriverId"
           type="text"
-          required
-          autocomplete="username"
-          placeholder="Masukkan Driver ID">
+          readonly
+          autocomplete="off"
+          placeholder="Menunggu wajah…">
       </div>
 
-      <div class="form-group hidden">
-        <label>Nama Driver</label>
+      <div class="form-group">
+        <label>Nama Driver <b>* wajib ditulis</b></label>
         <input
           id="loginDriverName"
+          class="login-name-required"
           type="text"
           required
-          autocomplete="name"
-          placeholder="Masukkan Nama Driver">
+          autocomplete="off"
+          placeholder="Tulis Nama Driver"
+          oninput="onLoginNameInput('driverLogin')">
       </div>
 
       <div class="camera-box">
 
-        <video id="driverLoginVideo" autoplay playsinline></video>
-
+        <div class="camera-stage">
+          <video id="driverLoginVideo" autoplay playsinline muted></video>
+          <div class="face-guide" id="driverFaceGuide">
+            <div class="face-oval"></div>
+            <div class="face-guide-text">Posisikan wajah di dalam oval, tegak dan jangan bergerak</div>
+          </div>
+        </div>
         <canvas id="driverLoginCanvas" class="hidden"></canvas>
-
         <div class="camera-auto-status" id="driverAutoFaceStatus">Mengaktifkan kamera…</div>
 
       </div>
@@ -972,14 +978,15 @@ tr:hover td{
         kamera wajib digunakan untuk verifikasi foto login.
       </div>
 
-      <div class="form-group hidden">
-        <label>Admin ID</label>
+      <div class="form-group">
+        <label>Admin ID <small>(terdeteksi otomatis)</small></label>
         <div class="secret-input">
           <input
             id="loginAdminId"
-            type="password"
-            placeholder="Otomatis"
-            autocomplete="username">
+            type="text"
+            readonly
+            placeholder="Menunggu wajah…"
+            autocomplete="off">
           <button
             type="button"
             class="secret-toggle"
@@ -990,14 +997,16 @@ tr:hover td{
         </div>
       </div>
 
-      <div class="form-group hidden">
-        <label>Nama Admin</label>
+      <div class="form-group">
+        <label>Nama Admin <b>* wajib ditulis</b></label>
         <div class="secret-input">
           <input
             id="loginAdminName"
-            type="password"
-            placeholder="Otomatis"
-            autocomplete="name">
+            class="login-name-required"
+            type="text"
+            placeholder="Tulis Nama Admin / Super Admin"
+            autocomplete="off"
+            oninput="onLoginNameInput('adminLogin')">
           <button
             type="button"
             class="secret-toggle"
@@ -1021,10 +1030,14 @@ tr:hover td{
 
       <div class="camera-box">
 
-        <video id="adminLoginVideo" autoplay playsinline></video>
-
+        <div class="camera-stage">
+          <video id="adminLoginVideo" autoplay playsinline muted></video>
+          <div class="face-guide" id="adminFaceGuide">
+            <div class="face-oval"></div>
+            <div class="face-guide-text">Posisikan wajah di dalam oval, tegak dan jangan bergerak</div>
+          </div>
+        </div>
         <canvas id="adminLoginCanvas" class="hidden"></canvas>
-
         <div class="camera-auto-status" id="adminAutoFaceStatus">Mengaktifkan kamera…</div>
 
       </div>
@@ -2194,6 +2207,11 @@ const state = {
   faceModelsReady:null,
   autoFaceLogin:{driverLogin:false,adminLogin:false},
   autoFaceTimer:{driverLogin:null,adminLogin:null},
+  pendingFaceDescriptor:{driverLogin:null,adminLogin:null},
+  pendingFaceCandidate:{driverLogin:null,adminLogin:null},
+  faceStable:{driverLogin:0,adminLogin:0},
+  lastFaceBox:{driverLogin:null,adminLogin:null},
+  loginGPSWarmup:null,
 
   camera:{
     driverLogin:null,
@@ -2474,98 +2492,193 @@ function setAutoFaceStatus(type,message,error=false){
   if(el){el.textContent=message;el.style.color=error?'#c62828':'#607d8b';}
 }
 
+function setFaceGuide(type,stateName){
+  const id=type==='driverLogin'?'driverFaceGuide':'adminFaceGuide';
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.toggle('ok',stateName==='ok');
+  el.classList.toggle('bad',stateName==='bad');
+}
+
 function stopAutoFaceLogin(type){
   state.autoFaceLogin[type]=false;
   if(state.autoFaceTimer[type]){
     clearTimeout(state.autoFaceTimer[type]);
     state.autoFaceTimer[type]=null;
   }
+  state.pendingFaceDescriptor[type]=null;
+  state.pendingFaceCandidate[type]=null;
+  state.faceStable[type]=0;
+  state.lastFaceBox[type]=null;
+  setFaceGuide(type,'');
 }
 
 async function startAutoFaceLogin(type){
   if(state.user || state.loginBusy) return;
   stopAutoFaceLogin(type);
   state.autoFaceLogin[type]=true;
-  setAutoFaceStatus(type,'Mengaktifkan kamera…');
+  setAutoFaceStatus(type,'Kamera otomatis aktif…');
   try{
-    await startCamera(type,true);
-    setAutoFaceStatus(type,'Kamera aktif — arahkan satu wajah ke kamera…');
+    // Mulai kamera dan model secara paralel agar waktu tunggu minimum.
+    await Promise.all([startCamera(type,true), ensureFaceModels()]);
+    setAutoFaceStatus(type,'Masukkan nama, lalu posisikan wajah di dalam oval…');
+    if(type==='driverLogin') warmupLoginGPS();
     autoDetectFaceLogin(type);
   }catch(error){
-    setAutoFaceStatus(type,'Kamera tidak dapat diakses. Izinkan kamera lalu muat ulang halaman.',true);
+    setAutoFaceStatus(type,'Kamera/verifikasi belum siap. Izinkan kamera lalu muat ulang.',true);
   }
+}
+
+function faceBoxIsReady(detection,video){
+  const box=detection?.box;
+  if(!box || !video.videoWidth || !video.videoHeight) return {ok:false,reason:'Wajah belum terbaca.'};
+  const cx=(box.x+box.width/2)/video.videoWidth;
+  const cy=(box.y+box.height/2)/video.videoHeight;
+  const ratio=box.width/video.videoWidth;
+  if(cx<0.38 || cx>0.62 || cy<0.38 || cy>0.64) return {ok:false,reason:'Geser wajah ke tengah oval.'};
+  if(ratio<0.22) return {ok:false,reason:'Dekatkan wajah sedikit.'};
+  if(ratio>0.62) return {ok:false,reason:'Jauhkan wajah sedikit.'};
+  return {ok:true};
+}
+
+function faceMovementIsStable(box,type){
+  const last=state.lastFaceBox[type];
+  state.lastFaceBox[type]=box;
+  if(!last) return false;
+  const dx=Math.abs(box.x-last.x),dy=Math.abs(box.y-last.y);
+  const dw=Math.abs(box.width-last.width);
+  return dx<10 && dy<10 && dw<10;
 }
 
 async function autoDetectFaceLogin(type){
   if(!state.autoFaceLogin[type] || state.user || state.loginBusy) return;
   const video=document.getElementById(type==='adminLogin'?'adminLoginVideo':'driverLoginVideo');
   if(!video || !video.srcObject || !video.videoWidth){
-    state.autoFaceTimer[type]=setTimeout(()=>autoDetectFaceLogin(type),250);
+    state.autoFaceTimer[type]=setTimeout(()=>autoDetectFaceLogin(type),120);
     return;
   }
   try{
     await ensureFaceModels();
+    // Deteksi ringan dulu. Descriptor hanya dihitung setelah wajah stabil di posisi yang benar.
     const detection=await faceapi.detectSingleFace(
       video,
-      new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.5})
-    ).withFaceLandmarks().withFaceDescriptor();
-    if(detection){
-      setAutoFaceStatus(type,'Wajah terdeteksi — memverifikasi…');
-      state.autoFaceLogin[type]=false;
-      await performFaceAutoLogin(type,Array.from(detection.descriptor));
-      return;
+      new faceapi.TinyFaceDetectorOptions({inputSize:160,scoreThreshold:0.55})
+    );
+    if(!detection){
+      state.faceStable[type]=0; state.lastFaceBox[type]=null; setFaceGuide(type,'bad');
+      setAutoFaceStatus(type,'Arahkan SATU wajah tepat ke dalam oval…');
+    }else{
+      const fit=faceBoxIsReady(detection,video);
+      const stable=fit.ok && faceMovementIsStable(detection.box,type);
+      if(!fit.ok){
+        state.faceStable[type]=0; setFaceGuide(type,'bad'); setAutoFaceStatus(type,fit.reason+' Jangan bergerak.');
+      }else if(stable){
+        state.faceStable[type]++;
+        setFaceGuide(type,'ok');
+        setAutoFaceStatus(type,'Wajah pas — jangan bergerak, verifikasi cepat…');
+        if(state.faceStable[type]>=2){
+          const full=await faceapi.detectSingleFace(
+            video,
+            new faceapi.TinyFaceDetectorOptions({inputSize:160,scoreThreshold:0.55})
+          ).withFaceLandmarks().withFaceDescriptor();
+          if(full){
+            state.autoFaceLogin[type]=false;
+            await performFaceAutoLogin(type,Array.from(full.descriptor));
+            return;
+          }
+          state.faceStable[type]=0;
+        }
+      }else{
+        state.faceStable[type]=1; setFaceGuide(type,'ok'); setAutoFaceStatus(type,'Tahan wajah tetap di dalam oval…');
+      }
     }
   }catch(error){
     console.warn('Auto face login:',error.message);
   }
-  state.autoFaceTimer[type]=setTimeout(()=>autoDetectFaceLogin(type),350);
+  state.autoFaceTimer[type]=setTimeout(()=>autoDetectFaceLogin(type),120);
+}
+
+function warmupLoginGPS(){
+  if(state.loginGPSWarmup || !navigator.geolocation) return;
+  state.loginGPSWarmup=new Promise(resolve=>{
+    navigator.geolocation.getCurrentPosition(
+      p=>resolve({latitude:Number(p.coords.latitude),longitude:Number(p.coords.longitude),accuracy:Number(p.coords.accuracy||0)}),
+      ()=>resolve(null),
+      {enableHighAccuracy:false,timeout:900,maximumAge:60000}
+    );
+  }).then(v=>{if(document.getElementById('loginPage')?.style.display!=='none') state.loginGPS=v;return v;}).finally(()=>{state.loginGPSWarmup=null;});
+}
+
+function getLoginName(type){
+  return String(document.getElementById(type==='driverLogin'?'loginDriverName':'loginAdminName')?.value || '').trim();
+}
+
+function setRecognizedLoginId(type,id){
+  const el=document.getElementById(type==='driverLogin'?'loginDriverId':'loginAdminId');
+  if(el) el.value=String(id||'');
+}
+
+function onLoginNameInput(type){
+  const name=getLoginName(type);
+  warmupLoginGPS();
+  const pending=state.pendingFaceDescriptor[type];
+  if(pending && name.length>=2 && !state.loginBusy){
+    performFaceAutoLogin(type,pending);
+  }
 }
 
 async function performFaceAutoLogin(type,liveDescriptor){
   if(state.loginBusy || state.user)return;
+  const typedName=getLoginName(type);
+  if(typedName.length<2){
+    state.pendingFaceDescriptor[type]=liveDescriptor;
+    setAutoFaceStatus(type,'Wajah terdeteksi. Nama wajib ditulis terlebih dahulu.');
+    setLoginStatus('Tulis Nama sesuai data terdaftar agar login dilanjutkan.');
+    setFaceGuide(type,'ok');
+    return;
+  }
   state.loginBusy=true;
+  state.pendingFaceDescriptor[type]=liveDescriptor;
   try{
     state.user=null;
     state.loginPhoto={driverLogin:null,adminLogin:null};
-  stopAutoFaceLogin('driverLogin');
-  stopAutoFaceLogin('adminLogin');
+    stopAutoFaceLogin(type);
     clearLoginHistory();
+    // Nama wajib ditulis; ID dikenali otomatis oleh server dari descriptor wajah.
+    setLoginStatus('Verifikasi wajah + nama…');
+    const payload={
+      action:'faceLogin',
+      role:type==='driverLogin'?'DRIVER':'ADMIN',
+      faceDescriptor:liveDescriptor,
+      namaDriver:type==='driverLogin'?typedName:undefined,
+      namaAdmin:type==='adminLogin'?typedName:undefined
+    };
     if(type==='driverLogin'){
-      setLoginStatus('Memverifikasi Driver…');
-      const gps=await requestLoginLocation();
-      const result=await apiPost({
-        action:'faceLogin',
-        role:'DRIVER',
-        faceDescriptor:liveDescriptor,
-        latitude:gps.latitude,
-        longitude:gps.longitude,
-        gpsAccuracy:gps.accuracy
-      });
-      state.user={...result.user,role:'DRIVER',driverId:result.user.id,id:result.user.id,name:result.user.name,namaDriver:result.user.name,loginGPS:gps,loginPhoto:result.user.facePhoto||''};
-      stopCamera('driverLogin');
-      await enterApplication();
-      toast('Login Driver berhasil sebagai '+state.user.name+'.','success');
-    }else{
-      setLoginStatus('Memverifikasi Admin / Super Admin…');
-      const result=await apiPost({
-        action:'faceLogin',
-        role:'ADMIN',
-        faceDescriptor:liveDescriptor
-      });
-      state.user={...result.user,role:String(result.user.role||'ADMIN').toUpperCase(),loginPhoto:result.user.facePhoto||''};
-      stopCamera('adminLogin');
-      await enterApplication();
-      toast('Login '+state.user.role+' berhasil.','success');
+      const gps=state.loginGPS || await requestLoginLocation();
+      if(!gps) throw new Error('Lokasi GPS diperlukan untuk login Driver.');
+      payload.latitude=gps.latitude; payload.longitude=gps.longitude; payload.gpsAccuracy=gps.accuracy;
     }
+    const result=await apiPost(payload);
+    setRecognizedLoginId(type,result.user.id || result.user.adminId || '');
+    state.user={...result.user,role:type==='driverLogin'?'DRIVER':String(result.user.role||'ADMIN').toUpperCase()};
+    if(type==='driverLogin'){
+      state.user.driverId=result.user.id; state.user.namaDriver=result.user.name; state.user.name=result.user.name; state.user.loginGPS=payload.gpsAccuracy!==undefined?{latitude:payload.latitude,longitude:payload.longitude,accuracy:payload.gpsAccuracy}:null;
+    }
+    stopCamera(type);
+    clearLoginHistory();
+    await enterApplication();
+    toast('Login '+state.user.role+' berhasil sebagai '+(state.user.name||state.user.namaAdmin||state.user.namaDriver)+'.','success');
   }catch(error){
     state.user=null;
     clearLoginHistory();
-    setLoginStatus(error.message,true);
-    setAutoFaceStatus(type,'Wajah belum cocok. Arahkan wajah yang terdaftar ke kamera…',true);
-    toast(error.message,'error');
     state.loginBusy=false;
+    state.pendingFaceDescriptor[type]=null;
+    setLoginStatus(error.message,true);
+    setAutoFaceStatus(type,error.message+' Arahkan wajah kembali ke oval…',true);
+    setFaceGuide(type,'bad');
     state.autoFaceLogin[type]=true;
-    state.autoFaceTimer[type]=setTimeout(()=>autoDetectFaceLogin(type),700);
+    state.faceStable[type]=0;
+    state.autoFaceTimer[type]=setTimeout(()=>autoDetectFaceLogin(type),250);
     return;
   }
   state.loginBusy=false;
@@ -6862,6 +6975,9 @@ document.addEventListener(
     document.getElementById('adminTab')?.classList.remove('active');
     document.getElementById('driverLoginPanel')?.classList.remove('hidden');
     document.getElementById('adminLoginPanel')?.classList.add('hidden');
+
+    // Kamera Driver langsung aktif saat halaman login dibuka.
+    setTimeout(()=>startAutoFaceLogin('driverLogin'),80);
 
     buildInspectionOptions();
 
