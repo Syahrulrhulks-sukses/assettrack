@@ -3238,62 +3238,34 @@ function showPage(page){
    REFRESH ALL
 ========================================================= */
 
-async function refreshAll(){
-  if(!state.user || !state.user.role) return;
-
-  try{
-    const role=String(state.user.role).toUpperCase();
-    const isAdmin=['ADMIN','SUPER_ADMIN'].includes(role);
-
-    // Satu request bootstrap menggantikan 3-7 request terpisah.
-    // Ini mempercepat proses setelah login tanpa mengubah struktur database.
-    const bootstrap=await apiGet('bootstrap',{role:role});
-
-    state.assets=bootstrap.assets || [];
-    state.drivers=bootstrap.drivers || [];
-    state.inspections=bootstrap.inspections || [];
-    populateDriverLogin();
-
-    if(isAdmin){
-      state.admins=bootstrap.admins || [];
-      state.km=bootstrap.km || [];
-      state.corrections=bootstrap.corrections || [];
-      state.audit=bootstrap.audit || [];
-    }else{
-      state.admins=[];
-      state.km=[];
-      state.corrections=[];
-      state.audit=[];
-    }
-
-    updateDashboard();
-    populateAssetSelects();
-    populateDriverSelect();
-    renderAssets();
-    renderDrivers();
-    renderInspections();
-
-    if(isAdmin){
-      renderKM();
-      renderCorrections();
-      renderAudit();
-      renderAdmins();
-    }else{
-      const adminBody=document.getElementById('adminBody');
-      if(adminBody) adminBody.innerHTML='';
-    }
-
-    document.getElementById('systemStatus').innerHTML=
-      '<span class="badge green">ONLINE</span> '+
-      'Aset Aqiqah Plus berhasil terhubung dengan Google Apps Script.';
-
-  }catch(error){
-    document.getElementById('systemStatus').innerHTML=
-      '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
-    toast('Gagal mengambil data: '+error.message,'error');
-  }
+function applyBootstrapData(bootstrap){
+  const role=String(state.user?.role||'').toUpperCase();
+  const isAdmin=['ADMIN','SUPER_ADMIN'].includes(role);
+  state.assets=bootstrap.assets||[]; state.drivers=bootstrap.drivers||[]; state.inspections=bootstrap.inspections||[];
+  state.admins=isAdmin?(bootstrap.admins||[]):[]; state.km=isAdmin?(bootstrap.km||[]):[];
+  state.corrections=bootstrap.corrections||[]; state.audit=isAdmin?(bootstrap.audit||[]):[];
+  populateDriverLogin(); updateDashboard(); populateAssetSelects(); populateDriverSelect();
+  renderAssets(); renderDrivers(); renderInspections();
+  if(isAdmin){renderKM();renderCorrections();renderAudit();renderAdmins();}
 }
-
+function bootstrapCacheKey(role){return 'AQP_BOOTSTRAP_V2_'+String(role||'').toUpperCase();}
+function readBootstrapCache(role){try{const x=JSON.parse(localStorage.getItem(bootstrapCacheKey(role))||'null');return x&&x.data?x.data:null;}catch(_){return null;}}
+function writeBootstrapCache(role,data){try{localStorage.setItem(bootstrapCacheKey(role),JSON.stringify({time:Date.now(),data:data}));}catch(_){}}
+async function refreshAll(){
+  if(!state.user||!state.user.role)return;
+  const role=String(state.user.role).toUpperCase();
+  const cached=readBootstrapCache(role);
+  if(cached){applyBootstrapData(cached); const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Data siap.';}
+  else {const st=document.getElementById('systemStatus'); if(st)st.textContent='Memuat data...';}
+  apiGet('bootstrap',{role:role}).then(bootstrap=>{
+    writeBootstrapCache(role,bootstrap);
+    if(state.user&&String(state.user.role).toUpperCase()===role)applyBootstrapData(bootstrap);
+    const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Aset Aqiqah Plus siap digunakan.';
+  }).catch(error=>{
+    const st=document.getElementById('systemStatus'); if(st&&!cached)st.innerHTML='<span class="badge red">ERROR</span> '+escapeHtml(error.message);
+    console.warn('Refresh background gagal:',error.message);
+  });
+}
 
 /* =========================================================
    DASHBOARD
