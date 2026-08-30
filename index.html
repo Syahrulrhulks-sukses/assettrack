@@ -8,8 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1"></script>
 
 <style>
 *{
@@ -296,34 +294,6 @@ textarea{
 .login-footer{margin-top:12px;text-align:center;font-size:11px;color:#78909c;}
 #loginPage{background:#fff;padding:0 12px;align-items:flex-start;}
 .login-card{margin:12px auto;}
-
-/* ===== DRIVER INSPECTION LOCK ===== */
-#page-inspection.driver-locked #inspectionAsset,
-#page-inspection.driver-locked #latitude,
-#page-inspection.driver-locked #longitude,
-#page-inspection.driver-locked #gpsAccuracy,
-#page-inspection.driver-locked #gpsLabel{
-  background:#f2f5f8 !important;
-  color:#123B6D !important;
-  font-weight:700;
-  pointer-events:none;
-}
-#page-inspection.driver-locked .driver-location-lock-note{display:block;}
-.driver-location-lock-note{display:none;margin:-4px 0 12px;color:#123B6D;font-size:12px;font-weight:700;}
-
-/* ===== MOBILE DASHBOARD COMPACT ===== */
-@media(max-width:600px){
-  .main{padding:10px;}
-  .page-title{margin-bottom:10px;}
-  .page-title h2{font-size:24px;}
-  .cards{grid-template-columns:1fr 1fr !important;gap:9px;margin-bottom:10px;}
-  .stat-card{padding:12px;border-radius:13px;}
-  .stat-card .label{font-size:12px;}
-  .stat-card .number{font-size:24px;margin-top:3px;}
-  .panel{padding:13px;margin-bottom:10px;border-radius:13px;}
-  #page-dashboard .panel{margin-bottom:10px;}
-}
-
 @media(max-width:480px){.login-card{margin:0 auto;min-height:100vh;border-left:0;border-right:0;border-radius:0;padding:14px;}.login-brand-white{margin:-14px -14px 14px;}.face-login-box{max-height:none;}}
 
 /* =========================
@@ -812,12 +782,6 @@ tr:hover td{
   font-weight:bold;
 }
 
-/* ===== SECURITY / MEDIA VALIDATION ===== */
-.media-validation-note{margin-top:8px;padding:8px 10px;border-radius:9px;background:#fff8e1;color:#6d4c41;font-size:11px;line-height:1.4;}
-.capture-btn{width:100%;margin-top:8px;border:0;border-radius:9px;padding:10px;background:#e3f2fd;color:#1565c0;font-weight:800;}
-.photo-validation-ok{color:#2e7d32;font-weight:800;font-size:11px;margin-top:6px;}
-.photo-validation-error{color:#c62828;font-weight:800;font-size:11px;margin-top:6px;}
-.liveness-challenge{margin:8px 0;padding:10px 12px;border-radius:10px;background:#e8eef6;color:#123B6D;font-size:12px;font-weight:800;text-align:center;}
 /* =========================
    MEDIA
 ========================= */
@@ -844,20 +808,8 @@ tr:hover td{
 .media-item input{
   padding:8px;
 }
+.photo-note-box{display:grid;gap:7px;margin-top:8px}.photo-note-box select,.photo-note-box textarea{font-size:13px}.photo-note-help{display:block;margin-top:5px;color:#78909c;font-size:11px}.photo-media-item{background:#fff}.photo-media-item input[type=file]{background:#fafafa}
 
-/* ===== FOTO PEMERIKSAAN + CATATAN ===== */
-.photo-media-item{border:1px solid #eceff1;border-radius:12px;padding:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.03);}
-.photo-media-item .media-title{font-weight:800;font-size:13px;margin-bottom:8px;color:#455a64;}
-.photo-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px;}
-.photo-preview-card{border:1px solid #eceff1;border-radius:10px;padding:8px;background:#fafafa;}
-.photo-preview-card img{width:100%;height:150px;object-fit:cover;border-radius:8px;background:#eee;display:block;}
-.photo-meta{display:grid;gap:7px;margin-top:8px;}
-.photo-meta select,.photo-meta input{width:100%;}
-.photo-km-value{font-weight:700;}
-.daily-inspection-banner{padding:12px 14px;border-radius:12px;margin-bottom:14px;background:#fff4d6;border:1px solid #f2d28a;color:#6b4f00;font-size:13px;line-height:1.5;}
-.daily-inspection-banner.hidden{display:none!important;}
-.daily-locked-note{padding:9px 12px;border-radius:9px;background:#f5f7f8;color:#607d8b;font-size:12px;margin-top:6px;}
-@media(max-width:600px){.photo-preview-grid{grid-template-columns:1fr;}.photo-preview-card img{height:180px;}}
 
 /* =========================
    MODAL
@@ -985,7 +937,7 @@ tr:hover td{
 
 @media(max-width:480px){
   .cards{
-    grid-template-columns:1fr 1fr !important;
+    grid-template-columns:1fr;
   }
 
   .login-card{
@@ -1211,6 +1163,7 @@ tr:hover td{
 @media(max-width:480px){#loginPage{align-items:flex-start}.login-card{max-width:none;padding:0 16px}.login-brand-white{margin:8px -16px 16px;min-height:100px}.login-brand-white img{max-width:240px;max-height:82px}.face-login-box{aspect-ratio:3/4}}
 
 
+.qr-login-lock{margin:10px 0;padding:11px 12px;border:1px solid #f1c4d8;border-radius:12px;background:#fff5f8;color:#8a1450;font-size:13px;display:flex;flex-direction:column;gap:3px}.qr-login-lock span{color:#546e7a;font-weight:600}.qr-login-lock.ok{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20}.qr-login-lock.ok span{color:#2e7d32}.driver-photo-proof{margin-top:8px;padding:10px 12px;border-radius:10px;background:#eef6ff;color:#174a7c;font-size:12px;font-weight:700}.correction-driver-card{margin-bottom:14px;padding:14px;border:1px solid #f0c6da;border-radius:14px;background:#fff7fa}.correction-driver-card h4{margin:0 0 8px;color:#a40067}.correction-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.correction-form-grid .full{grid-column:1/-1}@media(max-width:600px){.correction-form-grid{grid-template-columns:1fr}}
 .menu-display-settings{display:grid;gap:8px;}
 .menu-display-row{display:grid;grid-template-columns:minmax(150px,1fr) repeat(3,80px);gap:8px;align-items:center;padding:9px 10px;border:1px solid #eee;border-radius:10px;background:#fff;}
 .menu-display-head{font-weight:800;background:#fde7f3;color:#7a0058;}
@@ -1219,66 +1172,6 @@ tr:hover td{
 
 
 .login-refresh-btn{display:block;width:100%;margin:10px 0 0;padding:12px 16px;border:2px solid #c90068;border-radius:14px;background:#fff;color:#c90068;font-weight:700;font-size:15px;cursor:pointer}.login-refresh-btn.hidden{display:none}.login-refresh-btn:active{transform:scale(.99)}
-
-/* ===== WATERMARK LOGO ASET AQIQAH PLUS ===== */
-.app-watermark{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.055;background-repeat:repeat;background-position:center;background-size:115px auto;transform:rotate(-8deg);filter:grayscale(.15);}
-#appPage>.topbar,
-#appPage>.main{position:relative;z-index:1;}
-#appPage>.sidebar{position:fixed;z-index:40;}
-#adminPinPanel{border:1px solid #f3d3e2;}
-
-/* ===== FINAL FIX: SIDEBAR & CONTENT MUST STAY BESIDE EACH OTHER ===== */
-#appPage > .topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-}
-
-#appPage > .sidebar{
-  position:fixed !important;
-  top:64px;
-  left:0;
-  bottom:0;
-  width:245px;
-  z-index:40 !important;
-  overflow-y:auto;
-}
-
-#appPage > .main{
-  position:relative;
-  z-index:1;
-  margin-left:245px;
-  min-width:0;
-}
-
-/* HP: saat menu dibuka, konten tetap berada DI SAMPING menu,
-   bukan turun ke bawah menu. */
-@media(max-width:750px){
-  #appPage > .sidebar{
-    width:min(300px, 72vw);
-    transform:translateX(-100%);
-  }
-
-  #appPage > .sidebar.open{
-    transform:translateX(0);
-  }
-
-  #appPage > .main{
-    margin-left:0;
-    padding:15px;
-  }
-
-  #appPage > .sidebar.open ~ .main{
-    margin-left:min(300px, 72vw);
-  }
-}
-
-/* Cegah judul/halaman terpilih tertarik ke bawah sidebar */
-#appPage > .main .page{
-  position:relative;
-  z-index:1;
-}
-
 </style>
 </head>
 
@@ -1312,19 +1205,20 @@ tr:hover td{
       <input id="loginDriverId" type="hidden">
       <div id="autoDriverId" class="auto-id"></div>
 
-      <div class="login-step-label face-step-label"><span class="step-icon">▣</span><span>2. Posisikan wajah Anda di dalam bingkai</span></div>
-      <div class="login-help">Kamera aktif otomatis. Jangan bergerak sampai bingkai berubah biru.</div>
+      <div id="driverQrLockBox" class="qr-login-lock">🔒 <strong>QR Kendaraan wajib dipindai</strong><span id="driverQrVehicleText">Belum ada kendaraan yang dikunci.</span></div>
+      <div class="login-step-label face-step-label"><span class="step-icon">▣</span><span>2. Foto login di depan kendaraan</span></div>
+      <div class="login-help">Pastikan kendaraan yang baru dipindai terlihat jelas di belakang Anda. Kamera aktif otomatis.</div>
 
       <div class="face-login-box" id="driverFaceBox">
         <video id="driverLoginVideo" autoplay playsinline muted></video>
         <canvas id="driverLoginCanvas" class="hidden"></canvas>
         <div id="driverFaceGuide" class="face-guide"></div>
-        <div class="face-bottom-hint" id="driverFaceHint">Posisikan wajah Anda<br>di dalam garis</div>
+        <div class="face-bottom-hint" id="driverFaceHint">Posisikan wajah Anda<br>di dalam garis<br><small>🚗 Kendaraan terlihat di belakang</small></div>
         <div id="driverFaceStatus" class="face-status">Menunggu nama...</div>
         <div id="driverFaceCheck" class="face-check hidden">✓</div>
       </div>
       <div id="loginStatus" class="login-status"></div>
-      <button type="button" id="driverLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('driver')">📸 Ambil Ulang Foto / Refresh Kamera</button>
+      <button type="button" id="driverLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('driver')">🔄 Refresh Foto / Kamera</button>
       <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
       <button type="button" class="secondary-btn register-driver-btn" onclick="openDriverSelfRegistration()">📝 Daftar Driver Baru</button>
     </div>
@@ -1353,7 +1247,7 @@ tr:hover td{
         <div id="adminFaceCheck" class="face-check hidden">✓</div>
       </div>
       <div id="adminLoginStatus" class="login-status"></div>
-      <button type="button" id="adminLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('admin')">📸 Ambil Ulang Foto / Refresh Kamera</button>
+      <button type="button" id="adminLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('admin')">🔄 Refresh Foto / Kamera</button>
       <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
     </div>
 
@@ -1367,8 +1261,6 @@ tr:hover td{
 ========================================================= -->
 
 <section id="appPage">
-
-  <div id="appWatermark" class="app-watermark" aria-hidden="true"></div>
 
   <header class="topbar">
 
@@ -1697,8 +1589,6 @@ tr:hover td{
 
       <div class="panel">
 
-        <div id="dailyInspectionBanner" class="daily-inspection-banner hidden"></div>
-
         <form id="inspectionForm">
 
           <div class="form-grid">
@@ -1766,7 +1656,6 @@ tr:hover td{
               <label>Lokasi GPS</label>
               <input id="gpsLabel" readonly>
             </div>
-            <div class="driver-location-lock-note">🔒 Lokasi terkunci dari proses Login Driver dan tidak dapat diubah.</div>
 
             <div class="full-width">
               <button
@@ -1934,12 +1823,6 @@ tr:hover td{
 
 
             <div class="section-title">
-              🧾 Detail 29 Item Pemeriksaan
-            </div>
-
-            <div id="inspectionDetailFields" class="media-grid full-width"></div>
-
-            <div class="section-title">
               📸 Foto Pemeriksaan
             </div>
 
@@ -1986,7 +1869,6 @@ tr:hover td{
             </button>
 
             <button
-              id="inspectionSubmitBtn"
               type="submit"
               class="primary-btn"
               style="width:auto">
@@ -2104,7 +1986,22 @@ tr:hover td{
         <p>Pengajuan dan approval koreksi pemeriksaan</p>
       </div>
 
-      <div class="panel">
+      <div id="driverCorrectionPanel" class="panel correction-driver-card hidden">
+          <h4>✏️ Ajukan Koreksi</h4>
+          <div class="info-box">Data pemeriksaan dan KM yang sudah tersimpan tidak dapat diubah langsung oleh Driver. Ajukan koreksi dan tunggu persetujuan Admin/Super Admin.</div>
+          <form id="driverCorrectionForm">
+            <div class="correction-form-grid">
+              <div class="form-group full"><label>Pemeriksaan</label><select id="correctionInspection" required></select></div>
+              <div class="form-group"><label>Kolom yang dikoreksi</label><select id="correctionColumn" required></select></div>
+              <div class="form-group"><label>Nilai Lama</label><input id="correctionOld" readonly></div>
+              <div class="form-group"><label>Nilai Baru</label><input id="correctionNew" required></div>
+              <div class="form-group full"><label>Alasan Koreksi *</label><textarea id="correctionReason" required placeholder="Jelaskan alasan perubahan..."></textarea></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="primary-btn" style="width:auto">📨 Ajukan Koreksi</button></div>
+          </form>
+        </div>
+
+        <div class="panel">
 
         <div class="table-wrap">
 
@@ -2284,10 +2181,10 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pengaturan</h2>
-        <p id="settingsDescription">Pengaturan Aset Aqiqah Plus</p>
+        <p>Pengaturan Super Admin Aset Aqiqah Plus</p>
       </div>
 
-      <div class="panel" id="superAdminPinPanel">
+      <div class="panel">
 
         <h3>Ganti PIN Super Admin</h3>
 
@@ -2322,19 +2219,9 @@ tr:hover td{
 
       </div>
 
-      <div class="panel" id="adminPinPanel" style="display:none">
-        <h3>Ganti PIN Admin</h3>
-        <p style="color:#607d8b;font-size:13px;margin-top:0">Admin dapat mengganti PIN miliknya sendiri. Pengaturan ini tidak dapat digunakan untuk mengubah PIN Super Admin.</p>
-        <div class="form-grid">
-          <div class="form-group"><label>PIN Lama</label><input id="oldAdminPin" type="password" maxlength="6" inputmode="numeric" autocomplete="current-password"></div>
-          <div class="form-group"><label>PIN Baru</label><input id="newAdminPin" type="password" maxlength="6" inputmode="numeric" autocomplete="new-password"></div>
-        </div>
-        <button class="primary-btn" style="width:auto" onclick="changeAdminPin()">🔐 Ganti PIN Admin</button>
-      </div>
-
       <div class="panel">
         <h3>Pengaturan Tampilan Menu</h3>
-        <p id="menuSettingsDescription" style="color:#607d8b;font-size:13px">Super Admin dapat menentukan menu yang terlihat untuk Driver, Admin, dan Super Admin. Admin hanya dapat menentukan menu yang terlihat untuk Driver.</p>
+        <p style="color:#607d8b;font-size:13px">Super Admin dapat menentukan menu apa yang terlihat untuk Driver, Admin, dan Super Admin. Pengaturan disimpan di Script Properties, bukan membuat sheet baru.</p>
         <div id="menuDisplaySettings" class="menu-display-settings">Memuat pengaturan tampilan...</div>
         <div class="form-actions" style="margin-top:12px">
           <button type="button" class="secondary-btn" onclick="loadMenuDisplaySettings()">↻ Muat</button>
@@ -2440,15 +2327,9 @@ const state = {
   audit:[],
 
   selectedAsset:null,
-  qrLockGPS:null,
-  qrLockTime:0,
-  inspectionLockedAssetCode:'',
-  inspectionGPSLocked:false,
-  dailyInspectionId:'',
-  dailyInspectionMode:false,
-  dailyHandoverMode:false,
-  previousInspectionId:'',
-  pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim()
+  pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim(),
+  qrAssetLocked:false,
+  qrAsset:null
 
 };
 
@@ -2494,37 +2375,6 @@ async function apiGet(action,params={}){
   }
 
   return data;
-}
-
-
-/* ===== QR DRIVER LOCK: lokasi saat QR dibuka menjadi titik kendaraan ===== */
-function haversineMeters(a,b){
-  if(!a||!b)return Infinity;
-  const R=6371000, p1=Number(a.latitude)*Math.PI/180, p2=Number(b.latitude)*Math.PI/180;
-  const dp=(Number(b.latitude)-Number(a.latitude))*Math.PI/180;
-  const dl=(Number(b.longitude)-Number(a.longitude))*Math.PI/180;
-  const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
-  return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));
-}
-function lockQrLocation(){
-  if(!state.pendingAssetCode || !navigator.geolocation)return Promise.resolve(null);
-  return new Promise((resolve,reject)=>{
-    navigator.geolocation.getCurrentPosition(pos=>{
-      const c=pos.coords;
-      state.qrLockGPS={latitude:Number(c.latitude),longitude:Number(c.longitude),accuracy:Number(c.accuracy||0)};
-      state.qrLockTime=Date.now();
-      sessionStorage.setItem('AQP_QR_LOCK_'+state.pendingAssetCode,JSON.stringify({gps:state.qrLockGPS,time:state.qrLockTime}));
-      resolve(state.qrLockGPS);
-    },reject,{enableHighAccuracy:true,timeout:3500,maximumAge:0});
-  });
-}
-function restoreQrLocationLock(){
-  if(!state.pendingAssetCode)return null;
-  try{
-    const x=JSON.parse(sessionStorage.getItem('AQP_QR_LOCK_'+state.pendingAssetCode)||'null');
-    if(x&&x.gps&&Date.now()-Number(x.time||0)<10*60*1000){state.qrLockGPS=x.gps;state.qrLockTime=Number(x.time);return x.gps;}
-  }catch(_){ }
-  return null;
 }
 
 
@@ -2685,10 +2535,7 @@ function normalizeStatus(value){return String(value ?? '').replace(/\u00a0/g,' '
 function isDriverActive(value){return ['aktif','active','1','true','ya'].includes(normalizeStatus(value));}
 
 const FACE_MODEL_URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-const FACE_MATCH_THRESHOLD=0.55;
-const FAST_FACE_INPUT_SIZE=160;
-const FAST_FACE_SCORE=0.50;
-const FAST_FACE_INTERVAL=80;
+const FACE_MATCH_THRESHOLD=0.52;
 
 async function ensureFaceModels(){
   if(state.faceModelsReady) return state.faceModelsReady;
@@ -2703,8 +2550,6 @@ async function ensureFaceModels(){
   try{await state.faceModelsReady;return true;}catch(e){state.faceModelsReady=null;throw e;}
 }
 function preloadFaceModels(){if(typeof faceapi!=='undefined') ensureFaceModels().catch(()=>{});}
-// Mulai memuat model sejak halaman login dibuka agar tidak menunggu saat wajah sudah di depan kamera.
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',preloadFaceModels,{once:true}); else setTimeout(preloadFaceModels,0);
 function faceDistance(a,b){
   let aa=a,bb=b;
   if(typeof aa==='string'){try{aa=JSON.parse(aa);}catch(_){aa=[];}}
@@ -2732,15 +2577,9 @@ function showLoginRefresh(role){
   const btn=document.getElementById(p+'LoginRefreshBtn');
   if(btn) btn.classList.remove('hidden');
 }
-function hideLoginRefresh(role){
-  const p=role==='admin'?'admin':'driver';
-  const btn=document.getElementById(p+'LoginRefreshBtn');
-  if(btn) btn.classList.add('hidden');
-}
 
 async function refreshLoginCamera(role){
   const p=role==='admin'?'admin':'driver';
-  if(role==='admin'){adminFaceAttempts=0;adminFaceLocked=false;}else{driverFaceAttempts=0;driverFaceLocked=false;}
   const btn=document.getElementById(p+'LoginRefreshBtn');
   if(btn){btn.classList.add('hidden');btn.disabled=true;}
   if(role==='admin'){
@@ -2766,17 +2605,27 @@ async function refreshLoginCamera(role){
 
 let autoFaceTimer=null,autoFaceBusy=false,autoFaceCandidate=null;
 let stableSince=0,stableBox=null,stableFrames=0;
-let driverFaceAttempts=0,driverFaceLocked=false;
 let autoAdminTimer=null,autoAdminBusy=false,autoAdminCandidate=null;
 let adminStableSince=0,adminStableBox=null,adminStableFrames=0;
-let adminFaceAttempts=0,adminFaceLocked=false;
+
+function updateDriverQrLockUI(){
+  const box=document.getElementById('driverQrLockBox');
+  const text=document.getElementById('driverQrVehicleText');
+  if(!box||!text)return;
+  const code=String(state.pendingAssetCode||'').trim();
+  if(!code){box.classList.remove('ok');text.textContent='Belum ada kendaraan yang dikunci. Scan QR kendaraan terlebih dahulu.';return;}
+  const asset=(state.assets||[]).find(a=>String(a.code||'').toUpperCase()===code.toUpperCase());
+  box.classList.add('ok');
+  text.textContent=asset ? `${asset.code} — ${asset.name||asset.kendaraan||''}${asset.plate?' — '+asset.plate:''}` : 'Kode kendaraan: '+code;
+}
 
 function onDriverNameInput(){
   const name=(document.getElementById('loginDriverName')?.value||'').trim();
   const idEl=document.getElementById('loginDriverId'),badge=document.getElementById('autoDriverId');
-  autoFaceCandidate=null;stableSince=0;stableBox=null;stableFrames=0;driverFaceAttempts=0;driverFaceLocked=false;resetLiveness('driver');hideLoginRefresh('driver');
+  autoFaceCandidate=null;stableSince=0;stableBox=null;stableFrames=0;
   if(idEl) idEl.value=''; if(badge){badge.textContent='';badge.classList.remove('show');}
   if(!name){setFaceUI('Menunggu nama...',false,'driver');return;}
+  if(!state.pendingAssetCode){setFaceUI('Scan QR kendaraan terlebih dahulu.',false,'driver');return;}
   const exact=state.drivers.find(d=>driverNameOf(d).trim().toLowerCase()===name.toLowerCase() && driverIsActive(d));
   if(!exact){setFaceUI('Nama Driver belum ditemukan.',false,'driver');return;}
   autoFaceCandidate=exact;
@@ -2788,7 +2637,7 @@ function onDriverNameInput(){
 function onAdminNameInput(){
   const name=(document.getElementById('loginAdminName')?.value||'').trim();
   const idEl=document.getElementById('loginAdminId'),badge=document.getElementById('autoAdminId');
-  autoAdminCandidate=null;adminStableSince=0;adminStableBox=null;adminStableFrames=0;adminFaceAttempts=0;adminFaceLocked=false;resetLiveness('admin');hideLoginRefresh('admin');
+  autoAdminCandidate=null;adminStableSince=0;adminStableBox=null;adminStableFrames=0;
   if(idEl) idEl.value='';if(badge){badge.textContent='';badge.classList.remove('show');}
   if(!name){setFaceUI('Menunggu nama...',false,'admin');return;}
   const exact=(state.admins||[]).find(a=>String(a.name||a.namaAdmin||'').trim().toLowerCase()===name.toLowerCase() && isDriverActive(a.status));
@@ -2804,20 +2653,28 @@ function onAdminPinInput(){
 }
 
 async function detectStableFace(video,role){
-  // FAST: satu deteksi ringan. Tidak menunggu 260 ms dan tidak melakukan
-  // deteksi wajah kedua hanya untuk mengecek kestabilan.
-  const det=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:FAST_FACE_INPUT_SIZE,scoreThreshold:FAST_FACE_SCORE}));
+  const det=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:160,scoreThreshold:0.55}));
   if(!det) return null;
   const b=det.box;
-  const prev=role==='admin'?adminStableBox:stableBox;
   const now=performance.now();
-  let movement=1;
+  const prev=role==='admin'?adminStableBox:stableBox;
+  const area=Math.max(1,b.width*b.height);
+  let stable=false;
   if(prev){
-    movement=(Math.abs(b.x-prev.x)+Math.abs(b.y-prev.y)+Math.abs(b.width-prev.width)+Math.abs(b.height-prev.height))/Math.max(1,b.width+b.height);
+    const dx=Math.abs(b.x-prev.x)/Math.max(1,b.width);
+    const dy=Math.abs(b.y-prev.y)/Math.max(1,b.height);
+    const dw=Math.abs(b.width-prev.width)/Math.max(1,b.width);
+    const dh=Math.abs(b.height-prev.height)/Math.max(1,b.height);
+    stable=dx<0.035&&dy<0.035&&dw<0.045&&dh<0.045;
   }
-  if(role==='admin'){adminStableBox=b;adminStableSince=now;adminStableFrames++;}
-  else{stableBox=b;stableSince=now;stableFrames++;}
-  return {det,stable:true,movement};
+  if(role==='admin'){
+    if(stable){if(!adminStableSince)adminStableSince=now;adminStableFrames++;}else{adminStableSince=now;adminStableFrames=1;}
+    adminStableBox=b;
+    return {det,stable:adminStableFrames>=2&&(now-adminStableSince)>=260};
+  }
+  if(stable){if(!stableSince)stableSince=now;stableFrames++;}else{stableSince=now;stableFrames=1;}
+  stableBox=b;
+  return {det,stable:stableFrames>=2&&(now-stableSince)>=260};
 }
 
 async function captureLiveFrame(type){
@@ -2831,142 +2688,44 @@ async function captureLiveFrame(type){
   return canvas.toDataURL('image/jpeg',0.68);
 }
 
-async function getFastFaceResult(video,role){
-  // Satu pipeline untuk landmark + descriptor + liveness. Versi lama melakukan
-  // tiga inferensi terpisah sehingga lambat.
+async function getFaceDescriptorFromVideo(video){
   await ensureFaceModels();
-  const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:FAST_FACE_INPUT_SIZE,scoreThreshold:FAST_FACE_SCORE}))
-    .withFaceLandmarks().withFaceDescriptor();
+  const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.55})).withFaceLandmarks().withFaceDescriptor();
   if(!result) throw new Error('Wajah tidak ditemukan.');
-  const eyes=extractEyePoints(result.landmarks);
-  let ear=0;
-  if(eyes) ear=(eyeAspectRatio(eyes.left)+eyeAspectRatio(eyes.right))/2;
-  const st=role==='admin'?adminLivenessState:driverLivenessState;
-  if(!st.startedAt) st.startedAt=performance.now();
-  if(st.baseline===null){st.baseline=ear||0;st.lastEar=ear||0;st.motionFrames=0;}
-  else if(ear && st.lastEar && Math.abs(ear-st.lastEar)>0.035){st.motionFrames=(st.motionFrames||0)+1;}
-  st.lastEar=ear||st.lastEar||0;
-  // Liveness ringan: perubahan landmark mata antar-frame. Tidak ada inferensi kedua.
-  const blinkLike=!!ear && !!st.baseline && ear < st.baseline*0.78;
-  const passiveLive=!!st.motionFrames && st.motionFrames>=1;
-  if(blinkLike||passiveLive) st.blinkDetected=true;
-  return {result,descriptor:Array.from(result.descriptor),liveness:!!st.blinkDetected,ear};
-}
-
-function isFrameClear(video){
-  try{
-    if(!video||!video.videoWidth||!video.videoHeight)return false;
-    const c=document.createElement('canvas');c.width=96;c.height=72;
-    const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,96,72);
-    const d=ctx.getImageData(0,0,96,72).data;
-    const g=new Float32Array(96*72);let mean=0,n=0;
-    for(let y=0;y<72;y++)for(let x=0;x<96;x++){
-      const i=(y*96+x)*4;const v=.299*d[i]+.587*d[i+1]+.114*d[i+2];g[y*96+x]=v;mean+=v;n++;
-    }
-    mean/=n;
-    if(mean<45||mean>225)return false;
-    let lm=0,lm2=0,ln=0;
-    // Laplacian variance: reject genuinely blurred frames before locking.
-    for(let y=1;y<71;y++)for(let x=1;x<95;x++){
-      const i=y*96+x;
-      const lap=4*g[i]-g[i-1]-g[i+1]-g[i-96]-g[i+96];
-      lm+=lap;lm2+=lap*lap;ln++;
-    }
-    const lv=lm2/ln-Math.pow(lm/ln,2);
-    return lv>=18;
-  }catch(e){return true;}
-}
-
-function retryFaceAttempt(role){
-  if(role==='admin'){
-    adminStableSince=0;adminStableBox=null;adminStableFrames=0;adminFaceLocked=false;
-    const v=document.getElementById('adminLoginVideo');if(v)v.play().catch(()=>{});
-  }else{
-    stableSince=0;stableBox=null;stableFrames=0;driverFaceLocked=false;
-    const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});
-  }
-  if((role==='admin'?adminFaceAttempts:driverFaceAttempts)>=3) showLoginRefresh(role);
-}
-
-let driverLivenessState={baseline:null,blinkDetected:false,startedAt:0};
-let adminLivenessState={baseline:null,blinkDetected:false,startedAt:0};
-function eyeAspectRatio(points){
-  if(!points||points.length<6)return 1;
-  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-  return (d(points[1],points[5])+d(points[2],points[4]))/(2*Math.max(1,d(points[0],points[3])));
-}
-function extractEyePoints(landmarks){
-  try{
-    const pos=landmarks.positions;
-    return {left:pos.slice(36,42),right:pos.slice(42,48)};
-  }catch(_){return null;}
-}
-async function checkLivenessBlink(video,role){
-  await ensureFaceModels();
-  const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:.55})).withFaceLandmarks();
-  if(!result)return {ok:false,reason:'Wajah tidak terlihat.'};
-  const eyes=extractEyePoints(result.landmarks);
-  if(!eyes)return {ok:false,reason:'Landmark wajah belum tersedia.'};
-  const ear=(eyeAspectRatio(eyes.left)+eyeAspectRatio(eyes.right))/2;
-  const st=role==='admin'?adminLivenessState:driverLivenessState;
-  if(!st.startedAt)st.startedAt=performance.now();
-  if(st.baseline===null){st.baseline=ear;return {ok:false,reason:'Silakan kedip sekali untuk memastikan Anda orang nyata.'};}
-  if(ear < st.baseline*.72){st.blinkDetected=true;return {ok:true,reason:'Liveness terdeteksi.'};}
-  if(performance.now()-st.startedAt>3500)return {ok:false,expired:true,reason:'Liveness gagal. Silakan kedip sekali dan coba lagi.'};
-  return {ok:false,reason:'Silakan kedip sekali.'};
-}
-function resetLiveness(role){
-  const st=role==='admin'?adminLivenessState:driverLivenessState;
-  st.baseline=null;st.blinkDetected=false;st.startedAt=performance.now();
+  return Array.from(result.descriptor);
 }
 
 async function autoFaceCheck(){
-  if(autoFaceBusy||state.loginBusy||!autoFaceCandidate||!state.camera.driverLogin||driverFaceLocked||driverFaceAttempts>=3)return;
+  if(autoFaceBusy||state.loginBusy||!autoFaceCandidate||!state.camera.driverLogin)return;
+  if(!state.pendingAssetCode){setFaceUI('Scan QR kendaraan terlebih dahulu.',false,'driver');return;}
   const name=(document.getElementById('loginDriverName')?.value||'').trim();if(!name)return;
   if(!autoFaceCandidate.faceDescriptor){setFaceUI('Data wajah Driver belum terdaftar.',false,'driver');return;}
   autoFaceBusy=true;
   try{
     const video=document.getElementById('driverLoginVideo');
     const stable=await detectStableFace(video,'driver');
-    if(!stable){setFaceUI('Mendeteksi wajah...',false,'driver');return;}
-    const live=await getFastFaceResult(video,'driver');
-    const dist=faceDistance(live.descriptor,autoFaceCandidate.faceDescriptor);
-    // Liveness dan pencocokan terjadi dari inferensi yang sama.
-    if(!live.liveness){setFaceUI('Wajah terdeteksi. Gerakkan mata/wajah sedikit...',false,'driver');return;}
-    driverFaceAttempts++;
-    if(dist>FACE_MATCH_THRESHOLD){
-      retryFaceAttempt('driver');
-      if(driverFaceAttempts<3)setFaceUI('Wajah tidak cocok. Percobaan '+driverFaceAttempts+'/3.',false,'driver');
-      else setFaceUI('Verifikasi gagal 3 kali. Tekan Ambil Ulang.',false,'driver');
-      return;
-    }
+    if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'driver');return;}
+    setFaceUI('Wajah diam. Mengunci gambar...',false,'driver');
+    const live=await getFaceDescriptorFromVideo(video);
+    const dist=faceDistance(live,autoFaceCandidate.faceDescriptor);
+    if(dist>FACE_MATCH_THRESHOLD){stableSince=0;stableFrames=0;const v=document.getElementById('driverLoginVideo');if(v) v.play().catch(()=>{});setFaceUI('Wajah tidak cocok. Coba lagi.',false,'driver');showLoginRefresh('driver');return;}
     const data=await captureLiveFrame('driverLogin');
-    if(!data){retryFaceAttempt('driver');return;}
     state.loginPhoto.driverLogin=data;
-    driverFaceLocked=true;
-    const driverVideo=document.getElementById('driverLoginVideo');if(driverVideo)driverVideo.pause();
-    setFaceUI('Wajah cocok ✓',true,'driver');
-    await loginDriverAutomatic(autoFaceCandidate,live.descriptor,dist);
-  }catch(e){
-    if(driverFaceAttempts<3)retryFaceAttempt('driver');else showLoginRefresh('driver');
-    setFaceUI(e.message||'Verifikasi gagal.',false,'driver');
-  }finally{autoFaceBusy=false;}
+    const driverVideo=document.getElementById('driverLoginVideo'); if(driverVideo) driverVideo.pause();
+    setFaceUI('Wajah terkunci ✓ Verifikasi berhasil',true,'driver');
+    await loginDriverAutomatic(autoFaceCandidate,live,dist);
+  }catch(e){setFaceUI(e.message||'Verifikasi gagal.',false,'driver');showLoginRefresh('driver');}
+  finally{autoFaceBusy=false;}
 }
 
 async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
   if(state.loginBusy)return;
   state.loginBusy=true;
   try{
-    setLoginStatus('Verifikasi ID, wajah dan lokasi...',false,'driver');
-    if(!state.pendingAssetCode) throw new Error('Driver wajib masuk melalui QR Code kendaraan.');
-    const qrGps=state.qrLockGPS || restoreQrLocationLock() || await lockQrLocation();
-    if(!qrGps) throw new Error('Lokasi QR kendaraan belum terkunci. Aktifkan izin lokasi.');
-    const gps=await requestLoginLocationFast();
-    const distanceToVehicle=haversineMeters(qrGps,gps);
-    if(distanceToVehicle>2) throw new Error('Lokasi login terlalu jauh dari kendaraan ('+distanceToVehicle.toFixed(1)+' m). Maksimal 2 meter dari QR kendaraan.');
-    state.loginGPS=gps;
-    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:'FAST_LIVE',latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
-    state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
+    setLoginStatus('Verifikasi ID dan wajah...',false,'driver');
+    const gps=await requestLoginLocationFast();state.loginGPS=gps;
+    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,qrAssetCode:String(state.pendingAssetCode||'').trim(),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
+    state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps};
     stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
   finally{state.loginBusy=false;}
@@ -2975,7 +2734,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
 function requestLoginLocationFast(){
   return new Promise((resolve,reject)=>{
     if(!navigator.geolocation){reject(new Error('Browser tidak mendukung lokasi.'));return;}
-    navigator.geolocation.getCurrentPosition(p=>{const c=p.coords;resolve({latitude:Number(c.latitude),longitude:Number(c.longitude),accuracy:Number(c.accuracy||0)});},()=>reject(new Error('Izin lokasi diperlukan untuk login Driver.')),{enableHighAccuracy:true,timeout:3500,maximumAge:0});
+    navigator.geolocation.getCurrentPosition(p=>{const c=p.coords;resolve({latitude:Number(c.latitude),longitude:Number(c.longitude),accuracy:Number(c.accuracy||0)});},()=>reject(new Error('Izin lokasi diperlukan untuk login Driver.')),{enableHighAccuracy:false,timeout:2500,maximumAge:30000});
   });
 }
 function clearLoginFieldsImmediately(){
@@ -2985,15 +2744,14 @@ function clearLoginFieldsImmediately(){
   localStorage.removeItem('assettrack_admin_id');localStorage.removeItem('assettrack_admin_name');
 }
 async function startAutoFaceLogin(){
-  resetLiveness('driver');
-  try{await ensureFaceModels();const ok=await startCamera('driverLogin',true);if(!ok)return;stopAutoFaceLogin();autoFaceTimer=setInterval(autoFaceCheck,FAST_FACE_INTERVAL);setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'driver');}
+  try{await ensureFaceModels();const ok=await startCamera('driverLogin',true);if(!ok)return;stopAutoFaceLogin();autoFaceTimer=setInterval(autoFaceCheck,120);setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'driver');}
   catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'driver');}
 }
 function stopAutoFaceLogin(){if(autoFaceTimer){clearInterval(autoFaceTimer);autoFaceTimer=null;}}
 
 /* ===== AUTO ADMIN / SUPER ADMIN FACE LOGIN ===== */
 async function autoAdminFaceCheck(){
-  if(autoAdminBusy||state.loginBusy||!autoAdminCandidate||!state.camera.adminLogin||adminFaceLocked||adminFaceAttempts>=3)return;
+  if(autoAdminBusy||state.loginBusy||!autoAdminCandidate||!state.camera.adminLogin)return;
   const name=(document.getElementById('loginAdminName')?.value||'').trim();
   const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
   if(!name||!/^[0-9]{6}$/.test(pin))return;
@@ -3001,22 +2759,17 @@ async function autoAdminFaceCheck(){
   try{
     const video=document.getElementById('adminLoginVideo');
     const stable=await detectStableFace(video,'admin');
-    if(!stable){setFaceUI('Mendeteksi wajah...',false,'admin');return;}
-    const live=await getFastFaceResult(video,'admin');
-    if(!live.liveness){setFaceUI('Wajah terdeteksi. Gerakkan mata/wajah sedikit...',false,'admin');return;}
-    adminFaceAttempts++;
+    if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'admin');return;}
+    setFaceUI('Wajah diam. Mengunci gambar...',false,'admin');
+    const live=await getFaceDescriptorFromVideo(video);
     const data=await captureLiveFrame('adminLogin');
-    if(!data){retryFaceAttempt('admin');return;}
-    adminFaceLocked=true;
-    const adminVideo=document.getElementById('adminLoginVideo');if(adminVideo)adminVideo.pause();
-    setFaceUI('Wajah terdeteksi ✓ Verifikasi...',true,'admin');
-    await loginAdminAutomatic(autoAdminCandidate,live.descriptor,data);
-  }catch(e){
-    if(adminFaceAttempts<3)retryFaceAttempt('admin');else showLoginRefresh('admin');
-    setFaceUI(e.message||'Verifikasi gagal.',false,'admin');
-  }finally{autoAdminBusy=false;}
+    state.loginPhoto.adminLogin=data;
+    const adminVideo=document.getElementById('adminLoginVideo'); if(adminVideo) adminVideo.pause();
+    setFaceUI('Wajah terkunci ✓ Verifikasi...',true,'admin');
+    await loginAdminAutomatic(autoAdminCandidate,live,data);
+  }catch(e){const v=document.getElementById('adminLoginVideo');if(v) v.play().catch(()=>{});setFaceUI(e.message||'Verifikasi gagal.',false,'admin');showLoginRefresh('admin');}
+  finally{autoAdminBusy=false;}
 }
-
 async function loginAdminAutomatic(candidate,liveDescriptor,data){
   if(state.loginBusy)return;
   state.loginBusy=true;
@@ -3030,8 +2783,7 @@ async function loginAdminAutomatic(candidate,liveDescriptor,data){
   finally{state.loginBusy=false;}
 }
 async function startAutoAdminFaceLogin(){
-  resetLiveness('admin');
-  try{await ensureFaceModels();const ok=await startCamera('adminLogin',true);if(!ok)return;stopAutoAdminFaceLogin();setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'admin');autoAdminTimer=setInterval(autoAdminFaceCheck,FAST_FACE_INTERVAL);}
+  try{await ensureFaceModels();const ok=await startCamera('adminLogin',true);if(!ok)return;stopAutoAdminFaceLogin();setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'admin');autoAdminTimer=setInterval(autoAdminFaceCheck,120);}
   catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'admin');}
 }
 function stopAutoAdminFaceLogin(){if(autoAdminTimer){clearInterval(autoAdminTimer);autoAdminTimer=null;}}
@@ -3131,6 +2883,7 @@ async function loginDriver(){
       driverId:driverId,
       namaDriver:driverName,
       data:state.loginPhoto.driverLogin,
+      qrAssetCode:String(state.pendingAssetCode||'').trim(),
       mimeType:'image/jpeg',
       faceDescriptor:Array.from(liveDescriptor),
       faceDistance:localDistance,
@@ -3198,16 +2951,11 @@ async function loadMenuDisplaySettings(){
   try{
     const result=await apiGet('menuConfig');
     const items=result.menuConfig||[];
-    const role=String(state.user?.role||'').toUpperCase();
-    const isSuper=role==='SUPER_ADMIN';
-    const isAdmin=role==='ADMIN';
-    const head=isSuper?`<div class="menu-display-row menu-display-head"><div>Menu</div><label>Driver</label><label>Admin</label><label>Super Admin</label></div>`:`<div class="menu-display-row menu-display-head"><div>Menu</div><label>Driver</label></div>`;
-    box.innerHTML=head+items.map(x=>`<div class="menu-display-row" data-menu-id="${escapeHtml(x.id)}"><div class="menu-name">${escapeHtml(x.icon||'')} ${escapeHtml(x.label||x.id)}</div><label><input type="checkbox" data-role="driver" ${x.driver?'checked':''}></label>${isSuper?`<label><input type="checkbox" data-role="admin" ${x.admin?'checked':''}></label><label><input type="checkbox" data-role="superAdmin" ${x.superAdmin?'checked':''}></label>`:''}</div>`).join('');
+    box.innerHTML=`<div class="menu-display-row menu-display-head"><div>Menu</div><label>Driver</label><label>Admin</label><label>Super Admin</label></div>`+items.map((x,i)=>`<div class="menu-display-row" data-menu-id="${escapeHtml(x.id)}"><div class="menu-name">${escapeHtml(x.icon||'')} ${escapeHtml(x.label||x.id)}</div><label><input type="checkbox" data-role="driver" ${x.driver?'checked':''}></label><label><input type="checkbox" data-role="admin" ${x.admin?'checked':''}></label><label><input type="checkbox" data-role="superAdmin" ${x.superAdmin?'checked':''}></label></div>`).join('');
   }catch(e){box.textContent='Gagal memuat pengaturan: '+e.message;}
 }
 async function saveMenuDisplaySettings(){
-  const role=String(state.user?.role||'').toUpperCase();
-  if(role!=='ADMIN' && role!=='SUPER_ADMIN'){toast('Hanya Admin atau Super Admin yang dapat mengubah tampilan.','error');return;}
+  if(!isSuperAdmin()){toast('Hanya Super Admin yang dapat mengubah tampilan.','error');return;}
   const box=document.getElementById('menuDisplaySettings'); if(!box)return;
   try{
     const current=await apiGet('menuConfig');
@@ -3215,12 +2963,10 @@ async function saveMenuDisplaySettings(){
     box.querySelectorAll('.menu-display-row[data-menu-id]').forEach(row=>{
       const id=row.getAttribute('data-menu-id'),x=byId[id];if(!x)return;
       x.driver=!!row.querySelector('[data-role="driver"]')?.checked;
-      if(role==='SUPER_ADMIN'){
-        x.admin=!!row.querySelector('[data-role="admin"]')?.checked;
-        x.superAdmin=!!row.querySelector('[data-role="superAdmin"]')?.checked;
-      }
+      x.admin=!!row.querySelector('[data-role="admin"]')?.checked;
+      x.superAdmin=!!row.querySelector('[data-role="superAdmin"]')?.checked;
     });
-    const result=await apiPost({action:'saveMenuConfig',menuConfig:Object.values(byId),userId:state.user.adminId||state.user.id,userName:state.user.name||state.user.namaAdmin,role:role});
+    const result=await apiPost({action:'saveMenuConfig',menuConfig:Object.values(byId),userId:state.user.adminId||state.user.id,userName:state.user.name||state.user.namaAdmin,role:'SUPER_ADMIN'});
     toast(result.message||'Tampilan berhasil disimpan.','success');applyMenuConfig(result.menuConfig||Object.values(byId));
   }catch(e){toast(e.message||'Gagal menyimpan tampilan.','error');}
 }
@@ -3230,7 +2976,7 @@ function applyMenuConfig(config){
     const el=document.querySelector(`[data-page="${String(x.id).replace(/"/g,'\\"')}"]`);
     if(!el)return;
     const visible=role==='SUPER_ADMIN'?!!x.superAdmin:role==='ADMIN'?!!x.admin:!!x.driver;
-    if(x.id==='settings'&&(role==='ADMIN'||role==='SUPER_ADMIN'))return;
+    if(x.id==='settings'&&role==='SUPER_ADMIN')return;
     el.classList.toggle('hidden',!visible);
   });
 }
@@ -3263,60 +3009,39 @@ async function enterApplication(){
   ).charAt(0).toUpperCase();
   document.getElementById('userAvatar').textContent=initial;
 
-  const wm=document.getElementById('appWatermark');
-  const logoImg=document.querySelector('.login-brand-white img');
-  if(wm && logoImg && logoImg.src) wm.style.backgroundImage=`url("${logoImg.src}")`;
-
   const adminNavigation=document.getElementById('adminNavigation');
   if(adminNavigation) adminNavigation.style.display=isAdmin ? 'block' : 'none';
 
   document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
-  document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!(isAdmin||isSuperAdmin));
-  const pinPanel=document.getElementById('superAdminPinPanel'); if(pinPanel) pinPanel.style.display=isSuperAdmin?'':'none';
-  const adminPinPanel=document.getElementById('adminPinPanel'); if(adminPinPanel) adminPinPanel.style.display=(role==='ADMIN')?'':'none';
-  const desc=document.getElementById('settingsDescription'); if(desc) desc.textContent=isSuperAdmin?'Pengaturan Super Admin Aset Aqiqah Plus':'Pengaturan tampilan menu Driver';
+  document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!isSuperAdmin);
   apiGet('menuConfig').then(r=>applyMenuConfig(r.menuConfig||[])).catch(()=>{});
 
   setInspectionGPS(state.loginGPS);
-  const driverQr=role==='DRIVER' && state.pendingAssetCode;
-  showPage(driverQr?'inspection':'dashboard');
+  updateDriverQrLockUI();
+  showPage('dashboard');
   refreshAll().catch(error=>{
-    const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge red">ERROR</span> '+escapeHtml(error.message);
+    document.getElementById('systemStatus').innerHTML=
+      '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
   });
-  if(driverQr){
-    // Buka pemeriksaan langsung; tidak menunggu bootstrap penuh.
-    openPendingAssetFast().catch(()=>{});
+  if(state.pendingAssetCode){
+    const waitForAsset=()=>{
+      if(state.assets && state.assets.length)openPendingAsset();
+      else setTimeout(waitForAsset,150);
+    };
+    waitForAsset();
   }
 }
 
-function lockInspectionAsset(asset){
-  const code=String(asset?.code||'').trim(); if(!code)return;
-  state.inspectionLockedAssetCode=code;
-  const sel=document.getElementById('inspectionAsset');
-  if(sel){sel.value=code;sel.disabled=String(state.user?.role||'').toUpperCase()==='DRIVER';}
-  const gpsBtn=document.querySelector('#page-inspection button[onclick="getGPS()"]');
-  if(gpsBtn && String(state.user?.role||'').toUpperCase()==='DRIVER'){gpsBtn.disabled=true;gpsBtn.style.display='none';}
-  state.inspectionGPSLocked=String(state.user?.role||'').toUpperCase()==='DRIVER';
-}
-async function openPendingAssetFast(){
-  const code=String(state.pendingAssetCode||'').trim();if(!code)return;
-  let asset=state.assets.find(a=>String(a.code).toUpperCase()===code.toUpperCase());
-  if(!asset){
-    try{const r=await apiGet('asset',{kode:code});asset=r.asset||null;if(asset){state.assets=[asset,...state.assets.filter(a=>String(a.code).toUpperCase()!==code.toUpperCase())];}}catch(_){ }
-  }
-  if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');return;}
+function openPendingAsset(){
+  const code=String(state.pendingAssetCode || '').trim();if(!code)return;
+  const asset=state.assets.find(a=>String(a.code).toUpperCase()===code.toUpperCase());
+  if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');state.pendingAssetCode='';state.qrAssetLocked=false;updateDriverQrLockUI();return;}
+  state.qrAsset=asset; state.qrAssetLocked=true; updateDriverQrLockUI();
   showPage('inspection');
-  const inspectionPage=document.getElementById('page-inspection');
-  if(inspectionPage && String(state.user?.role||'').toUpperCase()==='DRIVER') inspectionPage.classList.add('driver-locked');
   const assetSelect=document.getElementById('inspectionAsset');
-  if(assetSelect){assetSelect.value=asset.code;assetSelect.disabled=String(state.user?.role||'').toUpperCase()==='DRIVER';onInspectionAssetChange();}
-  populateDriverSelect();applyLoggedInDriverToInspection();lockInspectionAsset(asset);
-  if(String(state.user?.role||'').toUpperCase()==='DRIVER'){
-    try{await loadDailyInspectionForAsset(asset.code);}catch(_){ }
-  }
-  state.pendingAssetCode='';
+  if(assetSelect){assetSelect.value=asset.code;onInspectionAssetChange();}
+  populateDriverSelect();applyLoggedInDriverToInspection();
 }
-function openPendingAsset(){openPendingAssetFast();}
 
 function clearApplicationState(){
   state.user=null;
@@ -3330,10 +3055,6 @@ function clearApplicationState(){
   state.km=[];
   state.corrections=[];
   state.audit=[];
-  state.dailyInspectionId='';
-  state.dailyInspectionMode=false;
-  state.dailyHandoverMode=false;
-  state.previousInspectionId='';
 }
 
 function resetLoginForm(){
@@ -3355,8 +3076,9 @@ function resetToLogin(showToast=true){
   stopCamera('driverLogin');
   stopCamera('adminLogin');
   clearApplicationState();
-  state.pendingAssetCode='';
+  state.pendingAssetCode=''; state.qrAssetLocked=false; state.qrAsset=null;
   resetLoginForm();
+  updateDriverQrLockUI();
 
   document.getElementById('appPage').style.display='none';
   document.getElementById('loginPage').style.display='flex';
@@ -3417,8 +3139,8 @@ function showPage(page){
     toast('Halaman Admin hanya dapat diakses oleh Admin.','error');
     return;
   }
-  if(page==='settings' && !['ADMIN','SUPER_ADMIN'].includes(role)){
-    toast('Pengaturan tampilan hanya dapat diakses oleh Admin atau Super Admin.','error');
+  if(page==='settings' && role!=='SUPER_ADMIN'){
+    toast('Pengaturan hanya dapat diakses oleh Super Admin.','error');
     return;
   }
 
@@ -3467,6 +3189,7 @@ function showPage(page){
 
   if(page==='corrections'){
     renderCorrections();
+    prepareDriverCorrectionForm();
   }
 
   if(page==='reports'){
@@ -3488,40 +3211,62 @@ function showPage(page){
    REFRESH ALL
 ========================================================= */
 
-function applyBootstrapData(bootstrap){
-  const role=String(state.user?.role||'').toUpperCase();
-  const isAdmin=['ADMIN','SUPER_ADMIN'].includes(role);
-  state.assets=bootstrap.assets||[]; state.drivers=bootstrap.drivers||[]; state.inspections=bootstrap.inspections||[];
-  state.admins=isAdmin?(bootstrap.admins||[]):[]; state.km=isAdmin?(bootstrap.km||[]):[];
-  state.corrections=bootstrap.corrections||[]; state.audit=isAdmin?(bootstrap.audit||[]):[];
-  populateDriverLogin(); updateDashboard(); populateAssetSelects(); populateDriverSelect();
-  const activePage=document.querySelector('.page.active')?.id || 'page-dashboard';
-  if(activePage==='page-assets') renderAssets();
-  else if(activePage==='page-drivers') renderDrivers();
-  else if(activePage==='page-reports') renderInspections();
-  else if(activePage==='page-km' && isAdmin) renderKM();
-  else if(activePage==='page-corrections') renderCorrections();
-  else if(activePage==='page-audit' && isAdmin) renderAudit();
-  else if(activePage==='page-admins' && isAdmin) renderAdmins();
-}
-function bootstrapCacheKey(role){return 'AQP_BOOTSTRAP_V2_'+String(role||'').toUpperCase();}
-function readBootstrapCache(role){try{const x=JSON.parse(localStorage.getItem(bootstrapCacheKey(role))||'null');return x&&x.data?x.data:null;}catch(_){return null;}}
-function writeBootstrapCache(role,data){try{localStorage.setItem(bootstrapCacheKey(role),JSON.stringify({time:Date.now(),data:data}));}catch(_){}}
 async function refreshAll(){
-  if(!state.user||!state.user.role)return;
-  const role=String(state.user.role).toUpperCase();
-  const cached=readBootstrapCache(role);
-  if(cached){applyBootstrapData(cached); const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Data siap.';}
-  else {const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Menyiapkan data...';}
-  apiGet('bootstrap',{role:role}).then(bootstrap=>{
-    writeBootstrapCache(role,bootstrap);
-    if(state.user&&String(state.user.role).toUpperCase()===role)applyBootstrapData(bootstrap);
-    const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Aset Aqiqah Plus siap digunakan.';
-  }).catch(error=>{
-    const st=document.getElementById('systemStatus'); if(st&&!cached)st.innerHTML='<span class="badge red">ERROR</span> '+escapeHtml(error.message);
-    console.warn('Refresh background gagal:',error.message);
-  });
+  if(!state.user || !state.user.role) return;
+
+  try{
+    const role=String(state.user.role).toUpperCase();
+    const isAdmin=['ADMIN','SUPER_ADMIN'].includes(role);
+
+    // Satu request bootstrap menggantikan 3-7 request terpisah.
+    // Ini mempercepat proses setelah login tanpa mengubah struktur database.
+    const bootstrap=await apiGet('bootstrap',{role:role,driverId:role==='DRIVER'?driverIdOf(state.user):''});
+
+    state.assets=bootstrap.assets || [];
+    state.drivers=bootstrap.drivers || [];
+    state.inspections=bootstrap.inspections || [];
+    populateDriverLogin();
+
+    if(isAdmin){
+      state.admins=bootstrap.admins || [];
+      state.km=bootstrap.km || [];
+      state.corrections=bootstrap.corrections || [];
+      state.audit=bootstrap.audit || [];
+    }else{
+      state.admins=[];
+      state.km=[];
+      state.audit=[];
+      state.corrections=bootstrap.corrections || [];
+    }
+
+    updateDashboard();
+    populateAssetSelects();
+    populateDriverSelect();
+    renderAssets();
+    renderDrivers();
+    renderInspections();
+
+    if(isAdmin){
+      renderKM();
+      renderCorrections();
+      renderAudit();
+      renderAdmins();
+    }else{
+      const adminBody=document.getElementById('adminBody');
+      if(adminBody) adminBody.innerHTML='';
+    }
+
+    document.getElementById('systemStatus').innerHTML=
+      '<span class="badge green">ONLINE</span> '+
+      'Aset Aqiqah Plus berhasil terhubung dengan Google Apps Script.';
+
+  }catch(error){
+    document.getElementById('systemStatus').innerHTML=
+      '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
+    toast('Gagal mengambil data: '+error.message,'error');
+  }
 }
+
 
 /* =========================================================
    DASHBOARD
@@ -3582,14 +3327,6 @@ function updateDashboard(){
 /* =========================================================
    ASSET
 ========================================================= */
-
-function updateAssetEditPermissions(){
-  const role=String(state.user?.role||'').toUpperCase();
-  const canEdit=role==='ADMIN'||role==='SUPER_ADMIN';
-  const add=document.querySelector('#page-assets .toolbar .primary-btn');
-  if(add)add.style.display=canEdit?'':'none';
-  document.querySelectorAll('#assetBody .asset-edit-btn,#assetBody .asset-delete-btn').forEach(b=>b.style.display=canEdit?'':'none');
-}
 
 function renderAssets(){
 
@@ -3659,13 +3396,13 @@ function renderAssets(){
       <td>
 
         <button
-          class="secondary-btn asset-edit-btn"
+          class="secondary-btn"
           onclick="openAssetForm('${escapeJs(asset.id)}')">
           Edit
         </button>
 
         <button
-          class="danger-btn asset-delete-btn"
+          class="danger-btn"
           onclick="deleteAsset('${escapeJs(asset.id)}','${escapeJs(asset.code)}')">
           Hapus
         </button>
@@ -3676,13 +3413,11 @@ function renderAssets(){
     body.appendChild(tr);
 
   });
-  updateAssetEditPermissions();
 
 }
 
 
 function openAssetForm(id=''){
-  if(!['ADMIN','SUPER_ADMIN'].includes(String(state.user?.role||'').toUpperCase())){toast('Hanya Admin atau Super Admin yang dapat mengedit kendaraan.','error');return;}
 
   const asset=
     state.assets.find(
@@ -3837,7 +3572,6 @@ function openAssetForm(id=''){
 async function saveAsset(event){
 
   event.preventDefault();
-  if(!['ADMIN','SUPER_ADMIN'].includes(String(state.user?.role||'').toUpperCase())){toast('Hanya Admin atau Super Admin yang dapat menyimpan perubahan kendaraan.','error');return;}
 
   try{
 
@@ -3931,7 +3665,6 @@ async function saveAsset(event){
 
 
 async function deleteAsset(id,code){
-  if(!['ADMIN','SUPER_ADMIN'].includes(String(state.user?.role||'').toUpperCase())){toast('Hanya Admin atau Super Admin yang dapat menghapus kendaraan.','error');return;}
 
   if(!confirm(
     'Hapus aset '+code+'?'
@@ -4089,10 +3822,6 @@ function onInspectionAssetChange(){
   const code=document
     .getElementById('inspectionAsset')
     .value;
-  if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.inspectionLockedAssetCode && code!==state.inspectionLockedAssetCode){
-    document.getElementById('inspectionAsset').value=state.inspectionLockedAssetCode;
-    return;
-  }
 
   const asset=
     state.assets.find(
@@ -4156,44 +3885,6 @@ function applyLoggedInDriverToInspection(){
    INSPECTION OPTIONS
 ========================================================= */
 
-const INSPECTION_ITEMS_FRONTEND = [
-  ['Stik Oli Mesin','Foto'],['Stik Oli Power Steering','Foto'],
-  ['Tali Kipas / V-Belt','Foto'],['Aki','Foto'],
-  ['Ban Kiri Depan','Foto'],['Ban Kiri Belakang','Foto'],
-  ['Ban Kanan Depan','Foto'],['Ban Kanan Belakang','Foto'],
-  ['Ban Serep','Foto'],['Kunci Roda & Dongkrak','Foto'],
-  ['Minyak Rem','Foto'],['Kaca Mobil','Foto'],
-  ['Lampu Utama','Video'],['Lampu Rem','Video'],['Lampu Sein','Video'],
-  ['Body Mobil lecet Baru','Video'],['Interior','Foto/Video'],
-  ['interior Box','Foto/Video'],['sisi dalam Bak terbuka','Foto/Video'],
-  ['Kopling','Foto'],['Setir','Foto'],['Klakson','Foto'],['Sabuk Pengaman','Foto'],
-  ['Oli Mesin','Foto'],['Oli Power Steering','Foto'],
-  ['Tali Kipas / V-Belt','Foto'],['Radiator','Foto'],
-  ['Reservoir Radiator','Foto'],['Keamanan Pintu & Setir','Foto']
-];
-
-function buildInspectionDetailFields(){
-  const box=document.getElementById('inspectionDetailFields');
-  if(!box)return;
-  box.innerHTML=INSPECTION_ITEMS_FRONTEND.map((x,i)=>`
-    <div class="photo-media-item inspection-detail-card" data-detail-index="${i}">
-      <div class="media-title">${i+1}. ${escapeHtml(x[0])}</div>
-      <small style="color:#607d8b">Media: ${escapeHtml(x[1])}</small>
-      <select class="inspection-detail-status" data-detail-status="${i}">
-        ${photoStatusOptions('Baik')}
-      </select>
-      <input class="inspection-detail-note" data-detail-note="${i}" type="text" placeholder="Catatan kondisi (opsional)">
-    </div>`).join('');
-}
-
-function collectInspectionDetails(){
-  return INSPECTION_ITEMS_FRONTEND.map((x,i)=>{
-    const status=document.querySelector(`[data-detail-status="${i}"]`)?.value||'Baik';
-    const catatan=document.querySelector(`[data-detail-note="${i}"]`)?.value||'';
-    return {item:x[0],media:x[1],status,catatan};
-  });
-}
-
 function buildInspectionOptions(){
 
   const ids=[
@@ -4237,6 +3928,8 @@ function buildInspectionOptions(){
 ========================================================= */
 
 const PHOTO_MAP_FRONTEND={
+
+  body:'Foto Body Mobil',
 
   radiator:'Foto Radiator',
 
@@ -4285,7 +3978,7 @@ const VIDEO_MAP_FRONTEND={
 
   lampuSein:'Video Lampu Sein',
 
-  bodyLecet:'Video Body Mobil — WAJIB Serah Terima',
+  bodyLecet:'Video Body Mobil Lecet',
 
   interior:'Video Interior',
 
@@ -4295,220 +3988,74 @@ const VIDEO_MAP_FRONTEND={
 };
 
 
-let inspectionCameraStream=null;
-let inspectionCameraKey='';
-async function openInspectionCamera(key){
-  if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.dailyInspectionMode && !String(key||'').startsWith('km')){
-    toast('Pemeriksaan awal sudah terkunci. Data non-KM tidak dapat diperbarui hari ini.','error');return;
-  }
-  inspectionCameraKey=key;
-  const modal=document.getElementById('inspectionCameraModal');
-  const video=document.getElementById('inspectionCameraVideo');
-  const title=document.getElementById('inspectionCameraTitle');
-  const status=document.getElementById('inspectionCameraStatus');
-  const item=(INSPECTION_ITEMS_FRONTEND.find(x=>String(x[0]).toLowerCase().replace(/\s+/g,'')===String(key).toLowerCase().replace(/\s+/g,''))||[])[0] || key;
-  if(title)title.textContent='Ambil Foto: '+item;
-  if(status)status.textContent='Arahkan kamera ke '+item+'. Foto dari galeri tidak tersedia.';
-  try{
-    inspectionCameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
-    video.srcObject=inspectionCameraStream;
-    await video.play();
-    modal?.classList.add('show');
-  }catch(e){toast('Kamera tidak dapat dibuka. Izinkan akses kamera.','error');}
-}
-function closeInspectionCamera(){
-  const modal=document.getElementById('inspectionCameraModal');
-  if(inspectionCameraStream){inspectionCameraStream.getTracks().forEach(t=>t.stop());inspectionCameraStream=null;}
-  const video=document.getElementById('inspectionCameraVideo');if(video)video.srcObject=null;
-  modal?.classList.remove('show');inspectionCameraKey='';
-}
-async function captureInspectionCameraPhoto(){
-  const key=inspectionCameraKey;const video=document.getElementById('inspectionCameraVideo');
-  if(!key||!video?.videoWidth){toast('Kamera belum siap.','error');return;}
-  try{
-    const canvas=document.getElementById('inspectionCameraCanvas');
-    const w=Math.min(video.videoWidth,1280),h=Math.round(w*video.videoHeight/video.videoWidth);
-    canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(video,0,0,w,h);
-    const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',.82));
-    if(!blob)throw new Error('Foto gagal diambil.');
-    const file=new File([blob],'camera_'+key+'_'+Date.now()+'.jpg',{type:'image/jpeg',lastModified:Date.now()});
-    const input=document.getElementById('photo_'+key);
-    const dt=new DataTransfer();
-    if(key!=='body'){dt.items.add(file);}else dt.items.add(file);
-    input.files=dt.files;
-    previewInspectionPhotos(key);
-    await validatePhotoObject(file,key);
-    const ok=document.querySelector('#photoPreview_'+CSS.escape(key)+' .photo-validation-ok');
-    if(ok)ok.textContent='✓ Objek sesuai dan foto diambil dari kamera.';
-    toast('Foto '+key+' berhasil diambil dari kamera.','success');
-    closeInspectionCamera();
-  }catch(e){toast(e.message||'Foto ditolak.','error');}
-}
-
 function buildMediaFields(){
-  const photoBox=document.getElementById('photoFields');
-  const videoBox=document.getElementById('videoFields');
-  if(!photoBox||!videoBox)return;
+
+  const photoBox=document.getElementById(
+    'photoFields'
+  );
+
+  const videoBox=document.getElementById(
+    'videoFields'
+  );
+
   photoBox.innerHTML='';
+
   videoBox.innerHTML='';
 
-  Object.entries(PHOTO_MAP_FRONTEND).forEach(([key,label])=>{
-    const multiple=key==='body' ? ' multiple' : '';
-    const kmClass=key.startsWith('km') ? ' photo-is-km' : '';
+  Object.entries(
+    PHOTO_MAP_FRONTEND
+  ).forEach(([key,label])=>{
+
     photoBox.innerHTML+=`
-      <div class="photo-media-item${kmClass}" data-photo-key="${escapeHtml(key)}">
-        <div class="media-title">${escapeHtml(label)}</div>
-        <input type="file" id="photo_${escapeHtml(key)}" accept="image/*"${multiple} style="display:none"
-               onchange="previewInspectionPhotos('${escapeJs(key)}')">
-        <button type="button" class="capture-btn" onclick="openInspectionCamera('${escapeJs(key)}')">📷 Buka Kamera & Ambil Foto</button>
-        <div class="media-validation-note">🔒 Foto pemeriksaan diambil langsung dari kamera aplikasi. Pilihan foto dari galeri tidak digunakan untuk item pemeriksaan.</div>
-        <div id="photoPreview_${escapeHtml(key)}" class="photo-preview-grid"></div>
-      </div>`;
-  });
-
-  Object.entries(VIDEO_MAP_FRONTEND).forEach(([key,label])=>{
-    videoBox.innerHTML+=`
-      <div class="media-item">
+      <div class="media-item photo-media-item" data-photo-key="${escapeHtml(key)}">
         <label>${escapeHtml(label)}</label>
-        <input type="file" id="video_${escapeHtml(key)}" accept="video/*" capture="environment">
-      </div>`;
+        <input type="file" id="photo_${key}" accept="image/*" capture="environment" ${key==='body'?'multiple':''}>
+        <div class="photo-note-box">
+          <select id="photoStatus_${key}" aria-label="Status ${escapeHtml(label)}">
+            <option value="">Status foto</option>
+            <option value="Baik">✅ Baik</option>
+            <option value="Perlu Perhatian">⚠️ Perlu Perhatian</option>
+            <option value="Rusak">❌ Rusak</option>
+            <option value="Perlu Ganti">🔧 Perlu Ganti</option>
+          </select>
+          <textarea id="photoNote_${key}" rows="2" placeholder="Catatan foto ${escapeHtml(label)}..."></textarea>
+        </div>
+        <small class="photo-note-help">Catatan/status ini ikut disimpan bersama data foto.</small>
+      </div>
+    `;
+
   });
-}
 
-function photoStatusOptions(selected='Baik'){
-  const opts=['Baik','Perlu Perhatian','Perlu Ganti','Rusak','Catatan Lainnya'];
-  return opts.map(x=>`<option value="${escapeHtml(x)}" ${x===selected?'selected':''}>${escapeHtml(x)}</option>`).join('');
-}
+  Object.entries(
+    VIDEO_MAP_FRONTEND
+  ).forEach(([key,label])=>{
 
-function previewInspectionPhotos(key){
-  const input=document.getElementById('photo_'+key);
-  const box=document.getElementById('photoPreview_'+key);
-  if(!input||!box)return;
-  box.innerHTML='';
-  Array.from(input.files||[]).forEach((file,index)=>{
-    const card=document.createElement('div');
-    card.className='photo-preview-card';
-    card.innerHTML=`
-      <img id="photoThumb_${escapeHtml(key)}_${index}" alt="Pratinjau foto">
-      <div class="photo-meta">
-        <select data-photo-status="${escapeHtml(key)}" data-index="${index}" aria-label="Status foto">
-          ${photoStatusOptions('Baik')}
-        </select>
-        ${key.startsWith('km') ? `<input class="photo-km-value" data-photo-km="${escapeHtml(key)}" data-index="${index}" type="number" step="0.1" inputmode="decimal" placeholder="Angka KM yang terbaca pada foto">` : ''}
-        <input data-photo-note="${escapeHtml(key)}" data-index="${index}" type="text" placeholder="Catatan foto (opsional)">
-      </div>`;
-    box.appendChild(card);
-    const img=card.querySelector('img');
-    const reader=new FileReader();
-    reader.onload=e=>{img.src=e.target.result;};
-    reader.readAsDataURL(file);
+    videoBox.innerHTML+=`
+
+      <div class="media-item">
+
+        <label>${escapeHtml(label)}</label>
+
+        <input
+          type="file"
+          id="video_${key}"
+          accept="video/*"
+          capture="environment">
+
+      </div>
+
+    `;
+
   });
+
 }
 
-function collectPhotoMeta(key,index){
-  const root=document.getElementById('photoPreview_'+key);
-  const status=root?.querySelector(`[data-photo-status="${CSS.escape(key)}"][data-index="${index}"]`)?.value || 'Baik';
-  const note=root?.querySelector(`[data-photo-note="${CSS.escape(key)}"][data-index="${index}"]`)?.value || '';
-  const kmEl=root?.querySelector(`[data-photo-km="${CSS.escape(key)}"][data-index="${index}"]`);
-  return {status,catatan:note,kmValue:kmEl?.value || ''};
-}
-
-function setDailyInspectionUI(enabled,row){
-  state.dailyInspectionMode=!!enabled;
-  if(enabled) state.dailyHandoverMode=false;
-  state.dailyInspectionId=enabled ? String(row?.['Inspection ID']||'') : '';
-  const banner=document.getElementById('dailyInspectionBanner');
-  const btn=document.getElementById('inspectionSubmitBtn');
-  if(enabled){
-    if(banner){banner.classList.remove('hidden');banner.innerHTML='🔒 <b>Pemeriksaan hari ini sudah tersimpan.</b> Data awal tidak dapat diedit. Barcode kendaraan ini tetap dapat digunakan sampai akhir hari untuk memperbarui data KM, terutama <b>KM Finish Akhir</b>. Perubahan data pemeriksaan lainnya harus melalui menu Koreksi.';}
-    if(btn)btn.textContent='↻ Update KM Hari Ini';
-    document.querySelectorAll('#inspectionForm input,#inspectionForm select,#inspectionForm textarea').forEach(el=>{
-      const id=el.id||'';
-      const isKmPhotoMeta=!!el.closest?.('.photo-is-km');
-      const allowed=id==='kmBeforeFuel'||id==='kmAfterFuel'||id==='kmFinish'||id==='kmOilChange'||id==='inspectionSubmitBtn'||id.startsWith('photo_km')||isKmPhotoMeta;
-      if(el.type==='file') el.disabled=!id.startsWith('photo_km');
-      else if(isKmPhotoMeta) el.disabled=false;
-      else if(['kmBeforeFuel','kmAfterFuel','kmFinish','kmOilChange'].includes(id)) el.disabled=false;
-      else if(id==='inspectionSubmitBtn') el.disabled=false;
-      else el.disabled=true;
-    });
-    document.querySelectorAll('#videoFields input').forEach(el=>el.disabled=true);
-  }else{
-    if(banner){banner.classList.add('hidden');banner.innerHTML='';}
-    if(btn)btn.textContent='💾 Simpan Pemeriksaan';
-    document.querySelectorAll('#inspectionForm input,#inspectionForm select,#inspectionForm textarea').forEach(el=>{
-      if(el.id==='inspectionAsset' && String(state.user?.role||'').toUpperCase()==='DRIVER') return;
-      if(el.id==='inspectionDriver' && String(state.user?.role||'').toUpperCase()==='DRIVER') return;
-      if(['latitude','longitude','gpsAccuracy','gpsLabel','inspectionVehicle','inspectionPlate'].includes(el.id)) return;
-      el.disabled=false;
-    });
-    document.querySelectorAll('#videoFields input').forEach(el=>el.disabled=false);
-  }
-}
-
-async function loadDailyInspectionForAsset(code){
-  if(!code)return null;
-  const role=String(state.user?.role||'').toUpperCase();
-  if(role!=='DRIVER')return null;
-  const driverId=driverIdOf(state.user);
-  let same=null, latest=null;
-  try{
-    const r=await apiGet('dailyinspection',{kodeAset:code,driverId:driverId});
-    same=r.inspection||null;
-  }catch(_){}
-  latest=(state.inspections||[]).slice().reverse().find(x=>
-    String(x['Kode Aset']||'').toUpperCase()===String(code).toUpperCase() &&
-    toDateInput(x['Timestamp'])===toDateInput(new Date())
-  );
-  if(!latest && same) latest=same;
-
-  if(same){
-    state.dailyHandoverMode=false;
-    state.previousInspectionId=String(same['Inspection ID']||'');
-    applyDailyInspectionToForm(same);
-    return same;
-  }
-
-  if(latest){
-    state.dailyHandoverMode=true;
-    state.previousInspectionId=String(latest['Inspection ID']||'');
-    setDailyInspectionUI(false,null);
-    const banner=document.getElementById('dailyInspectionBanner');
-    if(banner){
-      banner.classList.remove('hidden');
-      banner.innerHTML='🔄 <b>Serah Terima Kendaraan.</b> Mobil ini sudah diperiksa driver sebelumnya hari ini. Anda wajib mencatat ulang <b>KM + Video Body + Lampu Utama + Lampu Rem + Lampu Sein</b>. Pemeriksaan Anda akan menjadi sesi baru dan data driver sebelumnya tetap terkunci.';
-    }
-    return latest;
-  }
-
-  state.dailyHandoverMode=false;
-  state.previousInspectionId='';
-  setDailyInspectionUI(false,null);
-  return null;
-}
-
-function toDateTimeLocal(value){
-  if(!value)return getCurrentDateTimeLocal();
-  const d=new Date(value);if(isNaN(d.getTime()))return String(value).slice(0,16);
-  const off=d.getTimezoneOffset();const local=new Date(d.getTime()-off*60000);return local.toISOString().slice(0,16);
-}
-
-
-function setInspectionGPS(gps){
-  if(!gps)return;
-  const lat=document.getElementById('latitude'),lng=document.getElementById('longitude'),acc=document.getElementById('gpsAccuracy'),label=document.getElementById('gpsLabel');
-  if(lat)lat.value=Number(gps.latitude).toFixed(7);
-  if(lng)lng.value=Number(gps.longitude).toFixed(7);
-  if(acc)acc.value=String(gps.accuracy??'');
-  if(label)label.value=Number(gps.latitude).toFixed(7)+', '+Number(gps.longitude).toFixed(7);
-}
 
 /* =========================================================
    GPS
 ========================================================= */
 
 function getGPS(){
-  if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.inspectionGPSLocked){toast('Lokasi Driver sudah terkunci dari proses login dan tidak dapat diubah.','error');return;}
   if(!navigator.geolocation){
     toast(
       'Browser tidak mendukung GPS.',
@@ -4583,31 +4130,6 @@ async function saveInspectionForm(event){
 
   try{
 
-    if(state.dailyInspectionMode && state.dailyInspectionId){
-      const code=document.getElementById('inspectionAsset').value;
-      const finish=document.getElementById('kmFinish').value;
-      const beforeFuel=document.getElementById('kmBeforeFuel').value;
-      const afterFuel=document.getElementById('kmAfterFuel').value;
-      const oil=document.getElementById('kmOilChange').value;
-      const finishInput=document.getElementById('photo_kmFinishAkhir');
-      const kmMedia={};
-      for(const key of ['kmStart','kmSebelumIsiBensin','kmSesudahIsiBensin','kmFinishAkhir']){
-        const input=document.getElementById('photo_'+key);
-        if(input?.files?.length){
-          kmMedia[key]=[];
-          for(let i=0;i<input.files.length;i++){
-            const item=await fileToMedia(input.files[i],false);
-            kmMedia[key].push(Object.assign(item,collectPhotoMeta(key,i)));
-          }
-        }
-      }
-      const result=await apiPost({action:'updateDailyKM',inspectionId:state.dailyInspectionId,kodeAset:code,driverId:driverIdOf(state.user),namaDriver:driverNameOf(state.user),role:'DRIVER',qrAssetCode:state.inspectionLockedAssetCode||state.user?.qrAssetCode||code,kmBeforeFuel:beforeFuel,kmAfterFuel:afterFuel,kmFinishAkhir:finish,kmOilChange:oil,media:kmMedia});
-      toast(result.message,'success');
-      await refreshAll();
-      if(result.inspection) applyDailyInspectionToForm(result.inspection);
-      return;
-    }
-
     const code=document
       .getElementById('inspectionAsset')
       .value;
@@ -4624,6 +4146,10 @@ async function saveInspectionForm(event){
     const driver=state.drivers.find(
       x=>driverIdOf(x).toUpperCase()===String(driverId).toUpperCase()
     );
+
+    if(String(state.user?.role||'').toUpperCase()==='DRIVER' && !state.qrAssetLocked){
+      toast('Driver wajib membuka pemeriksaan melalui QR kendaraan.','error'); return;
+    }
 
     if(!code){
 
@@ -4669,15 +4195,25 @@ async function saveInspectionForm(event){
       Foto
     */
 
-    for(const [key] of Object.entries(PHOTO_MAP_FRONTEND)){
-      const input=document.getElementById('photo_'+key);
+    for(
+      const [key] of Object.entries(
+        PHOTO_MAP_FRONTEND
+      )
+    ){
+      const input=document.getElementById(
+        'photo_'+key
+      );
+
       if(input?.files?.length){
+        const status=document.getElementById('photoStatus_'+key)?.value || '';
+        const note=document.getElementById('photoNote_'+key)?.value.trim() || '';
         media[key]=[];
-        for(let i=0;i<input.files.length;i++){
-          await validatePhotoObject(input.files[i],key);
-          const item=await fileToMedia(input.files[i],false);
-          const meta=collectPhotoMeta(key,i);
-          media[key].push(Object.assign(item,meta));
+        const files=Array.from(input.files).slice(0,key==='body'?50:1);
+        for(const file of files){
+          const item=await fileToMedia(file,false);
+          item.status=status;
+          item.note=note;
+          media[key].push(item);
         }
       }
     }
@@ -4707,15 +4243,6 @@ async function saveInspectionForm(event){
 
       }
 
-    }
-
-    if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.dailyHandoverMode){
-      const required=['bodyLecet','lampuUtama','lampuRem','lampuSein'];
-      const missing=required.filter(k=>!media[k]?.length);
-      if(missing.length) throw new Error('Serah terima wajib: Video Body, Lampu Utama, Lampu Rem, dan Lampu Sein.');
-      const kmStartValue=document.getElementById('kmStart')?.value||'';
-      if(kmStartValue==='') throw new Error('KM saat menerima kendaraan wajib diisi dan difoto.');
-      if(!media.kmStart?.length) throw new Error('Foto KM saat menerima kendaraan wajib diambil.');
     }
 
     const conditions={
@@ -4773,6 +4300,8 @@ async function saveInspectionForm(event){
     const payload={
 
       action:'saveInspection',
+      role:String(state.user?.role||''),
+      qrAssetCode:String(state.qrAsset?.code || state.pendingAssetCode || '').trim(),
 
       kodeAset:code,
 
@@ -4798,11 +4327,6 @@ async function saveInspectionForm(event){
         document.getElementById(
           'gpsLabel'
         ).value,
-
-      role:String(state.user?.role||'').toUpperCase(),
-      qrAssetCode:state.inspectionLockedAssetCode || state.pendingAssetCode || state.user?.qrAssetCode || '',
-      lockedLatitude:state.user?.loginGPS?.latitude || '',
-      lockedLongitude:state.user?.loginGPS?.longitude || '',
 
       kmStart:
         document.getElementById(
@@ -4830,10 +4354,6 @@ async function saveInspectionForm(event){
         ).value,
 
       conditions:conditions,
-      sesi: state.dailyHandoverMode ? 0 : 1,
-      jenisPemeriksaan: state.dailyHandoverMode ? 'SERAH TERIMA' : 'AWAL',
-      previousInspectionId: state.previousInspectionId || '',
-      details: collectInspectionDetails(),
 
       statusPemeriksaan:
         document.getElementById(
@@ -4900,32 +4420,6 @@ async function saveInspectionForm(event){
    FILE TO BASE64
 ========================================================= */
 
-let mediaVisionModel=null;
-async function getMediaVisionModel(){
-  if(mediaVisionModel)return mediaVisionModel;
-  if(!window.mobilenet)throw new Error('Model validasi objek belum tersedia. Pastikan internet aktif.');
-  mediaVisionModel=await mobilenet.load({version:2,alpha:1.0});
-  return mediaVisionModel;
-}
-function semanticRulesForKey(key){
-  const k=String(key||'').toLowerCase();
-  if(k.includes('ban'))return {labels:['wheel','tire','car wheel','rubber'],min:.18,strict:true};
-  if(k==='lampuutama'||k==='lampurem'||k==='lampusein'||k==='bodylece t')return {labels:['car','vehicle','wheel','limousine','cab','minivan','pickup'],min:.12,strict:false};
-  return null;
-}
-async function validatePhotoObject(file,key){
-  const rule=semanticRulesForKey(key);
-  if(!rule)return {ok:true,skipped:true};
-  const model=await getMediaVisionModel();
-  const img=await new Promise((resolve,reject)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>{URL.revokeObjectURL(u);resolve(im)};im.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Foto tidak dapat dibaca.'))};im.src=u;});
-  const preds=await model.classify(img,5);
-  const matches=preds.filter(p=>rule.labels.some(label=>String(p.className||'').toLowerCase().includes(label))).sort((a,b)=>b.probability-a.probability);
-  if(!matches.length || matches[0].probability<rule.min){
-    throw new Error('Foto ditolak: objek yang sesuai dengan pemeriksaan "'+key+'" tidak terdeteksi. Arahkan kamera ke objek yang benar, bukan tembok atau objek lain.');
-  }
-  return {ok:true,prediction:matches[0].className,confidence:matches[0].probability};
-}
-
 async function fileToMedia(file,isVideo){
 
   const max=
@@ -4954,16 +4448,14 @@ async function fileToMedia(file,isVideo){
 
     const data=await compressImage(
       file,
-      960,
-      .62
+      1280,
+      .78
     );
 
     return {
       name:file.name,
       type:'image/jpeg',
-      data:data,
-      capturedFromCamera:true,
-      captureTimestamp:Date.now()
+      data:data
     };
 
   }
@@ -5138,13 +4630,6 @@ function resetInspectionForm(){
   document.getElementById(
     'inspectionPlate'
   ).value='';
-
-  state.dailyInspectionId='';
-  state.dailyInspectionMode=false;
-  state.dailyHandoverMode=false;
-  state.previousInspectionId='';
-  setDailyInspectionUI(false);
-  document.querySelectorAll('[id^=photoPreview_]').forEach(el=>el.innerHTML='');
 
 }
 
@@ -5891,6 +5376,49 @@ function renderKM(){
    CORRECTIONS
 ========================================================= */
 
+function correctionColumns(){
+  return [
+    ['KM Start','KM'],['KM Sebelum Isi Bensin','KM'],['KM Sesudah Isi Bensin','KM'],['KM Finish Akhir','KM'],['KM Ganti Oli','KM'],
+    ['Oli Mesin','Pemeriksaan'],['Oli Power Steering','Pemeriksaan'],['Tali Kipas / V-Belt','Pemeriksaan'],['Aki','Pemeriksaan'],
+    ['Ban Kiri Depan','Pemeriksaan'],['Ban Kiri Belakang','Pemeriksaan'],['Ban Kanan Depan','Pemeriksaan'],['Ban Kanan Belakang','Pemeriksaan'],['Ban Serep','Pemeriksaan'],
+    ['Kunci Roda & Dongkrak','Pemeriksaan'],['Rem','Pemeriksaan'],['Kopling','Pemeriksaan'],['Setir','Pemeriksaan'],['Klakson','Pemeriksaan'],['Sabuk Pengaman','Pemeriksaan'],['Catatan','Pemeriksaan']
+  ];
+}
+function prepareDriverCorrectionForm(){
+  const panel=document.getElementById('driverCorrectionPanel');
+  if(!panel)return;
+  const isDriver=String(state.user?.role||'').toUpperCase()==='DRIVER';
+  panel.classList.toggle('hidden',!isDriver);
+  if(!isDriver)return;
+  const sel=document.getElementById('correctionInspection');
+  const col=document.getElementById('correctionColumn');
+  if(!sel||!col)return;
+  const mine=(state.inspections||[]).filter(r=>String(r['Driver ID']||'').toUpperCase()===driverIdOf(state.user).toUpperCase());
+  sel.innerHTML='<option value="">Pilih pemeriksaan</option>'+mine.slice().reverse().map(r=>`<option value="${escapeHtml(r['Inspection ID']||'')}">${escapeHtml(formatDate(r['Waktu Pemeriksaan']||r['Timestamp']))} — ${escapeHtml(r['Kode Aset']||'')} — ${escapeHtml(r['Nama Kendaraan']||'')}</option>`).join('');
+  col.innerHTML='<option value="">Pilih kolom</option>'+correctionColumns().map(x=>`<option value="${escapeHtml(x[0])}">${escapeHtml(x[0])} (${escapeHtml(x[1])})</option>`).join('');
+  sel.onchange=updateCorrectionOldValue; col.onchange=updateCorrectionOldValue;
+  const form=document.getElementById('driverCorrectionForm');
+  if(form&&!form.dataset.bound){form.addEventListener('submit',submitDriverCorrection);form.dataset.bound='1';}
+  updateCorrectionOldValue();
+}
+function updateCorrectionOldValue(){
+  const id=document.getElementById('correctionInspection')?.value||''; const key=document.getElementById('correctionColumn')?.value||'';
+  const row=(state.inspections||[]).find(r=>String(r['Inspection ID'])===String(id));
+  const old=document.getElementById('correctionOld'); if(old)old.value=row&&key?String(row[key]??''):'';
+}
+async function submitDriverCorrection(e){
+  e.preventDefault();
+  try{
+    if(String(state.user?.role||'').toUpperCase()!=='DRIVER')throw new Error('Form ini hanya untuk Driver.');
+    const inspectionId=document.getElementById('correctionInspection').value; const key=document.getElementById('correctionColumn').value;
+    const oldValue=document.getElementById('correctionOld').value; const newValue=document.getElementById('correctionNew').value.trim(); const reason=document.getElementById('correctionReason').value.trim();
+    if(!inspectionId||!key||!reason)throw new Error('Pemeriksaan, kolom, dan alasan wajib diisi.');
+    if(newValue===oldValue)throw new Error('Nilai baru sama dengan nilai lama.');
+    const r=await apiPost({action:'requestCorrection',role:'DRIVER',inspectionId,kolomKoreksi:key,nilaiLama:oldValue,nilaiBaru:newValue,alasan:reason,jenisKoreksi:key.startsWith('KM')?'KM':'Data',driverId:driverIdOf(state.user),namaDriver:driverNameOf(state.user)});
+    toast(r.message||'Koreksi diajukan.','success'); document.getElementById('correctionNew').value='';document.getElementById('correctionReason').value=''; await refreshAll(); prepareDriverCorrectionForm();
+  }catch(err){toast(err.message||'Gagal mengajukan koreksi.','error');}
+}
+
 function renderCorrections(){
 
   const body=document.getElementById(
@@ -5945,7 +5473,7 @@ function renderCorrections(){
       <td>
 
         ${
-          pending && isSuperAdmin()
+          pending && isAdmin()
           ?
 
           `
@@ -5981,10 +5509,10 @@ function renderCorrections(){
 
 async function approveCorrection(id){
 
-  if(!isSuperAdmin()){
+  if(!isAdmin()){
 
     toast(
-      'Hanya Super Admin yang dapat menyetujui koreksi.',
+      'Hanya Admin atau Super Admin yang dapat menyetujui koreksi.',
       'error'
     );
 
@@ -6010,7 +5538,7 @@ async function approveCorrection(id){
         userName:state.user.name ||
           state.user.namaAdmin,
 
-        role:'SUPER_ADMIN'
+        role:String(state.user.role||'ADMIN').toUpperCase()
 
       });
 
@@ -6035,10 +5563,10 @@ async function approveCorrection(id){
 
 async function rejectCorrection(id){
 
-  if(!isSuperAdmin()){
+  if(!isAdmin()){
 
     toast(
-      'Hanya Super Admin yang dapat menolak koreksi.',
+      'Hanya Admin atau Super Admin yang dapat menolak koreksi.',
       'error'
     );
 
@@ -6067,7 +5595,7 @@ async function rejectCorrection(id){
         userName:state.user.name ||
           state.user.namaAdmin,
 
-        role:'SUPER_ADMIN'
+        role:String(state.user.role||'ADMIN').toUpperCase()
 
       });
 
@@ -6189,28 +5717,66 @@ function renderInspections(){
 }
 
 
-async function showInspection(id){
-  const row=(state.inspections||[]).find(x=>String(x['Inspection ID'])===String(id));
+function showInspection(id){
+
+  const row=
+    state.inspections.find(
+      x=>String(x['Inspection ID'])===String(id)
+    );
+
   if(!row)return;
+
   let html='<div class="form-grid">';
+
   Object.keys(row).forEach(key=>{
+
     const value=row[key];
-    if(value===null||value===undefined||value==='')return;
-    html+=`<div class="form-group"><label>${escapeHtml(key)}</label><div style="padding:10px;background:#f8f9fa;border-radius:8px;font-size:13px;word-break:break-word;">${formatInspectionValue(key,value)}</div></div>`;
+
+    if(
+      value===null ||
+      value===undefined ||
+      value===''
+    )return;
+
+    html+=`
+
+      <div class="form-group">
+
+        <label>
+          ${escapeHtml(key)}
+        </label>
+
+        <div
+          style="
+            padding:10px;
+            background:#f8f9fa;
+            border-radius:8px;
+            font-size:13px;
+            word-break:break-word;
+          ">
+
+          ${formatInspectionValue(
+            key,
+            value
+          )}
+
+        </div>
+
+      </div>
+
+    `;
+
   });
-  html+='</div><div id="inspectionPhotosDetail" style="margin-top:15px"><div class="info-box">Memuat foto pemeriksaan dari Spreadsheet...</div></div>';
-  openModal('Detail Pemeriksaan',html);
-  try{
-    const result=await apiGet('photos',{inspectionId:id});
-    const photos=result.photos||[];
-    const box=document.getElementById('inspectionPhotosDetail');
-    if(!box)return;
-    if(!photos.length){box.innerHTML='<div class="info-box">Tidak ada foto tersimpan.</div>';return;}
-    box.innerHTML='<h3 style="margin:0 0 10px">📸 Foto Pemeriksaan</h3><div class="photo-preview-grid">'+photos.map(p=>`<div class="photo-preview-card"><img src="${escapeHtml(p.data)}" alt="${escapeHtml(p.namaFoto||p.kategori||'Foto')}"/><div style="margin-top:7px;font-weight:700">${escapeHtml(p.namaFoto||p.kategori||'Foto')}</div><div style="margin-top:5px">${statusBadge(p.status||'Baik')}</div>${p.kmValue!==''&&p.kmValue!=null?`<div style="margin-top:5px"><b>Angka KM:</b> ${escapeHtml(p.kmValue)}</div>`:''}${p.catatan?`<div style="margin-top:5px;color:#607d8b"><b>Catatan:</b> ${escapeHtml(p.catatan)}</div>`:''}</div>`).join('')+'</div>';
-  }catch(e){
-    const box=document.getElementById('inspectionPhotosDetail');if(box)box.innerHTML='<div class="info-box">Foto gagal dimuat: '+escapeHtml(e.message)+'</div>';
-  }
+
+  html+='</div>';
+
+  openModal(
+    'Detail Pemeriksaan',
+    html
+  );
+
 }
+
 
 function formatInspectionValue(
   key,
@@ -6559,22 +6125,6 @@ async function saveAdminForm(event){
    CHANGE PIN
 ========================================================= */
 
-async function changeAdminPin(){
-  const role=String(state.user?.role||'').toUpperCase();
-  if(role!=='ADMIN'){toast('Hanya Admin yang dapat mengganti PIN Admin miliknya sendiri.','error');return;}
-  const oldPin=(document.getElementById('oldAdminPin')?.value||'').trim();
-  const newPin=(document.getElementById('newAdminPin')?.value||'').trim();
-  if(!/^\d{6}$/.test(oldPin)){toast('PIN lama harus 6 digit.','error');return;}
-  if(!/^\d{6}$/.test(newPin)){toast('PIN baru harus 6 digit.','error');return;}
-  if(oldPin===newPin){toast('PIN baru harus berbeda dari PIN lama.','error');return;}
-  try{
-    const result=await apiPost({action:'changeAdminPin',oldPin:oldPin,newPin:newPin,userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin,role:'ADMIN'});
-    document.getElementById('oldAdminPin').value='';
-    document.getElementById('newAdminPin').value='';
-    toast(result.message||'PIN Admin berhasil diubah.','success');
-  }catch(e){toast(e.message||'Gagal mengganti PIN Admin.','error');}
-}
-
 async function changePin(){
 
   if(!isSuperAdmin()){
@@ -6769,7 +6319,6 @@ function statusBadge(status){
 
   if(
     lower.includes('perhatian') ||
-    lower.includes('perlu ganti') ||
     lower.includes('menunggu')
   ){
     cls='orange';
@@ -6908,10 +6457,7 @@ document.addEventListener(
     document.getElementById('adminLoginPanel')?.classList.add('hidden');
 
     buildInspectionOptions();
-    buildInspectionDetailFields();
 
-    restoreQrLocationLock();
-    if(state.pendingAssetCode){lockQrLocation().catch(()=>{});}
     buildMediaFields();
     startAutoFaceLogin();
 
