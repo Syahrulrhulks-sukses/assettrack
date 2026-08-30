@@ -294,6 +294,34 @@ textarea{
 .login-footer{margin-top:12px;text-align:center;font-size:11px;color:#78909c;}
 #loginPage{background:#fff;padding:0 12px;align-items:flex-start;}
 .login-card{margin:12px auto;}
+
+/* ===== DRIVER INSPECTION LOCK ===== */
+#page-inspection.driver-locked #inspectionAsset,
+#page-inspection.driver-locked #latitude,
+#page-inspection.driver-locked #longitude,
+#page-inspection.driver-locked #gpsAccuracy,
+#page-inspection.driver-locked #gpsLabel{
+  background:#f2f5f8 !important;
+  color:#123B6D !important;
+  font-weight:700;
+  pointer-events:none;
+}
+#page-inspection.driver-locked .driver-location-lock-note{display:block;}
+.driver-location-lock-note{display:none;margin:-4px 0 12px;color:#123B6D;font-size:12px;font-weight:700;}
+
+/* ===== MOBILE DASHBOARD COMPACT ===== */
+@media(max-width:600px){
+  .main{padding:10px;}
+  .page-title{margin-bottom:10px;}
+  .page-title h2{font-size:24px;}
+  .cards{grid-template-columns:1fr 1fr !important;gap:9px;margin-bottom:10px;}
+  .stat-card{padding:12px;border-radius:13px;}
+  .stat-card .label{font-size:12px;}
+  .stat-card .number{font-size:24px;margin-top:3px;}
+  .panel{padding:13px;margin-bottom:10px;border-radius:13px;}
+  #page-dashboard .panel{margin-bottom:10px;}
+}
+
 @media(max-width:480px){.login-card{margin:0 auto;min-height:100vh;border-left:0;border-right:0;border-radius:0;padding:14px;}.login-brand-white{margin:-14px -14px 14px;}.face-login-box{max-height:none;}}
 
 /* =========================
@@ -935,7 +963,7 @@ tr:hover td{
 
 @media(max-width:480px){
   .cards{
-    grid-template-columns:1fr;
+    grid-template-columns:1fr 1fr !important;
   }
 
   .login-card{
@@ -1659,6 +1687,7 @@ tr:hover td{
               <label>Lokasi GPS</label>
               <input id="gpsLabel" readonly>
             </div>
+            <div class="driver-location-lock-note">🔒 Lokasi terkunci dari proses Login Driver dan tidak dapat diubah.</div>
 
             <div class="full-width">
               <button
@@ -2325,6 +2354,10 @@ const state = {
   audit:[],
 
   selectedAsset:null,
+  qrLockGPS:null,
+  qrLockTime:0,
+  inspectionLockedAssetCode:'',
+  inspectionGPSLocked:false,
   pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim()
 
 };
@@ -2371,6 +2404,37 @@ async function apiGet(action,params={}){
   }
 
   return data;
+}
+
+
+/* ===== QR DRIVER LOCK: lokasi saat QR dibuka menjadi titik kendaraan ===== */
+function haversineMeters(a,b){
+  if(!a||!b)return Infinity;
+  const R=6371000, p1=Number(a.latitude)*Math.PI/180, p2=Number(b.latitude)*Math.PI/180;
+  const dp=(Number(b.latitude)-Number(a.latitude))*Math.PI/180;
+  const dl=(Number(b.longitude)-Number(a.longitude))*Math.PI/180;
+  const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));
+}
+function lockQrLocation(){
+  if(!state.pendingAssetCode || !navigator.geolocation)return Promise.resolve(null);
+  return new Promise((resolve,reject)=>{
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const c=pos.coords;
+      state.qrLockGPS={latitude:Number(c.latitude),longitude:Number(c.longitude),accuracy:Number(c.accuracy||0)};
+      state.qrLockTime=Date.now();
+      sessionStorage.setItem('AQP_QR_LOCK_'+state.pendingAssetCode,JSON.stringify({gps:state.qrLockGPS,time:state.qrLockTime}));
+      resolve(state.qrLockGPS);
+    },reject,{enableHighAccuracy:true,timeout:3500,maximumAge:0});
+  });
+}
+function restoreQrLocationLock(){
+  if(!state.pendingAssetCode)return null;
+  try{
+    const x=JSON.parse(sessionStorage.getItem('AQP_QR_LOCK_'+state.pendingAssetCode)||'null');
+    if(x&&x.gps&&Date.now()-Number(x.time||0)<10*60*1000){state.qrLockGPS=x.gps;state.qrLockTime=Number(x.time);return x.gps;}
+  }catch(_){ }
+  return null;
 }
 
 
@@ -2762,10 +2826,16 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
   if(state.loginBusy)return;
   state.loginBusy=true;
   try{
-    setLoginStatus('Verifikasi ID dan wajah...',false,'driver');
-    const gps=await requestLoginLocationFast();state.loginGPS=gps;
-    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
-    state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps};
+    setLoginStatus('Verifikasi ID, wajah dan lokasi...',false,'driver');
+    if(!state.pendingAssetCode) throw new Error('Driver wajib masuk melalui QR Code kendaraan.');
+    const qrGps=state.qrLockGPS || restoreQrLocationLock() || await lockQrLocation();
+    if(!qrGps) throw new Error('Lokasi QR kendaraan belum terkunci. Aktifkan izin lokasi.');
+    const gps=await requestLoginLocationFast();
+    const distanceToVehicle=haversineMeters(qrGps,gps);
+    if(distanceToVehicle>2) throw new Error('Lokasi login terlalu jauh dari kendaraan ('+distanceToVehicle.toFixed(1)+' m). Maksimal 2 meter dari QR kendaraan.');
+    state.loginGPS=gps;
+    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
+    state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
     stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
   finally{state.loginBusy=false;}
@@ -2774,7 +2844,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
 function requestLoginLocationFast(){
   return new Promise((resolve,reject)=>{
     if(!navigator.geolocation){reject(new Error('Browser tidak mendukung lokasi.'));return;}
-    navigator.geolocation.getCurrentPosition(p=>{const c=p.coords;resolve({latitude:Number(c.latitude),longitude:Number(c.longitude),accuracy:Number(c.accuracy||0)});},()=>reject(new Error('Izin lokasi diperlukan untuk login Driver.')),{enableHighAccuracy:false,timeout:2500,maximumAge:30000});
+    navigator.geolocation.getCurrentPosition(p=>{const c=p.coords;resolve({latitude:Number(c.latitude),longitude:Number(c.longitude),accuracy:Number(c.accuracy||0)});},()=>reject(new Error('Izin lokasi diperlukan untuk login Driver.')),{enableHighAccuracy:true,timeout:3500,maximumAge:0});
   });
 }
 function clearLoginFieldsImmediately(){
@@ -3079,29 +3149,42 @@ async function enterApplication(){
   apiGet('menuConfig').then(r=>applyMenuConfig(r.menuConfig||[])).catch(()=>{});
 
   setInspectionGPS(state.loginGPS);
-  showPage('dashboard');
+  const driverQr=role==='DRIVER' && state.pendingAssetCode;
+  showPage(driverQr?'inspection':'dashboard');
   refreshAll().catch(error=>{
-    document.getElementById('systemStatus').innerHTML=
-      '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
+    const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge red">ERROR</span> '+escapeHtml(error.message);
   });
-  if(state.pendingAssetCode){
-    const waitForAsset=()=>{
-      if(state.assets && state.assets.length)openPendingAsset();
-      else setTimeout(waitForAsset,150);
-    };
-    waitForAsset();
+  if(driverQr){
+    // Buka pemeriksaan langsung; tidak menunggu bootstrap penuh.
+    openPendingAssetFast().catch(()=>{});
   }
 }
 
-function openPendingAsset(){
-  const code=String(state.pendingAssetCode || '').trim();if(!code)return;
-  const asset=state.assets.find(a=>String(a.code).toUpperCase()===code.toUpperCase());
-  if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');state.pendingAssetCode='';return;}
-  showPage('inspection');
-  const assetSelect=document.getElementById('inspectionAsset');
-  if(assetSelect){assetSelect.value=asset.code;onInspectionAssetChange();}
-  populateDriverSelect();applyLoggedInDriverToInspection();state.pendingAssetCode='';
+function lockInspectionAsset(asset){
+  const code=String(asset?.code||'').trim(); if(!code)return;
+  state.inspectionLockedAssetCode=code;
+  const sel=document.getElementById('inspectionAsset');
+  if(sel){sel.value=code;sel.disabled=String(state.user?.role||'').toUpperCase()==='DRIVER';}
+  const gpsBtn=document.querySelector('#page-inspection button[onclick="getGPS()"]');
+  if(gpsBtn && String(state.user?.role||'').toUpperCase()==='DRIVER'){gpsBtn.disabled=true;gpsBtn.style.display='none';}
+  state.inspectionGPSLocked=String(state.user?.role||'').toUpperCase()==='DRIVER';
 }
+async function openPendingAssetFast(){
+  const code=String(state.pendingAssetCode||'').trim();if(!code)return;
+  let asset=state.assets.find(a=>String(a.code).toUpperCase()===code.toUpperCase());
+  if(!asset){
+    try{const r=await apiGet('asset',{kode:code});asset=r.asset||null;if(asset){state.assets=[asset,...state.assets.filter(a=>String(a.code).toUpperCase()!==code.toUpperCase())];}}catch(_){ }
+  }
+  if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');return;}
+  showPage('inspection');
+  const inspectionPage=document.getElementById('page-inspection');
+  if(inspectionPage && String(state.user?.role||'').toUpperCase()==='DRIVER') inspectionPage.classList.add('driver-locked');
+  const assetSelect=document.getElementById('inspectionAsset');
+  if(assetSelect){assetSelect.value=asset.code;assetSelect.disabled=String(state.user?.role||'').toUpperCase()==='DRIVER';onInspectionAssetChange();}
+  populateDriverSelect();applyLoggedInDriverToInspection();lockInspectionAsset(asset);
+  state.pendingAssetCode='';
+}
+function openPendingAsset(){openPendingAssetFast();}
 
 function clearApplicationState(){
   state.user=null;
@@ -3276,8 +3359,14 @@ function applyBootstrapData(bootstrap){
   state.admins=isAdmin?(bootstrap.admins||[]):[]; state.km=isAdmin?(bootstrap.km||[]):[];
   state.corrections=bootstrap.corrections||[]; state.audit=isAdmin?(bootstrap.audit||[]):[];
   populateDriverLogin(); updateDashboard(); populateAssetSelects(); populateDriverSelect();
-  renderAssets(); renderDrivers(); renderInspections();
-  if(isAdmin){renderKM();renderCorrections();renderAudit();renderAdmins();}
+  const activePage=document.querySelector('.page.active')?.id || 'page-dashboard';
+  if(activePage==='page-assets') renderAssets();
+  else if(activePage==='page-drivers') renderDrivers();
+  else if(activePage==='page-reports') renderInspections();
+  else if(activePage==='page-km' && isAdmin) renderKM();
+  else if(activePage==='page-corrections') renderCorrections();
+  else if(activePage==='page-audit' && isAdmin) renderAudit();
+  else if(activePage==='page-admins' && isAdmin) renderAdmins();
 }
 function bootstrapCacheKey(role){return 'AQP_BOOTSTRAP_V2_'+String(role||'').toUpperCase();}
 function readBootstrapCache(role){try{const x=JSON.parse(localStorage.getItem(bootstrapCacheKey(role))||'null');return x&&x.data?x.data:null;}catch(_){return null;}}
@@ -3287,7 +3376,7 @@ async function refreshAll(){
   const role=String(state.user.role).toUpperCase();
   const cached=readBootstrapCache(role);
   if(cached){applyBootstrapData(cached); const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Data siap.';}
-  else {const st=document.getElementById('systemStatus'); if(st)st.textContent='Memuat data...';}
+  else {const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Menyiapkan data...';}
   apiGet('bootstrap',{role:role}).then(bootstrap=>{
     writeBootstrapCache(role,bootstrap);
     if(state.user&&String(state.user.role).toUpperCase()===role)applyBootstrapData(bootstrap);
@@ -3852,6 +3941,10 @@ function onInspectionAssetChange(){
   const code=document
     .getElementById('inspectionAsset')
     .value;
+  if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.inspectionLockedAssetCode && code!==state.inspectionLockedAssetCode){
+    document.getElementById('inspectionAsset').value=state.inspectionLockedAssetCode;
+    return;
+  }
 
   const asset=
     state.assets.find(
@@ -4079,11 +4172,21 @@ function buildMediaFields(){
 }
 
 
+function setInspectionGPS(gps){
+  if(!gps)return;
+  const lat=document.getElementById('latitude'),lng=document.getElementById('longitude'),acc=document.getElementById('gpsAccuracy'),label=document.getElementById('gpsLabel');
+  if(lat)lat.value=Number(gps.latitude).toFixed(7);
+  if(lng)lng.value=Number(gps.longitude).toFixed(7);
+  if(acc)acc.value=String(gps.accuracy??'');
+  if(label)label.value=Number(gps.latitude).toFixed(7)+', '+Number(gps.longitude).toFixed(7);
+}
+
 /* =========================================================
    GPS
 ========================================================= */
 
 function getGPS(){
+  if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.inspectionGPSLocked){toast('Lokasi Driver sudah terkunci dari proses login dan tidak dapat diubah.','error');return;}
   if(!navigator.geolocation){
     toast(
       'Browser tidak mendukung GPS.',
@@ -4349,6 +4452,11 @@ async function saveInspectionForm(event){
         document.getElementById(
           'gpsLabel'
         ).value,
+
+      role:String(state.user?.role||'').toUpperCase(),
+      qrAssetCode:state.inspectionLockedAssetCode || state.pendingAssetCode || state.user?.qrAssetCode || '',
+      lockedLatitude:state.user?.loginGPS?.latitude || '',
+      lockedLongitude:state.user?.loginGPS?.longitude || '',
 
       kmStart:
         document.getElementById(
@@ -6453,6 +6561,8 @@ document.addEventListener(
 
     buildInspectionOptions();
 
+    restoreQrLocationLock();
+    if(state.pendingAssetCode){lockQrLocation().catch(()=>{});}
     buildMediaFields();
     startAutoFaceLogin();
 
