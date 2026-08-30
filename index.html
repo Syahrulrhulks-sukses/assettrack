@@ -837,6 +837,20 @@ tr:hover td{
   padding:8px;
 }
 
+/* ===== FOTO PEMERIKSAAN + CATATAN ===== */
+.photo-media-item{border:1px solid #eceff1;border-radius:12px;padding:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.03);}
+.photo-media-item .media-title{font-weight:800;font-size:13px;margin-bottom:8px;color:#455a64;}
+.photo-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px;}
+.photo-preview-card{border:1px solid #eceff1;border-radius:10px;padding:8px;background:#fafafa;}
+.photo-preview-card img{width:100%;height:150px;object-fit:cover;border-radius:8px;background:#eee;display:block;}
+.photo-meta{display:grid;gap:7px;margin-top:8px;}
+.photo-meta select,.photo-meta input{width:100%;}
+.photo-km-value{font-weight:700;}
+.daily-inspection-banner{padding:12px 14px;border-radius:12px;margin-bottom:14px;background:#fff4d6;border:1px solid #f2d28a;color:#6b4f00;font-size:13px;line-height:1.5;}
+.daily-inspection-banner.hidden{display:none!important;}
+.daily-locked-note{padding:9px 12px;border-radius:9px;background:#f5f7f8;color:#607d8b;font-size:12px;margin-top:6px;}
+@media(max-width:600px){.photo-preview-grid{grid-template-columns:1fr;}.photo-preview-card img{height:180px;}}
+
 /* =========================
    MODAL
 ========================= */
@@ -1675,6 +1689,8 @@ tr:hover td{
 
       <div class="panel">
 
+        <div id="dailyInspectionBanner" class="daily-inspection-banner hidden"></div>
+
         <form id="inspectionForm">
 
           <div class="form-grid">
@@ -1956,6 +1972,7 @@ tr:hover td{
             </button>
 
             <button
+              id="inspectionSubmitBtn"
               type="submit"
               class="primary-btn"
               style="width:auto">
@@ -2413,6 +2430,8 @@ const state = {
   qrLockTime:0,
   inspectionLockedAssetCode:'',
   inspectionGPSLocked:false,
+  dailyInspectionId:'',
+  dailyInspectionMode:false,
   pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim()
 
 };
@@ -3237,6 +3256,9 @@ async function openPendingAssetFast(){
   const assetSelect=document.getElementById('inspectionAsset');
   if(assetSelect){assetSelect.value=asset.code;assetSelect.disabled=String(state.user?.role||'').toUpperCase()==='DRIVER';onInspectionAssetChange();}
   populateDriverSelect();applyLoggedInDriverToInspection();lockInspectionAsset(asset);
+  if(String(state.user?.role||'').toUpperCase()==='DRIVER'){
+    try{await loadDailyInspectionForAsset(asset.code);}catch(_){ }
+  }
   state.pendingAssetCode='';
 }
 function openPendingAsset(){openPendingAssetFast();}
@@ -3253,6 +3275,8 @@ function clearApplicationState(){
   state.km=[];
   state.corrections=[];
   state.audit=[];
+  state.dailyInspectionId='';
+  state.dailyInspectionMode=false;
 }
 
 function resetLoginForm(){
@@ -4167,63 +4191,138 @@ const VIDEO_MAP_FRONTEND={
 
 
 function buildMediaFields(){
-
-  const photoBox=document.getElementById(
-    'photoFields'
-  );
-
-  const videoBox=document.getElementById(
-    'videoFields'
-  );
-
+  const photoBox=document.getElementById('photoFields');
+  const videoBox=document.getElementById('videoFields');
+  if(!photoBox||!videoBox)return;
   photoBox.innerHTML='';
-
   videoBox.innerHTML='';
 
-  Object.entries(
-    PHOTO_MAP_FRONTEND
-  ).forEach(([key,label])=>{
-
+  Object.entries(PHOTO_MAP_FRONTEND).forEach(([key,label])=>{
+    const multiple=key==='body' ? ' multiple' : '';
+    const kmClass=key.startsWith('km') ? ' photo-is-km' : '';
     photoBox.innerHTML+=`
-
-      <div class="media-item">
-
-        <label>${escapeHtml(label)}</label>
-
-        <input
-          type="file"
-          id="photo_${key}"
-          accept="image/*"
-          capture="environment">
-
-      </div>
-
-    `;
-
+      <div class="photo-media-item${kmClass}" data-photo-key="${escapeHtml(key)}">
+        <div class="media-title">${escapeHtml(label)}</div>
+        <input type="file" id="photo_${escapeHtml(key)}" accept="image/*" capture="environment"${multiple}
+               onchange="previewInspectionPhotos('${escapeJs(key)}')">
+        <div id="photoPreview_${escapeHtml(key)}" class="photo-preview-grid"></div>
+      </div>`;
   });
 
-  Object.entries(
-    VIDEO_MAP_FRONTEND
-  ).forEach(([key,label])=>{
-
+  Object.entries(VIDEO_MAP_FRONTEND).forEach(([key,label])=>{
     videoBox.innerHTML+=`
-
       <div class="media-item">
-
         <label>${escapeHtml(label)}</label>
-
-        <input
-          type="file"
-          id="video_${key}"
-          accept="video/*"
-          capture="environment">
-
-      </div>
-
-    `;
-
+        <input type="file" id="video_${escapeHtml(key)}" accept="video/*" capture="environment">
+      </div>`;
   });
+}
 
+function photoStatusOptions(selected='Baik'){
+  const opts=['Baik','Perlu Perhatian','Perlu Ganti','Rusak','Catatan Lainnya'];
+  return opts.map(x=>`<option value="${escapeHtml(x)}" ${x===selected?'selected':''}>${escapeHtml(x)}</option>`).join('');
+}
+
+function previewInspectionPhotos(key){
+  const input=document.getElementById('photo_'+key);
+  const box=document.getElementById('photoPreview_'+key);
+  if(!input||!box)return;
+  box.innerHTML='';
+  Array.from(input.files||[]).forEach((file,index)=>{
+    const card=document.createElement('div');
+    card.className='photo-preview-card';
+    card.innerHTML=`
+      <img id="photoThumb_${escapeHtml(key)}_${index}" alt="Pratinjau foto">
+      <div class="photo-meta">
+        <select data-photo-status="${escapeHtml(key)}" data-index="${index}" aria-label="Status foto">
+          ${photoStatusOptions('Baik')}
+        </select>
+        ${key.startsWith('km') ? `<input class="photo-km-value" data-photo-km="${escapeHtml(key)}" data-index="${index}" type="number" step="0.1" inputmode="decimal" placeholder="Angka KM yang terbaca pada foto">` : ''}
+        <input data-photo-note="${escapeHtml(key)}" data-index="${index}" type="text" placeholder="Catatan foto (opsional)">
+      </div>`;
+    box.appendChild(card);
+    const img=card.querySelector('img');
+    const reader=new FileReader();
+    reader.onload=e=>{img.src=e.target.result;};
+    reader.readAsDataURL(file);
+  });
+}
+
+function collectPhotoMeta(key,index){
+  const root=document.getElementById('photoPreview_'+key);
+  const status=root?.querySelector(`[data-photo-status="${CSS.escape(key)}"][data-index="${index}"]`)?.value || 'Baik';
+  const note=root?.querySelector(`[data-photo-note="${CSS.escape(key)}"][data-index="${index}"]`)?.value || '';
+  const kmEl=root?.querySelector(`[data-photo-km="${CSS.escape(key)}"][data-index="${index}"]`);
+  return {status,catatan:note,kmValue:kmEl?.value || ''};
+}
+
+function setDailyInspectionUI(enabled,row){
+  state.dailyInspectionMode=!!enabled;
+  state.dailyInspectionId=enabled ? String(row?.['Inspection ID']||'') : '';
+  const banner=document.getElementById('dailyInspectionBanner');
+  const btn=document.getElementById('inspectionSubmitBtn');
+  if(enabled){
+    if(banner){banner.classList.remove('hidden');banner.innerHTML='🔒 <b>Pemeriksaan hari ini sudah tersimpan.</b> Data awal tidak dapat diedit. Barcode kendaraan ini tetap dapat digunakan sampai akhir hari untuk memperbarui data KM, terutama <b>KM Finish Akhir</b>. Perubahan data pemeriksaan lainnya harus melalui menu Koreksi.';}
+    if(btn)btn.textContent='↻ Update KM Hari Ini';
+    document.querySelectorAll('#inspectionForm input,#inspectionForm select,#inspectionForm textarea').forEach(el=>{
+      const id=el.id||'';
+      const isKmPhotoMeta=!!el.closest?.('.photo-is-km');
+      const allowed=id==='kmBeforeFuel'||id==='kmAfterFuel'||id==='kmFinish'||id==='kmOilChange'||id==='inspectionSubmitBtn'||id.startsWith('photo_km')||isKmPhotoMeta;
+      if(el.type==='file') el.disabled=!id.startsWith('photo_km');
+      else if(isKmPhotoMeta) el.disabled=false;
+      else if(['kmBeforeFuel','kmAfterFuel','kmFinish','kmOilChange'].includes(id)) el.disabled=false;
+      else if(id==='inspectionSubmitBtn') el.disabled=false;
+      else el.disabled=true;
+    });
+    document.querySelectorAll('#videoFields input').forEach(el=>el.disabled=true);
+  }else{
+    if(banner){banner.classList.add('hidden');banner.innerHTML='';}
+    if(btn)btn.textContent='💾 Simpan Pemeriksaan';
+    document.querySelectorAll('#inspectionForm input,#inspectionForm select,#inspectionForm textarea').forEach(el=>{
+      if(el.id==='inspectionAsset' && String(state.user?.role||'').toUpperCase()==='DRIVER') return;
+      if(el.id==='inspectionDriver' && String(state.user?.role||'').toUpperCase()==='DRIVER') return;
+      if(['latitude','longitude','gpsAccuracy','gpsLabel','inspectionVehicle','inspectionPlate'].includes(el.id)) return;
+      el.disabled=false;
+    });
+    document.querySelectorAll('#videoFields input').forEach(el=>el.disabled=false);
+  }
+}
+
+async function loadDailyInspectionForAsset(code){
+  if(!code)return null;
+  const role=String(state.user?.role||'').toUpperCase();
+  if(role!=='DRIVER')return null;
+  const driverId=driverIdOf(state.user);
+  let row=(state.inspections||[]).slice().reverse().find(x=>String(x['Kode Aset']||'').toUpperCase()===String(code).toUpperCase() && String(x['Driver ID']||'').toUpperCase()===String(driverId).toUpperCase() && toDateInput(x['Timestamp'])===toDateInput(new Date()));
+  if(!row){
+    try{const r=await apiGet('dailyinspection',{kodeAset:code,driverId:driverId});row=r.inspection||null;}catch(_){row=null;}
+  }
+  if(row) applyDailyInspectionToForm(row);
+  return row;
+}
+
+function applyDailyInspectionToForm(row){
+  if(!row)return;
+  const set=(id,val)=>{const e=document.getElementById(id);if(e)e.value=val==null?'':val;};
+  set('inspectionTime',toDateTimeLocal(row['Waktu Pemeriksaan']||row['Timestamp']));
+  set('kmStart',row['KM Start']);
+  set('kmBeforeFuel',row['KM Sebelum Isi Bensin']);
+  set('kmAfterFuel',row['KM Sesudah Isi Bensin']);
+  set('kmFinish',row['KM Finish Akhir']);
+  set('kmOilChange',row['KM Ganti Oli']);
+  set('statusPemeriksaan',row['Status Pemeriksaan']);
+  set('inspectionNotes',row['Catatan']);
+  ['oliMesin','oliPowerSteering','taliKipasVbelt','aki','banKiriDepan','banKiriBelakang','banKananDepan','banKananBelakang','banSerep','kunciRodaDongkrak','rem','kopling','setir','klakson','sabukPengaman'].forEach(id=>{
+    const map={oliMesin:'Oli Mesin',oliPowerSteering:'Oli Power Steering',taliKipasVbelt:'Tali Kipas / V-Belt',aki:'Aki',banKiriDepan:'Ban Kiri Depan',banKiriBelakang:'Ban Kiri Belakang',banKananDepan:'Ban Kanan Depan',banKananBelakang:'Ban Kanan Belakang',banSerep:'Ban Serep',kunciRodaDongkrak:'Kunci Roda & Dongkrak',rem:'Rem',kopling:'Kopling',setir:'Setir',klakson:'Klakson',sabukPengaman:'Sabuk Pengaman'};
+    set(id,row[map[id]]);
+  });
+  setDailyInspectionUI(true,row);
+}
+
+function toDateTimeLocal(value){
+  if(!value)return getCurrentDateTimeLocal();
+  const d=new Date(value);if(isNaN(d.getTime()))return String(value).slice(0,16);
+  const off=d.getTimezoneOffset();const local=new Date(d.getTime()-off*60000);return local.toISOString().slice(0,16);
 }
 
 
@@ -4316,6 +4415,31 @@ async function saveInspectionForm(event){
 
   try{
 
+    if(state.dailyInspectionMode && state.dailyInspectionId){
+      const code=document.getElementById('inspectionAsset').value;
+      const finish=document.getElementById('kmFinish').value;
+      const beforeFuel=document.getElementById('kmBeforeFuel').value;
+      const afterFuel=document.getElementById('kmAfterFuel').value;
+      const oil=document.getElementById('kmOilChange').value;
+      const finishInput=document.getElementById('photo_kmFinishAkhir');
+      const kmMedia={};
+      for(const key of ['kmStart','kmSebelumIsiBensin','kmSesudahIsiBensin','kmFinishAkhir']){
+        const input=document.getElementById('photo_'+key);
+        if(input?.files?.length){
+          kmMedia[key]=[];
+          for(let i=0;i<input.files.length;i++){
+            const item=await fileToMedia(input.files[i],false);
+            kmMedia[key].push(Object.assign(item,collectPhotoMeta(key,i)));
+          }
+        }
+      }
+      const result=await apiPost({action:'updateDailyKM',inspectionId:state.dailyInspectionId,kodeAset:code,driverId:driverIdOf(state.user),namaDriver:driverNameOf(state.user),role:'DRIVER',qrAssetCode:state.inspectionLockedAssetCode||state.user?.qrAssetCode||code,kmBeforeFuel:beforeFuel,kmAfterFuel:afterFuel,kmFinishAkhir:finish,kmOilChange:oil,media:kmMedia});
+      toast(result.message,'success');
+      await refreshAll();
+      if(result.inspection) applyDailyInspectionToForm(result.inspection);
+      return;
+    }
+
     const code=document
       .getElementById('inspectionAsset')
       .value;
@@ -4377,27 +4501,16 @@ async function saveInspectionForm(event){
       Foto
     */
 
-    for(
-      const [key] of Object.entries(
-        PHOTO_MAP_FRONTEND
-      )
-    ){
-
-      const input=document.getElementById(
-        'photo_'+key
-      );
-
+    for(const [key] of Object.entries(PHOTO_MAP_FRONTEND)){
+      const input=document.getElementById('photo_'+key);
       if(input?.files?.length){
-
-        media[key]=[
-          await fileToMedia(
-            input.files[0],
-            false
-          )
-        ];
-
+        media[key]=[];
+        for(let i=0;i<input.files.length;i++){
+          const item=await fileToMedia(input.files[i],false);
+          const meta=collectPhotoMeta(key,i);
+          media[key].push(Object.assign(item,meta));
+        }
       }
-
     }
 
     /*
@@ -4633,8 +4746,8 @@ async function fileToMedia(file,isVideo){
 
     const data=await compressImage(
       file,
-      1280,
-      .78
+      960,
+      .62
     );
 
     return {
@@ -4815,6 +4928,11 @@ function resetInspectionForm(){
   document.getElementById(
     'inspectionPlate'
   ).value='';
+
+  state.dailyInspectionId='';
+  state.dailyInspectionMode=false;
+  setDailyInspectionUI(false);
+  document.querySelectorAll('[id^=photoPreview_]').forEach(el=>el.innerHTML='');
 
 }
 
@@ -5859,66 +5977,28 @@ function renderInspections(){
 }
 
 
-function showInspection(id){
-
-  const row=
-    state.inspections.find(
-      x=>String(x['Inspection ID'])===String(id)
-    );
-
+async function showInspection(id){
+  const row=(state.inspections||[]).find(x=>String(x['Inspection ID'])===String(id));
   if(!row)return;
-
   let html='<div class="form-grid">';
-
   Object.keys(row).forEach(key=>{
-
     const value=row[key];
-
-    if(
-      value===null ||
-      value===undefined ||
-      value===''
-    )return;
-
-    html+=`
-
-      <div class="form-group">
-
-        <label>
-          ${escapeHtml(key)}
-        </label>
-
-        <div
-          style="
-            padding:10px;
-            background:#f8f9fa;
-            border-radius:8px;
-            font-size:13px;
-            word-break:break-word;
-          ">
-
-          ${formatInspectionValue(
-            key,
-            value
-          )}
-
-        </div>
-
-      </div>
-
-    `;
-
+    if(value===null||value===undefined||value==='')return;
+    html+=`<div class="form-group"><label>${escapeHtml(key)}</label><div style="padding:10px;background:#f8f9fa;border-radius:8px;font-size:13px;word-break:break-word;">${formatInspectionValue(key,value)}</div></div>`;
   });
-
-  html+='</div>';
-
-  openModal(
-    'Detail Pemeriksaan',
-    html
-  );
-
+  html+='</div><div id="inspectionPhotosDetail" style="margin-top:15px"><div class="info-box">Memuat foto pemeriksaan dari Spreadsheet...</div></div>';
+  openModal('Detail Pemeriksaan',html);
+  try{
+    const result=await apiGet('photos',{inspectionId:id});
+    const photos=result.photos||[];
+    const box=document.getElementById('inspectionPhotosDetail');
+    if(!box)return;
+    if(!photos.length){box.innerHTML='<div class="info-box">Tidak ada foto tersimpan.</div>';return;}
+    box.innerHTML='<h3 style="margin:0 0 10px">📸 Foto Pemeriksaan</h3><div class="photo-preview-grid">'+photos.map(p=>`<div class="photo-preview-card"><img src="${escapeHtml(p.data)}" alt="${escapeHtml(p.namaFoto||p.kategori||'Foto')}"/><div style="margin-top:7px;font-weight:700">${escapeHtml(p.namaFoto||p.kategori||'Foto')}</div><div style="margin-top:5px">${statusBadge(p.status||'Baik')}</div>${p.kmValue!==''&&p.kmValue!=null?`<div style="margin-top:5px"><b>Angka KM:</b> ${escapeHtml(p.kmValue)}</div>`:''}${p.catatan?`<div style="margin-top:5px;color:#607d8b"><b>Catatan:</b> ${escapeHtml(p.catatan)}</div>`:''}</div>`).join('')+'</div>';
+  }catch(e){
+    const box=document.getElementById('inspectionPhotosDetail');if(box)box.innerHTML='<div class="info-box">Foto gagal dimuat: '+escapeHtml(e.message)+'</div>';
+  }
 }
-
 
 function formatInspectionValue(
   key,
@@ -6477,6 +6557,7 @@ function statusBadge(status){
 
   if(
     lower.includes('perhatian') ||
+    lower.includes('perlu ganti') ||
     lower.includes('menunggu')
   ){
     cls='orange';
