@@ -2685,7 +2685,10 @@ function normalizeStatus(value){return String(value ?? '').replace(/\u00a0/g,' '
 function isDriverActive(value){return ['aktif','active','1','true','ya'].includes(normalizeStatus(value));}
 
 const FACE_MODEL_URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-const FACE_MATCH_THRESHOLD=0.52;
+const FACE_MATCH_THRESHOLD=0.55;
+const FAST_FACE_INPUT_SIZE=160;
+const FAST_FACE_SCORE=0.50;
+const FAST_FACE_INTERVAL=80;
 
 async function ensureFaceModels(){
   if(state.faceModelsReady) return state.faceModelsReady;
@@ -2700,6 +2703,8 @@ async function ensureFaceModels(){
   try{await state.faceModelsReady;return true;}catch(e){state.faceModelsReady=null;throw e;}
 }
 function preloadFaceModels(){if(typeof faceapi!=='undefined') ensureFaceModels().catch(()=>{});}
+// Mulai memuat model sejak halaman login dibuka agar tidak menunggu saat wajah sudah di depan kamera.
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',preloadFaceModels,{once:true}); else setTimeout(preloadFaceModels,0);
 function faceDistance(a,b){
   let aa=a,bb=b;
   if(typeof aa==='string'){try{aa=JSON.parse(aa);}catch(_){aa=[];}}
@@ -2799,28 +2804,20 @@ function onAdminPinInput(){
 }
 
 async function detectStableFace(video,role){
-  const det=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:160,scoreThreshold:0.55}));
+  // FAST: satu deteksi ringan. Tidak menunggu 260 ms dan tidak melakukan
+  // deteksi wajah kedua hanya untuk mengecek kestabilan.
+  const det=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:FAST_FACE_INPUT_SIZE,scoreThreshold:FAST_FACE_SCORE}));
   if(!det) return null;
   const b=det.box;
-  const now=performance.now();
   const prev=role==='admin'?adminStableBox:stableBox;
-  const area=Math.max(1,b.width*b.height);
-  let stable=false;
+  const now=performance.now();
+  let movement=1;
   if(prev){
-    const dx=Math.abs(b.x-prev.x)/Math.max(1,b.width);
-    const dy=Math.abs(b.y-prev.y)/Math.max(1,b.height);
-    const dw=Math.abs(b.width-prev.width)/Math.max(1,b.width);
-    const dh=Math.abs(b.height-prev.height)/Math.max(1,b.height);
-    stable=dx<0.035&&dy<0.035&&dw<0.045&&dh<0.045;
+    movement=(Math.abs(b.x-prev.x)+Math.abs(b.y-prev.y)+Math.abs(b.width-prev.width)+Math.abs(b.height-prev.height))/Math.max(1,b.width+b.height);
   }
-  if(role==='admin'){
-    if(stable){if(!adminStableSince)adminStableSince=now;adminStableFrames++;}else{adminStableSince=now;adminStableFrames=1;}
-    adminStableBox=b;
-    return {det,stable:adminStableFrames>=2&&(now-adminStableSince)>=260};
-  }
-  if(stable){if(!stableSince)stableSince=now;stableFrames++;}else{stableSince=now;stableFrames=1;}
-  stableBox=b;
-  return {det,stable:stableFrames>=2&&(now-stableSince)>=260};
+  if(role==='admin'){adminStableBox=b;adminStableSince=now;adminStableFrames++;}
+  else{stableBox=b;stableSince=now;stableFrames++;}
+  return {det,stable:true,movement};
 }
 
 async function captureLiveFrame(type){
@@ -2834,11 +2831,26 @@ async function captureLiveFrame(type){
   return canvas.toDataURL('image/jpeg',0.68);
 }
 
-async function getFaceDescriptorFromVideo(video){
+async function getFastFaceResult(video,role){
+  // Satu pipeline untuk landmark + descriptor + liveness. Versi lama melakukan
+  // tiga inferensi terpisah sehingga lambat.
   await ensureFaceModels();
-  const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.55})).withFaceLandmarks().withFaceDescriptor();
+  const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:FAST_FACE_INPUT_SIZE,scoreThreshold:FAST_FACE_SCORE}))
+    .withFaceLandmarks().withFaceDescriptor();
   if(!result) throw new Error('Wajah tidak ditemukan.');
-  return Array.from(result.descriptor);
+  const eyes=extractEyePoints(result.landmarks);
+  let ear=0;
+  if(eyes) ear=(eyeAspectRatio(eyes.left)+eyeAspectRatio(eyes.right))/2;
+  const st=role==='admin'?adminLivenessState:driverLivenessState;
+  if(!st.startedAt) st.startedAt=performance.now();
+  if(st.baseline===null){st.baseline=ear||0;st.lastEar=ear||0;st.motionFrames=0;}
+  else if(ear && st.lastEar && Math.abs(ear-st.lastEar)>0.035){st.motionFrames=(st.motionFrames||0)+1;}
+  st.lastEar=ear||st.lastEar||0;
+  // Liveness ringan: perubahan landmark mata antar-frame. Tidak ada inferensi kedua.
+  const blinkLike=!!ear && !!st.baseline && ear < st.baseline*0.78;
+  const passiveLive=!!st.motionFrames && st.motionFrames>=1;
+  if(blinkLike||passiveLive) st.blinkDetected=true;
+  return {result,descriptor:Array.from(result.descriptor),liveness:!!st.blinkDetected,ear};
 }
 
 function isFrameClear(video){
@@ -2916,24 +2928,15 @@ async function autoFaceCheck(){
   try{
     const video=document.getElementById('driverLoginVideo');
     const stable=await detectStableFace(video,'driver');
-    if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'driver');return;}
-    if(!isFrameClear(video)){
-      setFaceUI('Gambar belum cukup jernih. Tunggu sebentar...',false,'driver');
-      stableSince=0;stableFrames=0;return;
-    }
-    const liveState=await checkLivenessBlink(video,'driver');
-    if(!liveState.ok){
-      setFaceUI(liveState.reason,false,'driver');
-      if(liveState.expired)resetLiveness('driver');
-      return;
-    }
-    setFaceUI('Liveness ✓. Verifikasi wajah...',false,'driver');
+    if(!stable){setFaceUI('Mendeteksi wajah...',false,'driver');return;}
+    const live=await getFastFaceResult(video,'driver');
+    const dist=faceDistance(live.descriptor,autoFaceCandidate.faceDescriptor);
+    // Liveness dan pencocokan terjadi dari inferensi yang sama.
+    if(!live.liveness){setFaceUI('Wajah terdeteksi. Gerakkan mata/wajah sedikit...',false,'driver');return;}
     driverFaceAttempts++;
-    const live=await getFaceDescriptorFromVideo(video);
-    const dist=faceDistance(live,autoFaceCandidate.faceDescriptor);
     if(dist>FACE_MATCH_THRESHOLD){
       retryFaceAttempt('driver');
-      if(driverFaceAttempts<3)setFaceUI('Wajah tidak cocok. Percobaan '+driverFaceAttempts+'/3, silakan tetap diam.',false,'driver');
+      if(driverFaceAttempts<3)setFaceUI('Wajah tidak cocok. Percobaan '+driverFaceAttempts+'/3.',false,'driver');
       else setFaceUI('Verifikasi gagal 3 kali. Tekan Ambil Ulang.',false,'driver');
       return;
     }
@@ -2942,8 +2945,8 @@ async function autoFaceCheck(){
     state.loginPhoto.driverLogin=data;
     driverFaceLocked=true;
     const driverVideo=document.getElementById('driverLoginVideo');if(driverVideo)driverVideo.pause();
-    setFaceUI('Wajah terkunci ✓ Verifikasi berhasil',true,'driver');
-    await loginDriverAutomatic(autoFaceCandidate,live,dist);
+    setFaceUI('Wajah cocok ✓',true,'driver');
+    await loginDriverAutomatic(autoFaceCandidate,live.descriptor,dist);
   }catch(e){
     if(driverFaceAttempts<3)retryFaceAttempt('driver');else showLoginRefresh('driver');
     setFaceUI(e.message||'Verifikasi gagal.',false,'driver');
@@ -2962,7 +2965,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
     const distanceToVehicle=haversineMeters(qrGps,gps);
     if(distanceToVehicle>2) throw new Error('Lokasi login terlalu jauh dari kendaraan ('+distanceToVehicle.toFixed(1)+' m). Maksimal 2 meter dari QR kendaraan.');
     state.loginGPS=gps;
-    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:'BLINK',latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
+    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:'FAST_LIVE',latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
     stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
@@ -2983,7 +2986,7 @@ function clearLoginFieldsImmediately(){
 }
 async function startAutoFaceLogin(){
   resetLiveness('driver');
-  try{await ensureFaceModels();const ok=await startCamera('driverLogin',true);if(!ok)return;stopAutoFaceLogin();autoFaceTimer=setInterval(autoFaceCheck,120);setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'driver');}
+  try{await ensureFaceModels();const ok=await startCamera('driverLogin',true);if(!ok)return;stopAutoFaceLogin();autoFaceTimer=setInterval(autoFaceCheck,FAST_FACE_INTERVAL);setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'driver');}
   catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'driver');}
 }
 function stopAutoFaceLogin(){if(autoFaceTimer){clearInterval(autoFaceTimer);autoFaceTimer=null;}}
@@ -2998,26 +3001,16 @@ async function autoAdminFaceCheck(){
   try{
     const video=document.getElementById('adminLoginVideo');
     const stable=await detectStableFace(video,'admin');
-    if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'admin');return;}
-    if(!isFrameClear(video)){
-      setFaceUI('Gambar belum cukup jernih. Tunggu sebentar...',false,'admin');
-      adminStableSince=0;adminStableFrames=0;return;
-    }
-    const liveState=await checkLivenessBlink(video,'admin');
-    if(!liveState.ok){
-      setFaceUI(liveState.reason,false,'admin');
-      if(liveState.expired)resetLiveness('admin');
-      return;
-    }
-    setFaceUI('Liveness ✓. Verifikasi wajah...',false,'admin');
+    if(!stable){setFaceUI('Mendeteksi wajah...',false,'admin');return;}
+    const live=await getFastFaceResult(video,'admin');
+    if(!live.liveness){setFaceUI('Wajah terdeteksi. Gerakkan mata/wajah sedikit...',false,'admin');return;}
     adminFaceAttempts++;
-    const live=await getFaceDescriptorFromVideo(video);
     const data=await captureLiveFrame('adminLogin');
     if(!data){retryFaceAttempt('admin');return;}
     adminFaceLocked=true;
     const adminVideo=document.getElementById('adminLoginVideo');if(adminVideo)adminVideo.pause();
-    setFaceUI('Wajah terkunci ✓ Verifikasi...',true,'admin');
-    await loginAdminAutomatic(autoAdminCandidate,live,data);
+    setFaceUI('Wajah terdeteksi ✓ Verifikasi...',true,'admin');
+    await loginAdminAutomatic(autoAdminCandidate,live.descriptor,data);
   }catch(e){
     if(adminFaceAttempts<3)retryFaceAttempt('admin');else showLoginRefresh('admin');
     setFaceUI(e.message||'Verifikasi gagal.',false,'admin');
@@ -3038,7 +3031,7 @@ async function loginAdminAutomatic(candidate,liveDescriptor,data){
 }
 async function startAutoAdminFaceLogin(){
   resetLiveness('admin');
-  try{await ensureFaceModels();const ok=await startCamera('adminLogin',true);if(!ok)return;stopAutoAdminFaceLogin();setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'admin');autoAdminTimer=setInterval(autoAdminFaceCheck,120);}
+  try{await ensureFaceModels();const ok=await startCamera('adminLogin',true);if(!ok)return;stopAutoAdminFaceLogin();setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'admin');autoAdminTimer=setInterval(autoAdminFaceCheck,FAST_FACE_INTERVAL);}
   catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'admin');}
 }
 function stopAutoAdminFaceLogin(){if(autoAdminTimer){clearInterval(autoAdminTimer);autoAdminTimer=null;}}
