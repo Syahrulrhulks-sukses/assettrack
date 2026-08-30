@@ -1926,6 +1926,12 @@ tr:hover td{
 
 
             <div class="section-title">
+              🧾 Detail 29 Item Pemeriksaan
+            </div>
+
+            <div id="inspectionDetailFields" class="media-grid full-width"></div>
+
+            <div class="section-title">
               📸 Foto Pemeriksaan
             </div>
 
@@ -2432,6 +2438,8 @@ const state = {
   inspectionGPSLocked:false,
   dailyInspectionId:'',
   dailyInspectionMode:false,
+  dailyHandoverMode:false,
+  previousInspectionId:'',
   pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim()
 
 };
@@ -3277,6 +3285,8 @@ function clearApplicationState(){
   state.audit=[];
   state.dailyInspectionId='';
   state.dailyInspectionMode=false;
+  state.dailyHandoverMode=false;
+  state.previousInspectionId='';
 }
 
 function resetLoginForm(){
@@ -4087,6 +4097,44 @@ function applyLoggedInDriverToInspection(){
    INSPECTION OPTIONS
 ========================================================= */
 
+const INSPECTION_ITEMS_FRONTEND = [
+  ['Stik Oli Mesin','Foto'],['Stik Oli Power Steering','Foto'],
+  ['Tali Kipas / V-Belt','Foto'],['Aki','Foto'],
+  ['Ban Kiri Depan','Foto'],['Ban Kiri Belakang','Foto'],
+  ['Ban Kanan Depan','Foto'],['Ban Kanan Belakang','Foto'],
+  ['Ban Serep','Foto'],['Kunci Roda & Dongkrak','Foto'],
+  ['Minyak Rem','Foto'],['Kaca Mobil','Foto'],
+  ['Lampu Utama','Video'],['Lampu Rem','Video'],['Lampu Sein','Video'],
+  ['Body Mobil lecet Baru','Video'],['Interior','Foto/Video'],
+  ['interior Box','Foto/Video'],['sisi dalam Bak terbuka','Foto/Video'],
+  ['Kopling','Foto'],['Setir','Foto'],['Klakson','Foto'],['Sabuk Pengaman','Foto'],
+  ['Oli Mesin','Foto'],['Oli Power Steering','Foto'],
+  ['Tali Kipas / V-Belt','Foto'],['Radiator','Foto'],
+  ['Reservoir Radiator','Foto'],['Keamanan Pintu & Setir','Foto']
+];
+
+function buildInspectionDetailFields(){
+  const box=document.getElementById('inspectionDetailFields');
+  if(!box)return;
+  box.innerHTML=INSPECTION_ITEMS_FRONTEND.map((x,i)=>`
+    <div class="photo-media-item inspection-detail-card" data-detail-index="${i}">
+      <div class="media-title">${i+1}. ${escapeHtml(x[0])}</div>
+      <small style="color:#607d8b">Media: ${escapeHtml(x[1])}</small>
+      <select class="inspection-detail-status" data-detail-status="${i}">
+        ${photoStatusOptions('Baik')}
+      </select>
+      <input class="inspection-detail-note" data-detail-note="${i}" type="text" placeholder="Catatan kondisi (opsional)">
+    </div>`).join('');
+}
+
+function collectInspectionDetails(){
+  return INSPECTION_ITEMS_FRONTEND.map((x,i)=>{
+    const status=document.querySelector(`[data-detail-status="${i}"]`)?.value||'Baik';
+    const catatan=document.querySelector(`[data-detail-note="${i}"]`)?.value||'';
+    return {item:x[0],media:x[1],status,catatan};
+  });
+}
+
 function buildInspectionOptions(){
 
   const ids=[
@@ -4130,8 +4178,6 @@ function buildInspectionOptions(){
 ========================================================= */
 
 const PHOTO_MAP_FRONTEND={
-
-  body:'Foto Body Mobil',
 
   radiator:'Foto Radiator',
 
@@ -4180,7 +4226,7 @@ const VIDEO_MAP_FRONTEND={
 
   lampuSein:'Video Lampu Sein',
 
-  bodyLecet:'Video Body Mobil Lecet',
+  bodyLecet:'Video Body Mobil — WAJIB Serah Terima',
 
   interior:'Video Interior',
 
@@ -4258,6 +4304,7 @@ function collectPhotoMeta(key,index){
 
 function setDailyInspectionUI(enabled,row){
   state.dailyInspectionMode=!!enabled;
+  if(enabled) state.dailyHandoverMode=false;
   state.dailyInspectionId=enabled ? String(row?.['Inspection ID']||'') : '';
   const banner=document.getElementById('dailyInspectionBanner');
   const btn=document.getElementById('inspectionSubmitBtn');
@@ -4293,30 +4340,40 @@ async function loadDailyInspectionForAsset(code){
   const role=String(state.user?.role||'').toUpperCase();
   if(role!=='DRIVER')return null;
   const driverId=driverIdOf(state.user);
-  let row=(state.inspections||[]).slice().reverse().find(x=>String(x['Kode Aset']||'').toUpperCase()===String(code).toUpperCase() && String(x['Driver ID']||'').toUpperCase()===String(driverId).toUpperCase() && toDateInput(x['Timestamp'])===toDateInput(new Date()));
-  if(!row){
-    try{const r=await apiGet('dailyinspection',{kodeAset:code,driverId:driverId});row=r.inspection||null;}catch(_){row=null;}
-  }
-  if(row) applyDailyInspectionToForm(row);
-  return row;
-}
+  let same=null, latest=null;
+  try{
+    const r=await apiGet('dailyinspection',{kodeAset:code,driverId:driverId});
+    same=r.inspection||null;
+  }catch(_){}
+  latest=(state.inspections||[]).slice().reverse().find(x=>
+    String(x['Kode Aset']||'').toUpperCase()===String(code).toUpperCase() &&
+    toDateInput(x['Timestamp'])===toDateInput(new Date())
+  );
+  if(!latest && same) latest=same;
 
-function applyDailyInspectionToForm(row){
-  if(!row)return;
-  const set=(id,val)=>{const e=document.getElementById(id);if(e)e.value=val==null?'':val;};
-  set('inspectionTime',toDateTimeLocal(row['Waktu Pemeriksaan']||row['Timestamp']));
-  set('kmStart',row['KM Start']);
-  set('kmBeforeFuel',row['KM Sebelum Isi Bensin']);
-  set('kmAfterFuel',row['KM Sesudah Isi Bensin']);
-  set('kmFinish',row['KM Finish Akhir']);
-  set('kmOilChange',row['KM Ganti Oli']);
-  set('statusPemeriksaan',row['Status Pemeriksaan']);
-  set('inspectionNotes',row['Catatan']);
-  ['oliMesin','oliPowerSteering','taliKipasVbelt','aki','banKiriDepan','banKiriBelakang','banKananDepan','banKananBelakang','banSerep','kunciRodaDongkrak','rem','kopling','setir','klakson','sabukPengaman'].forEach(id=>{
-    const map={oliMesin:'Oli Mesin',oliPowerSteering:'Oli Power Steering',taliKipasVbelt:'Tali Kipas / V-Belt',aki:'Aki',banKiriDepan:'Ban Kiri Depan',banKiriBelakang:'Ban Kiri Belakang',banKananDepan:'Ban Kanan Depan',banKananBelakang:'Ban Kanan Belakang',banSerep:'Ban Serep',kunciRodaDongkrak:'Kunci Roda & Dongkrak',rem:'Rem',kopling:'Kopling',setir:'Setir',klakson:'Klakson',sabukPengaman:'Sabuk Pengaman'};
-    set(id,row[map[id]]);
-  });
-  setDailyInspectionUI(true,row);
+  if(same){
+    state.dailyHandoverMode=false;
+    state.previousInspectionId=String(same['Inspection ID']||'');
+    applyDailyInspectionToForm(same);
+    return same;
+  }
+
+  if(latest){
+    state.dailyHandoverMode=true;
+    state.previousInspectionId=String(latest['Inspection ID']||'');
+    setDailyInspectionUI(false,null);
+    const banner=document.getElementById('dailyInspectionBanner');
+    if(banner){
+      banner.classList.remove('hidden');
+      banner.innerHTML='🔄 <b>Serah Terima Kendaraan.</b> Mobil ini sudah diperiksa driver sebelumnya hari ini. Anda wajib mencatat ulang <b>KM + Video Body + Lampu Utama + Lampu Rem + Lampu Sein</b>. Pemeriksaan Anda akan menjadi sesi baru dan data driver sebelumnya tetap terkunci.';
+    }
+    return latest;
+  }
+
+  state.dailyHandoverMode=false;
+  state.previousInspectionId='';
+  setDailyInspectionUI(false,null);
+  return null;
 }
 
 function toDateTimeLocal(value){
@@ -4540,6 +4597,15 @@ async function saveInspectionForm(event){
 
     }
 
+    if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.dailyHandoverMode){
+      const required=['bodyLecet','lampuUtama','lampuRem','lampuSein'];
+      const missing=required.filter(k=>!media[k]?.length);
+      if(missing.length) throw new Error('Serah terima wajib: Video Body, Lampu Utama, Lampu Rem, dan Lampu Sein.');
+      const kmStartValue=document.getElementById('kmStart')?.value||'';
+      if(kmStartValue==='') throw new Error('KM saat menerima kendaraan wajib diisi dan difoto.');
+      if(!media.kmStart?.length) throw new Error('Foto KM saat menerima kendaraan wajib diambil.');
+    }
+
     const conditions={
 
       oliMesin:getValue('oliMesin'),
@@ -4652,6 +4718,10 @@ async function saveInspectionForm(event){
         ).value,
 
       conditions:conditions,
+      sesi: state.dailyHandoverMode ? 0 : 1,
+      jenisPemeriksaan: state.dailyHandoverMode ? 'SERAH TERIMA' : 'AWAL',
+      previousInspectionId: state.previousInspectionId || '',
+      details: collectInspectionDetails(),
 
       statusPemeriksaan:
         document.getElementById(
@@ -4931,6 +5001,8 @@ function resetInspectionForm(){
 
   state.dailyInspectionId='';
   state.dailyInspectionMode=false;
+  state.dailyHandoverMode=false;
+  state.previousInspectionId='';
   setDailyInspectionUI(false);
   document.querySelectorAll('[id^=photoPreview_]').forEach(el=>el.innerHTML='');
 
@@ -6696,6 +6768,7 @@ document.addEventListener(
     document.getElementById('adminLoginPanel')?.classList.add('hidden');
 
     buildInspectionOptions();
+    buildInspectionDetailFields();
 
     restoreQrLocationLock();
     if(state.pendingAssetCode){lockQrLocation().catch(()=>{});}
