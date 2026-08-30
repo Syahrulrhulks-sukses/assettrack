@@ -1169,6 +1169,11 @@ tr:hover td{
 
 
 .login-refresh-btn{display:block;width:100%;margin:10px 0 0;padding:12px 16px;border:2px solid #c90068;border-radius:14px;background:#fff;color:#c90068;font-weight:700;font-size:15px;cursor:pointer}.login-refresh-btn.hidden{display:none}.login-refresh-btn:active{transform:scale(.99)}
+
+/* ===== WATERMARK LOGO ASET AQIQAH PLUS ===== */
+.app-watermark{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.055;background-repeat:repeat;background-position:center;background-size:115px auto;transform:rotate(-8deg);filter:grayscale(.15);}
+#appPage>.topbar,#appPage>.sidebar,#appPage>.main{position:relative;z-index:1;}
+#adminPinPanel{border:1px solid #f3d3e2;}
 </style>
 </head>
 
@@ -1257,6 +1262,8 @@ tr:hover td{
 ========================================================= -->
 
 <section id="appPage">
+
+  <div id="appWatermark" class="app-watermark" aria-hidden="true"></div>
 
   <header class="topbar">
 
@@ -2200,6 +2207,16 @@ tr:hover td{
 
       </div>
 
+      <div class="panel" id="adminPinPanel" style="display:none">
+        <h3>Ganti PIN Admin</h3>
+        <p style="color:#607d8b;font-size:13px;margin-top:0">Admin dapat mengganti PIN miliknya sendiri. Pengaturan ini tidak dapat digunakan untuk mengubah PIN Super Admin.</p>
+        <div class="form-grid">
+          <div class="form-group"><label>PIN Lama</label><input id="oldAdminPin" type="password" maxlength="6" inputmode="numeric" autocomplete="current-password"></div>
+          <div class="form-group"><label>PIN Baru</label><input id="newAdminPin" type="password" maxlength="6" inputmode="numeric" autocomplete="new-password"></div>
+        </div>
+        <button class="primary-btn" style="width:auto" onclick="changeAdminPin()">🔐 Ganti PIN Admin</button>
+      </div>
+
       <div class="panel">
         <h3>Pengaturan Tampilan Menu</h3>
         <p id="menuSettingsDescription" style="color:#607d8b;font-size:13px">Super Admin dapat menentukan menu yang terlihat untuk Driver, Admin, dan Super Admin. Admin hanya dapat menentukan menu yang terlihat untuk Driver.</p>
@@ -3047,12 +3064,17 @@ async function enterApplication(){
   ).charAt(0).toUpperCase();
   document.getElementById('userAvatar').textContent=initial;
 
+  const wm=document.getElementById('appWatermark');
+  const logoImg=document.querySelector('.login-brand-white img');
+  if(wm && logoImg && logoImg.src) wm.style.backgroundImage=`url("${logoImg.src}")`;
+
   const adminNavigation=document.getElementById('adminNavigation');
   if(adminNavigation) adminNavigation.style.display=isAdmin ? 'block' : 'none';
 
   document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
   document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!(isAdmin||isSuperAdmin));
   const pinPanel=document.getElementById('superAdminPinPanel'); if(pinPanel) pinPanel.style.display=isSuperAdmin?'':'none';
+  const adminPinPanel=document.getElementById('adminPinPanel'); if(adminPinPanel) adminPinPanel.style.display=(role==='ADMIN')?'':'none';
   const desc=document.getElementById('settingsDescription'); if(desc) desc.textContent=isSuperAdmin?'Pengaturan Super Admin Aset Aqiqah Plus':'Pengaturan tampilan menu Driver';
   apiGet('menuConfig').then(r=>applyMenuConfig(r.menuConfig||[])).catch(()=>{});
 
@@ -6081,6 +6103,22 @@ async function saveAdminForm(event){
 /* =========================================================
    CHANGE PIN
 ========================================================= */
+
+async function changeAdminPin(){
+  const role=String(state.user?.role||'').toUpperCase();
+  if(role!=='ADMIN'){toast('Hanya Admin yang dapat mengganti PIN Admin miliknya sendiri.','error');return;}
+  const oldPin=(document.getElementById('oldAdminPin')?.value||'').trim();
+  const newPin=(document.getElementById('newAdminPin')?.value||'').trim();
+  if(!/^\d{6}$/.test(oldPin)){toast('PIN lama harus 6 digit.','error');return;}
+  if(!/^\d{6}$/.test(newPin)){toast('PIN baru harus 6 digit.','error');return;}
+  if(oldPin===newPin){toast('PIN baru harus berbeda dari PIN lama.','error');return;}
+  try{
+    const result=await apiPost({action:'changeAdminPin',oldPin:oldPin,newPin:newPin,userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin,role:'ADMIN'});
+    document.getElementById('oldAdminPin').value='';
+    document.getElementById('newAdminPin').value='';
+    toast(result.message||'PIN Admin berhasil diubah.','success');
+  }catch(e){toast(e.message||'Gagal mengganti PIN Admin.','error');}
+}
 
 async function changePin(){
 
