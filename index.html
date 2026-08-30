@@ -1200,8 +1200,63 @@ tr:hover td{
 
 /* ===== WATERMARK LOGO ASET AQIQAH PLUS ===== */
 .app-watermark{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.055;background-repeat:repeat;background-position:center;background-size:115px auto;transform:rotate(-8deg);filter:grayscale(.15);}
-#appPage>.topbar,#appPage>.sidebar,#appPage>.main{position:relative;z-index:1;}
+#appPage>.topbar,
+#appPage>.main{position:relative;z-index:1;}
+#appPage>.sidebar{position:fixed;z-index:40;}
 #adminPinPanel{border:1px solid #f3d3e2;}
+
+/* ===== FINAL FIX: SIDEBAR & CONTENT MUST STAY BESIDE EACH OTHER ===== */
+#appPage > .topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+
+#appPage > .sidebar{
+  position:fixed !important;
+  top:64px;
+  left:0;
+  bottom:0;
+  width:245px;
+  z-index:40 !important;
+  overflow-y:auto;
+}
+
+#appPage > .main{
+  position:relative;
+  z-index:1;
+  margin-left:245px;
+  min-width:0;
+}
+
+/* HP: saat menu dibuka, konten tetap berada DI SAMPING menu,
+   bukan turun ke bawah menu. */
+@media(max-width:750px){
+  #appPage > .sidebar{
+    width:min(300px, 72vw);
+    transform:translateX(-100%);
+  }
+
+  #appPage > .sidebar.open{
+    transform:translateX(0);
+  }
+
+  #appPage > .main{
+    margin-left:0;
+    padding:15px;
+  }
+
+  #appPage > .sidebar.open ~ .main{
+    margin-left:min(300px, 72vw);
+  }
+}
+
+/* Cegah judul/halaman terpilih tertarik ke bawah sidebar */
+#appPage > .main .page{
+  position:relative;
+  z-index:1;
+}
+
 </style>
 </head>
 
