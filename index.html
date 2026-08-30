@@ -2775,7 +2775,8 @@ async function loginAdminAutomatic(candidate,liveDescriptor,data){
   state.loginBusy=true;
   try{
     setLoginStatus('Verifikasi ID, PIN dan wajah...',false,'admin');
-    const result=await apiPost({action:'adminLoginFastByName',namaAdmin:String(candidate.name||candidate.namaAdmin||'').trim(),pin:document.getElementById('loginAdminPin').value.trim(),data:data,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor)});
+    const adminPin=String(document.getElementById('loginAdminPin')?.value||'').trim();
+    const result=await apiPost({action:'adminLoginFastByName',namaAdmin:String(candidate.name||candidate.namaAdmin||'').trim(),pin:adminPin,data:data,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor)});
     state.user={...result.admin,role:String(result.admin.role||'ADMIN').toUpperCase(),loginPhoto:result.loginPhoto||''};
     state.loginToken=null;
     stopAutoAdminFaceLogin();stopCamera('adminLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login '+state.user.role+' berhasil.','success');
