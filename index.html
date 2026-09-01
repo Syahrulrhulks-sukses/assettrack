@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aset Aqiqah Plus — Manajemen & Pemeriksaan Armada</title>
+<title>Aset Aqiqah Plus — Manajemen & Pemeriksaan Armada — Video Drive</title>
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -273,159 +273,6 @@ textarea{
   margin-top:12px;
   font-size:13px;
   text-align:center;
-}
-
-/* =========================
-   FAST FACE LOGIN — Aqiqah Plus
-========================= */
-.login-card{max-width:430px;padding:20px;border:1px solid #e91e63;border-top:4px solid var(--pink);}
-.login-brand-white{background:#fff;border-bottom:2px solid var(--pink);padding:8px 0 12px;margin:-20px -20px 18px;}
-.login-brand-white img{max-width:145px;max-height:62px;object-fit:contain;}
-.login-title{font-size:25px;font-weight:800;color:#263238;text-align:left;margin:4px 0;}
-.login-subtitle{font-size:12px;color:#78909c;margin-bottom:12px;}
-.face-login-box{position:relative;overflow:hidden;border-radius:18px;background:#111;aspect-ratio:3/4;max-height:470px;margin:12px 0;border:2px solid #fff;}
-.face-login-box video{width:100%;height:100%;object-fit:cover;display:block;}
-.face-guide{position:absolute;left:50%;top:50%;width:68%;height:72%;transform:translate(-50%,-50%);border:3px solid #fff;border-radius:48% 48% 43% 43%;box-shadow:0 0 0 9999px rgba(0,0,0,.12);pointer-events:none;transition:.15s;}
-.face-guide.locked{border-color:#123B6D;box-shadow:0 0 0 3px rgba(18,59,109,.25),0 0 22px rgba(18,59,109,.75),0 0 0 9999px rgba(0,0,0,.10);}
-.face-status{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(255,255,255,.94);border-radius:12px;padding:9px 11px;text-align:center;font-size:12px;font-weight:700;color:#455a64;}
-.face-status.locked{background:#123B6D;color:#fff;}
-.auto-id{display:none;margin:8px 0;padding:10px 12px;border-radius:10px;background:#e8eef6;color:#123B6D;font-weight:800;text-align:center;}
-.auto-id.show{display:block;}
-.login-footer{margin-top:12px;text-align:center;font-size:11px;color:#78909c;}
-#loginPage{background:#fff;padding:0 12px;align-items:flex-start;}
-.login-card{margin:12px auto;}
-@media(max-width:480px){.login-card{margin:0 auto;min-height:100vh;border-left:0;border-right:0;border-radius:0;padding:14px;}.login-brand-white{margin:-14px -14px 14px;}.face-login-box{max-height:none;}}
-
-/* =========================
-   LOGIN UI — TAMPILAN SAJA
-   Tidak mengubah fungsi/JavaScript/backend
-========================= */
-#loginPage{
-  min-height:100svh;
-  padding:0;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  background:#fff;
-}
-.login-card{
-  width:100%;
-  max-width:520px;
-  min-height:100svh;
-  margin:0 auto;
-  padding:0 18px 18px;
-  border:0;
-  border-radius:0;
-  background:#fff;
-  box-shadow:none;
-}
-.login-brand-white{
-  margin:0 -18px 18px;
-  padding:16px 18px 13px;
-  background:#fff;
-  border-top:5px solid #d1008f;
-  border-bottom:3px solid #d1008f;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:92px;
-}
-.login-brand-white img{
-  width:auto;
-  max-width:170px;
-  max-height:70px;
-  object-fit:contain;
-}
-.login-title{
-  text-align:center;
-  margin:4px 0 3px;
-  color:#171717;
-  font-size:27px;
-  font-weight:800;
-}
-.login-subtitle{
-  text-align:center;
-  margin:0 0 15px;
-  color:#757575;
-  font-size:12px;
-}
-.login-tabs{
-  margin:0 0 14px;
-}
-.login-tabs button.active{
-  background:#d1008f;
-}
-.form-group{margin-bottom:12px;}
-.form-group label{
-  color:#333;
-  font-size:14px;
-}
-#loginDriverName{
-  height:48px;
-  border:1.5px solid #d1008f;
-  border-radius:12px;
-  font-size:16px;
-}
-#loginDriverName:focus{
-  border-color:#d1008f;
-  box-shadow:0 0 0 3px rgba(209,0,143,.10);
-}
-.face-login-box{
-  width:100%;
-  aspect-ratio:3/4;
-  max-height:none;
-  margin:10px 0 12px;
-  border:2px solid #fff;
-  border-radius:20px;
-  background:#101010;
-  box-shadow:0 8px 24px rgba(0,0,0,.12);
-}
-.face-login-box video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.face-guide{
-  width:70%;
-  height:74%;
-  border:3px solid #fff;
-  border-radius:48% 48% 43% 43%;
-}
-.face-guide.locked{
-  border-color:#123B6D;
-  box-shadow:0 0 0 3px rgba(18,59,109,.30),0 0 24px rgba(18,59,109,.85),0 0 0 9999px rgba(0,0,0,.08);
-}
-.face-status{
-  background:rgba(255,255,255,.94);
-  color:#37474f;
-  border:1px solid rgba(255,255,255,.9);
-}
-.face-status.locked{
-  background:#123B6D;
-  color:#fff;
-}
-.auto-id{
-  margin:8px 0 10px;
-  background:#eef3f8;
-  color:#123B6D;
-  border:1px solid #d5dfeb;
-}
-.login-status{
-  min-height:18px;
-  margin-top:6px;
-}
-.login-footer{
-  margin:12px 0 4px;
-  text-align:center;
-  color:#555;
-  font-size:12px;
-  font-weight:600;
-}
-@media(max-width:480px){
-  .login-card{min-height:100svh;padding:0 14px 14px;}
-  .login-brand-white{margin:0 -14px 14px;padding:13px 14px 11px;min-height:82px;}
-  .login-brand-white img{max-width:155px;max-height:62px;}
-  .face-login-box{border-radius:18px;}
 }
 
 /* =========================
@@ -808,8 +655,17 @@ tr:hover td{
 .media-item input{
   padding:8px;
 }
-.photo-note-box{display:grid;gap:7px;margin-top:8px}.photo-note-box select,.photo-note-box textarea{font-size:13px}.photo-note-help{display:block;margin-top:5px;color:#78909c;font-size:11px}.photo-media-item{background:#fff}.photo-media-item input[type=file]{background:#fafafa}
 
+.video-link-btn{
+  display:inline-block;
+  border:0;
+  padding:8px 11px;
+  border-radius:9px;
+  background:#e3f2fd;
+  color:#1565c0;
+  font-weight:bold;
+  text-decoration:none;
+}
 
 /* =========================
    MODAL
@@ -948,230 +804,6 @@ tr:hover td{
     padding:0 10px;
   }
 }
-
-/* LOGIN MOCKUP STYLE — visual only, functionality unchanged */
-#loginPage{
-  min-height:100svh;
-  padding:0;
-  background:#fff;
-  align-items:flex-start;
-}
-.login-card{
-  max-width:410px;
-  min-height:100svh;
-  padding:0 16px 0;
-  border:0;
-  border-radius:0;
-  box-shadow:none;
-  background:#fff;
-}
-.login-brand-white{
-  margin:8px -16px 20px;
-  min-height:94px;
-  padding:10px 14px;
-  border:2px solid #d1008f;
-  border-radius:16px;
-  background:#fff;
-  box-sizing:border-box;
-}
-.login-brand-white img{max-width:170px;max-height:72px;}
-.login-title{
-  color:#d1008f;
-  font-size:29px;
-  line-height:1.1;
-  margin:0;
-  text-align:center;
-}
-.login-subtitle{
-  color:#777;
-  font-size:15px;
-  margin:8px 0 24px;
-  text-align:center;
-}
-.login-tabs{margin:0 0 12px;}
-.login-step-label{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin:0 0 9px;
-  color:#222;
-  font-size:15px;
-  font-weight:800;
-}
-.step-icon{
-  width:42px;
-  height:42px;
-  flex:0 0 42px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  color:#d1008f;
-  background:#fde7f3;
-  font-size:24px;
-  font-weight:900;
-  line-height:1;
-}
-.face-step-label{margin-top:8px;}
-.login-help{
-  margin:-2px 0 12px 52px;
-  color:#777;
-  font-size:13px;
-}
-.login-name-group{margin:0 0 22px;}
-#loginDriverName{
-  height:50px;
-  box-sizing:border-box;
-  padding:0 16px;
-  border:2px solid #d1008f;
-  border-radius:11px;
-  font-size:17px;
-  color:#333;
-}
-#loginDriverName::placeholder{color:#888;opacity:1;}
-.auto-id{
-  margin:-14px 0 12px;
-  padding:9px 12px;
-  border-radius:10px;
-  background:#fde7f3;
-  color:#d1008f;
-  border:1px solid #f4b4d6;
-}
-.face-login-box{
-  position:relative;
-  width:100%;
-  aspect-ratio:3/4;
-  max-height:none;
-  margin:0 0 14px;
-  overflow:hidden;
-  border:2px solid #eee;
-  border-radius:18px;
-  background:#151515;
-  box-shadow:0 5px 18px rgba(0,0,0,.12);
-}
-.face-login-box video{width:100%;height:100%;object-fit:cover;display:block;}
-.face-guide{
-  width:69%;
-  height:73%;
-  border:3px solid #fff;
-  border-radius:48% 48% 43% 43%;
-  box-shadow:0 0 0 9999px rgba(0,0,0,.10);
-}
-.face-guide.locked{
-  border-color:#123B6D;
-  box-shadow:0 0 0 3px rgba(18,59,109,.28),0 0 26px rgba(18,59,109,.9),0 0 0 9999px rgba(0,0,0,.08);
-}
-.face-status{
-  left:10px;
-  right:auto;
-  top:10px;
-  bottom:auto;
-  max-width:145px;
-  padding:10px 12px;
-  border-radius:11px;
-  background:rgba(209,0,143,.96);
-  color:#fff;
-  font-size:13px;
-  text-align:left;
-  box-shadow:0 3px 8px rgba(0,0,0,.15);
-}
-.face-status.locked{background:#123B6D;color:#fff;}
-.face-bottom-hint{
-  position:absolute;
-  left:50%;
-  bottom:34px;
-  transform:translateX(-50%);
-  width:170px;
-  color:#fff;
-  text-align:center;
-  font-size:14px;
-  line-height:1.45;
-  text-shadow:0 2px 4px rgba(0,0,0,.8);
-  pointer-events:none;
-}
-.login-status{
-  min-height:58px;
-  margin:0 0 10px;
-  padding:14px 15px;
-  box-sizing:border-box;
-  border:1px solid #eee;
-  border-radius:13px;
-  background:#fff;
-  box-shadow:0 3px 14px rgba(0,0,0,.08);
-  color:#333;
-  font-size:14px;
-  text-align:left;
-}
-.login-footer{
-  margin:12px -16px 0;
-  min-height:58px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-sizing:border-box;
-  background:#d1008f;
-  color:#fff;
-  font-size:14px;
-  font-weight:500;
-}
-.register-driver-btn{
-  width:100%;
-  margin-top:10px;
-}
-@media(max-width:480px){
-  .login-card{max-width:none;padding:0 16px;min-height:100svh;}
-  .login-brand-white{margin:8px -16px 18px;min-height:90px;}
-  .login-brand-white img{max-width:165px;max-height:70px;}
-  .login-subtitle{margin-bottom:20px;}
-  .face-login-box{border-radius:18px;}
-  .login-footer{margin-left:-16px;margin-right:-16px;}
-}
-
-
-/* ===== LOGIN AUTO FACE FINAL ===== */
-#loginPage{padding:0;background:#fff;min-height:100svh;align-items:flex-start;}
-.login-card{width:100%;max-width:430px;min-height:100svh;padding:0 16px 0;background:#fff;border-radius:0;box-shadow:none;overflow:hidden;}
-.login-brand-white{margin:10px -16px 18px;padding:14px 18px 12px;min-height:112px;background:#fff;border:2px solid #d1008f;border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(209,0,143,.08);}
-.login-brand-white img{display:block;width:auto;height:auto;max-width:100%;max-height:92px;object-fit:contain;}
-.login-title{text-align:center;color:#d1008f;font-size:30px;font-weight:800;line-height:1.1;margin:0 0 4px;}
-.login-subtitle{text-align:center;color:#777;font-size:16px;margin:0 0 18px;}
-.login-tabs{display:flex;gap:8px;margin:0 0 16px;}
-.login-tabs button{flex:1;border:1px solid #f3b2d5;padding:11px;border-radius:11px;background:#fff;color:#b4007b;font-weight:800;}
-.login-tabs button.active{background:#d1008f;color:#fff;border-color:#d1008f;}
-.login-step-label{display:flex;align-items:center;gap:10px;margin:0 0 9px;color:#222;font-size:15px;font-weight:800;}
-.login-step-label b{color:#d1008f;}
-.step-icon{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;color:#d1008f;background:#fde7f3;font-size:24px;font-weight:900;}
-.login-name-group{margin:0 0 12px;}
-#loginDriverName,#loginAdminName{height:52px;border:2px solid #d1008f;border-radius:11px;font-size:17px;padding:0 16px;}
-#loginDriverName:focus,#loginAdminName:focus{border-color:#d1008f;box-shadow:0 0 0 3px rgba(209,0,143,.08);}
-.auto-id{display:none;margin:0 0 12px;padding:9px 12px;border-radius:10px;background:#fde7f3;color:#d1008f;border:1px solid #f4b4d6;font-weight:700;}
-.auto-id.show{display:block;}
-.admin-pin-group{margin:0 0 12px;}
-.admin-pin-group label{display:block;margin-bottom:7px;font-weight:800;font-size:14px;}
-#loginAdminPin{height:48px;border:2px solid #d1008f;border-radius:11px;}
-.face-login-box{position:relative;width:100%;aspect-ratio:3/4;margin:0 0 12px;overflow:hidden;border:2px solid #e8e8e8;border-radius:18px;background:#151515;box-shadow:0 5px 18px rgba(0,0,0,.12);}
-.face-login-box video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1);}
-.face-guide{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:69%;height:73%;border:3px solid #fff;border-radius:48% 48% 43% 43%;box-shadow:0 0 0 9999px rgba(0,0,0,.10);transition:.16s ease;}
-.face-guide.locked{border-color:#123B6D;box-shadow:0 0 0 3px rgba(18,59,109,.28),0 0 26px rgba(18,59,109,.9),0 0 0 9999px rgba(0,0,0,.08);}
-.face-status{position:absolute;left:10px;top:10px;max-width:180px;padding:10px 12px;border-radius:11px;background:rgba(209,0,143,.96);color:#fff;font-size:13px;text-align:left;box-shadow:0 3px 8px rgba(0,0,0,.15);}
-.face-status.locked{background:#123B6D;}
-.face-bottom-hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:190px;color:#fff;text-align:center;font-size:14px;line-height:1.45;text-shadow:0 2px 4px rgba(0,0,0,.8);pointer-events:none;}
-.face-check{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#123B6D;color:#fff;border:3px solid rgba(255,255,255,.9);font-size:32px;font-weight:900;box-shadow:0 0 22px rgba(18,59,109,.8);}
-.face-check.hidden{display:none!important;}
-.login-status{min-height:46px;margin:0 0 10px;padding:10px 12px;border:1px solid #eee;border-radius:13px;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.06);font-size:13px;text-align:left;}
-.login-footer{margin:12px -16px 0;min-height:58px;display:flex;align-items:center;justify-content:center;background:#d1008f;color:#fff;font-size:14px;font-weight:600;}
-.register-driver-btn{width:100%;margin-top:10px;margin-bottom:12px;}
-@media(max-width:480px){#loginPage{align-items:flex-start}.login-card{max-width:none;padding:0 16px}.login-brand-white{margin:8px -16px 16px;min-height:100px}.login-brand-white img{max-width:240px;max-height:82px}.face-login-box{aspect-ratio:3/4}}
-
-
-.qr-login-lock{margin:10px 0;padding:11px 12px;border:1px solid #f1c4d8;border-radius:12px;background:#fff5f8;color:#8a1450;font-size:13px;display:flex;flex-direction:column;gap:3px}.qr-login-lock span{color:#546e7a;font-weight:600}.qr-login-lock.ok{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20}.qr-login-lock.ok span{color:#2e7d32}.driver-photo-proof{margin-top:8px;padding:10px 12px;border-radius:10px;background:#eef6ff;color:#174a7c;font-size:12px;font-weight:700}.correction-driver-card{margin-bottom:14px;padding:14px;border:1px solid #f0c6da;border-radius:14px;background:#fff7fa}.correction-driver-card h4{margin:0 0 8px;color:#a40067}.correction-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.correction-form-grid .full{grid-column:1/-1}@media(max-width:600px){.correction-form-grid{grid-template-columns:1fr}}
-.menu-display-settings{display:grid;gap:8px;}
-.menu-display-row{display:grid;grid-template-columns:minmax(150px,1fr) repeat(3,80px);gap:8px;align-items:center;padding:9px 10px;border:1px solid #eee;border-radius:10px;background:#fff;}
-.menu-display-head{font-weight:800;background:#fde7f3;color:#7a0058;}
-.menu-display-row label{text-align:center;font-size:12px;}
-.menu-display-row .menu-name{font-weight:700;font-size:13px;}
-
-
-.login-refresh-btn{display:block;width:100%;margin:10px 0 0;padding:12px 16px;border:2px solid #c90068;border-radius:14px;background:#fff;color:#c90068;font-weight:700;font-size:15px;cursor:pointer}.login-refresh-btn.hidden{display:none}.login-refresh-btn:active{transform:scale(.99)}
 </style>
 </head>
 
@@ -1185,71 +817,189 @@ tr:hover td{
 
   <div class="login-card">
 
-    <div class="login-brand-white">
-      <img src="data:image/png;base64,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ox/Zb78Dzr/gwt/9/ncLx8cYMqXoyKOOfN7hhyulMp5deullF174s05nhEgJIbdfvfpVr371mjU7avRHRO12+/H168/8whevXnvVlqlJkHL16tXvfNe7XnrUS3938SW/+vWvR8YWKFWWg/LAZx742te9djAYcM6VoqIoEOicH/7kwl9e9Pd77pncMklKMsaAoGgVS5cvfv4RL3zXu969ZMmS/qDPUcfqgo0NTWCASKosy04/7fSLL7l4/RNPlKUYGx898sgXf+oTnyYS2tCBEQN0PeV8dxq6B4lL9W6966c5MUzyQB0Ya0ZeXk3X3NS2GwCKorjj5ptPOfnkVqullHR7DVfLQh0hddCWDIIdQjYRSZIEenImIREQMLv6NYlFgI18kZlMqbMiAAz2aiAGqEgBA1RGDhQQAOMjnc1XXpO9f9Gib70Sl7WoVKB0NMxMVUsExXRkICekaLTT+a9v/OeXvvzV+x64p9/rV6t27bXX/+7iS774pS++6EUvdgFcIWWn0/rzFVd/5MMfvv6GawflQD985513bti46Y0nHP/Tn/7017/6davVYsgG5UAJ8bzDD5dS5Hl+5ZVXfe1rX+uMjEghhBA77LD9brvttmbNjkKUnLN2u33jjTe++13vve4v1wwGJttbbln34EMPdXu966+//qtf++rI6KiSst/vv/LoY177uteWgwEURavVevjhR9/1rvf+6fI/bNq8qYYDAK5Ze92fLr/8e9/7/rbbrVJSsYwzZAyZ6QJj0Fo85+99/we+9V//1e3OunfX3XzLbbfced655xDoZvbAZwg/RkwSxm8RM/3XsAFYNwODbXKqJsLuAopNjjU6d428brRle0vnDGPddGnSHdxuT01Nnf75MzZu3Dg2Ntbv90kpT1tSLCKzKsT53H7KhlMo5o5heqVNst4NXBESmK17UH9BayHA4lRtLbyfDOSwgCGdAYAEMMYKAUABoULeGdvw89939l7R+uhhMMphIBC5aeThARUAUYqiVXzrv7750Y99bMvkFsYw4xwQecZ1/MHu2wS33nbbBz/wobN/uHK//fcr+30CyrP8zjvvPumkT6295s+Ms7GxUSmVEKIsxe9+//ubbv7rzMwMEJWDAWdcCkFSAoCUCoD0QIiJMSvV75VKEgCUQhTFyD333PvBD33oyquuyPN8dGQEEYVSg35/3S3r/u2j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" alt="Aqiqah Plus">
+    <div class="logo">
+      <div class="logo-icon">🚗</div>
+      <h1>Aset Aqiqah Plus</h1>
+      <p>Sistem Manajemen & Pemeriksaan Armada</p>
     </div>
-
-    <div class="login-title">Login</div>
-    <div class="login-subtitle">Langkah 1 dari 2</div>
 
     <div class="login-tabs">
-      <button id="driverTab" class="active" onclick="switchLogin('driver')">Driver</button>
-      <button id="adminTab" onclick="switchLogin('admin')">Admin / Super Admin</button>
+      <button id="driverTab" class="active" onclick="switchLogin('driver')">
+        🚗 Driver
+      </button>
+
+      <button id="adminTab" onclick="switchLogin('admin')">
+        👑 Admin
+      </button>
     </div>
+
+    <!-- DRIVER LOGIN -->
 
     <div id="driverLoginPanel" class="login-panel">
-      <div class="login-step-label"><span class="step-icon">●</span><span>1. Tulis Nama Anda <b>*</b></span></div>
-      <div class="form-group login-name-group">
-        <input id="loginDriverName" type="text" required autocomplete="off" placeholder="Contoh: Syahrul" oninput="onDriverNameInput()">
+
+      <div class="info-box">
+        Login Driver menggunakan <b>Driver ID, Nama Driver, dan selfie langsung dari kamera</b>.
+        Driver wajib melakukan pendaftaran satu kali terlebih dahulu agar foto wajah awal
+        tersimpan sebagai data verifikasi.
       </div>
-      <input id="loginDriverId" type="hidden">
-      <div id="autoDriverId" class="auto-id"></div>
 
-      <div id="driverQrLockBox" class="qr-login-lock">🔒 <strong>QR Kendaraan wajib dipindai</strong><span id="driverQrVehicleText">Belum ada kendaraan yang dikunci.</span></div>
-      <div class="login-step-label face-step-label"><span class="step-icon">▣</span><span>2. Foto login di depan kendaraan</span></div>
-      <div class="login-help">Pastikan kendaraan yang baru dipindai terlihat jelas di belakang Anda. Kamera aktif otomatis.</div>
+      <div class="form-group">
+        <label>Driver ID</label>
+        <input
+          id="loginDriverId"
+          type="text"
+          required
+          autocomplete="username"
+          placeholder="Masukkan Driver ID">
+      </div>
 
-      <div class="face-login-box" id="driverFaceBox">
-        <video id="driverLoginVideo" autoplay playsinline muted></video>
+      <div class="form-group">
+        <label>Nama Driver</label>
+        <input
+          id="loginDriverName"
+          type="text"
+          required
+          autocomplete="name"
+          placeholder="Masukkan Nama Driver">
+      </div>
+
+      <div class="camera-box">
+
+        <video id="driverLoginVideo" autoplay playsinline></video>
+
         <canvas id="driverLoginCanvas" class="hidden"></canvas>
-        <div id="driverFaceGuide" class="face-guide"></div>
-        <div class="face-bottom-hint" id="driverFaceHint">Posisikan wajah Anda<br>di dalam garis<br><small>🚗 Kendaraan terlihat di belakang</small></div>
-        <div id="driverFaceStatus" class="face-status">Menunggu nama...</div>
-        <div id="driverFaceCheck" class="face-check hidden">✓</div>
+
+        <img id="driverLoginPreview" class="photo-preview">
+
+        <div class="camera-buttons">
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="startCamera('driverLogin')">
+            📷 Buka Kamera
+          </button>
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="capturePhoto('driverLogin')">
+            📸 Ambil Foto
+          </button>
+
+        </div>
+
       </div>
-      <div id="loginStatus" class="login-status"></div>
-      <button type="button" id="driverLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('driver')">🔄 Refresh Foto / Kamera</button>
-      <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
-      <button type="button" class="secondary-btn register-driver-btn" onclick="openDriverSelfRegistration()">📝 Daftar Driver Baru</button>
+
+      <button
+        class="primary-btn"
+        onclick="loginDriver()">
+        Masuk sebagai Driver
+      </button>
+
+      <button
+        type="button"
+        class="secondary-btn"
+        style="margin-top:10px;width:100%"
+        onclick="openDriverSelfRegistration()">
+        📝 Daftar Driver Baru
+      </button>
+
     </div>
+
+    <!-- ADMIN LOGIN -->
 
     <div id="adminLoginPanel" class="login-panel hidden">
-      <div class="login-step-label"><span class="step-icon">●</span><span>1. Tulis Nama Anda <b>*</b></span></div>
-      <div class="form-group login-name-group">
-        <input id="loginAdminName" type="text" required autocomplete="off" placeholder="Contoh: Syahrul" oninput="onAdminNameInput()">
-      </div>
-      <input id="loginAdminId" type="hidden">
-      <div id="autoAdminId" class="auto-id"></div>
 
-      <div class="form-group admin-pin-group">
-        <label>PIN <b>*</b></label>
-        <input id="loginAdminPin" type="password" inputmode="numeric" maxlength="6" placeholder="6 digit PIN" autocomplete="off" oninput="onAdminPinInput()">
+      <div class="info-box">
+        Login Admin menggunakan ID, Nama Admin, dan PIN. Setelah data benar,
+        kamera wajib digunakan untuk verifikasi foto login.
       </div>
 
-      <div class="login-step-label face-step-label"><span class="step-icon">▣</span><span>2. Posisikan wajah Anda di dalam bingkai</span></div>
-      <div class="login-help">Kamera aktif otomatis. Setelah wajah diam, gambar terkunci dan diverifikasi.</div>
-      <div class="face-login-box" id="adminFaceBox">
-        <video id="adminLoginVideo" autoplay playsinline muted></video>
+      <div class="form-group">
+        <label>Admin ID</label>
+        <div class="secret-input">
+          <input
+            id="loginAdminId"
+            type="password"
+            placeholder="Otomatis"
+            autocomplete="username">
+          <button
+            type="button"
+            class="secret-toggle"
+            title="Lihat/Koreksi Admin ID"
+            onclick="toggleAdminIdentity('loginAdminId',this)">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nama Admin</label>
+        <div class="secret-input">
+          <input
+            id="loginAdminName"
+            type="password"
+            placeholder="Otomatis"
+            autocomplete="name">
+          <button
+            type="button"
+            class="secret-toggle"
+            title="Lihat/Koreksi Nama Admin"
+            onclick="toggleAdminIdentity('loginAdminName',this)">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>PIN</label>
+        <input
+          id="loginAdminPin"
+          type="password"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="6 digit PIN"
+          autocomplete="off">
+      </div>
+
+      <div class="camera-box">
+
+        <video id="adminLoginVideo" autoplay playsinline></video>
+
         <canvas id="adminLoginCanvas" class="hidden"></canvas>
-        <div id="adminFaceGuide" class="face-guide"></div>
-        <div class="face-bottom-hint" id="adminFaceHint">Posisikan wajah Anda<br>di dalam garis</div>
-        <div id="adminFaceStatus" class="face-status">Menunggu nama...</div>
-        <div id="adminFaceCheck" class="face-check hidden">✓</div>
+
+        <img id="adminLoginPreview" class="photo-preview">
+
+        <div class="camera-buttons">
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="startCamera('adminLogin')">
+            📷 Buka Kamera
+          </button>
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="capturePhoto('adminLogin')">
+            📸 Ambil Foto
+          </button>
+
+        </div>
+
       </div>
-      <div id="adminLoginStatus" class="login-status"></div>
-      <button type="button" id="adminLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('admin')">🔄 Refresh Foto / Kamera</button>
-      <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
+
+      <button
+        class="primary-btn"
+        onclick="loginAdmin()">
+        🔐 Login Admin
+      </button>
+
     </div>
+
+    <div id="loginStatus" class="login-status"></div>
 
   </div>
 
@@ -1362,6 +1112,13 @@ tr:hover td{
       data-page="reports"
       onclick="showPage('reports')">
       📋 Laporan Pemeriksaan
+    </button>
+
+    <button
+      class="nav-btn"
+      data-page="videos"
+      onclick="showPage('videos')">
+      🎥 Video Pemeriksaan
     </button>
 
     <button
@@ -1584,7 +1341,7 @@ tr:hover td{
 
       <div class="page-title">
         <h2>Pemeriksaan Armada</h2>
-        <p>Form pemeriksaan kendaraan Aset Aqiqah Plus</p>
+        <p>Form pemeriksaan kendaraan sesuai database Aset Aqiqah Plus</p>
       </div>
 
       <div class="panel">
@@ -1986,22 +1743,7 @@ tr:hover td{
         <p>Pengajuan dan approval koreksi pemeriksaan</p>
       </div>
 
-      <div id="driverCorrectionPanel" class="panel correction-driver-card hidden">
-          <h4>✏️ Ajukan Koreksi</h4>
-          <div class="info-box">Data pemeriksaan dan KM yang sudah tersimpan tidak dapat diubah langsung oleh Driver. Ajukan koreksi dan tunggu persetujuan Admin/Super Admin.</div>
-          <form id="driverCorrectionForm">
-            <div class="correction-form-grid">
-              <div class="form-group full"><label>Pemeriksaan</label><select id="correctionInspection" required></select></div>
-              <div class="form-group"><label>Kolom yang dikoreksi</label><select id="correctionColumn" required></select></div>
-              <div class="form-group"><label>Nilai Lama</label><input id="correctionOld" readonly></div>
-              <div class="form-group"><label>Nilai Baru</label><input id="correctionNew" required></div>
-              <div class="form-group full"><label>Alasan Koreksi *</label><textarea id="correctionReason" required placeholder="Jelaskan alasan perubahan..."></textarea></div>
-            </div>
-            <div class="form-actions"><button type="submit" class="primary-btn" style="width:auto">📨 Ajukan Koreksi</button></div>
-          </form>
-        </div>
-
-        <div class="panel">
+      <div class="panel">
 
         <div class="table-wrap">
 
@@ -2073,6 +1815,73 @@ tr:hover td{
             </thead>
 
             <tbody id="inspectionBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         VIDEO PEMERIKSAAN
+    ====================================================== -->
+
+    <div id="page-videos" class="page">
+
+      <div class="page-title">
+        <h2>Video Pemeriksaan</h2>
+        <p>Video disimpan di Google Drive dan metadata dicatat di sheet Video_Pemeriksaan.</p>
+      </div>
+
+      <div class="panel">
+
+        <div class="toolbar">
+
+          <input
+            id="videoSearch"
+            placeholder="Cari kode aset, kendaraan, driver..."
+            oninput="renderVideos()">
+
+          <select id="videoTypeFilter" onchange="renderVideos()">
+            <option value="">Semua jenis video</option>
+            <option value="Video Lampu Utama">Video Lampu Utama</option>
+            <option value="Video Lampu Rem">Video Lampu Rem</option>
+            <option value="Video Lampu Sein">Video Lampu Sein</option>
+            <option value="Video Body Mobil Lecet">Video Body Mobil Lecet</option>
+            <option value="Video Interior">Video Interior</option>
+            <option value="Video Kerusakan yang Urgent">Video Kerusakan yang Urgent</option>
+          </select>
+
+          <button class="secondary-btn" type="button" onclick="loadVideos(true)">
+            🔄 Refresh Video
+          </button>
+
+        </div>
+
+        <div id="videoStatus" style="margin-bottom:12px;color:#78909c;font-size:13px;">
+          Video belum dimuat. Data akan diambil saat menu dibuka.
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Kode Aset</th>
+                <th>Kendaraan</th>
+                <th>Driver</th>
+                <th>Jenis Video</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody id="videoBody"></tbody>
 
           </table>
 
@@ -2220,16 +2029,6 @@ tr:hover td{
       </div>
 
       <div class="panel">
-        <h3>Pengaturan Tampilan Menu</h3>
-        <p style="color:#607d8b;font-size:13px">Super Admin dapat menentukan menu apa yang terlihat untuk Driver, Admin, dan Super Admin. Pengaturan disimpan di Script Properties, bukan membuat sheet baru.</p>
-        <div id="menuDisplaySettings" class="menu-display-settings">Memuat pengaturan tampilan...</div>
-        <div class="form-actions" style="margin-top:12px">
-          <button type="button" class="secondary-btn" onclick="loadMenuDisplaySettings()">↻ Muat</button>
-          <button type="button" class="primary-btn" style="width:auto" onclick="saveMenuDisplaySettings()">💾 Simpan Tampilan</button>
-        </div>
-      </div>
-
-      <div class="panel">
 
         <h3>Informasi API</h3>
 
@@ -2325,11 +2124,10 @@ const state = {
   km:[],
   corrections:[],
   audit:[],
+  videos:[],
 
   selectedAsset:null,
-  pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim(),
-  qrAssetLocked:false,
-  qrAsset:null
+  pendingAssetCode:(new URLSearchParams(window.location.search).get('asset') || '').trim()
 
 };
 
@@ -2466,336 +2264,357 @@ function toggleAdminIdentity(fieldId,button){
 }
 
 function switchLogin(type){
-  stopAutoFaceLogin();
-  stopAutoAdminFaceLogin();
+
+  // Setiap perpindahan role dimulai dari keadaan login yang benar-benar bersih.
   stopCamera('driverLogin');
   stopCamera('adminLogin');
   state.loginPhoto.driverLogin=null;
   state.loginPhoto.adminLogin=null;
   state.loginToken=null;
   state.loginGPS=null;
-  autoFaceCandidate=null;
-  autoAdminCandidate=null;
 
   const driverTab=document.getElementById('driverTab');
   const adminTab=document.getElementById('adminTab');
   const driverPanel=document.getElementById('driverLoginPanel');
   const adminPanel=document.getElementById('adminLoginPanel');
 
-  ['loginDriverId','loginDriverName','loginAdminId','loginAdminName','loginAdminPin'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
+  document.getElementById('loginDriverId').value='';
+  document.getElementById('loginDriverName').value='';
+  document.getElementById('loginAdminId').value='';
+  document.getElementById('loginAdminName').value='';
+  document.getElementById('loginAdminPin').value='';
+  document.getElementById('loginStatus').textContent='';
+
+  ['driverLoginPreview','adminLoginPreview'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.removeAttribute('src'); el.style.display='none'; }
   });
-  ['autoDriverId','autoAdminId'].forEach(id=>{
-    const el=document.getElementById(id); if(el){el.textContent='';el.classList.remove('show');}
-  });
-  setFaceUI('Menunggu nama...',false,'driver');
-  setFaceUI('Menunggu nama...',false,'admin');
-  setLoginStatus('',false,'driver');
-  setLoginStatus('',false,'admin');
 
   if(type==='driver'){
-    driverTab.classList.add('active'); adminTab.classList.remove('active');
-    driverPanel.classList.remove('hidden'); adminPanel.classList.add('hidden');
-    startAutoFaceLogin();
+    driverTab.classList.add('active');
+    adminTab.classList.remove('active');
+    driverPanel.classList.remove('hidden');
+    adminPanel.classList.add('hidden');
   }else{
-    driverTab.classList.remove('active'); adminTab.classList.add('active');
-    driverPanel.classList.add('hidden'); adminPanel.classList.remove('hidden');
-    startAutoAdminFaceLogin();
+    restoreAdminLoginIdentity();
+    driverTab.classList.remove('active');
+    adminTab.classList.add('active');
+    driverPanel.classList.add('hidden');
+    adminPanel.classList.remove('hidden');
   }
 }
 
-async function startCamera(type,silent=false){
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+async function startCamera(type){
+
   try{
+
     stopCamera(type);
-    const video=document.getElementById(type==='adminLogin'?'adminLoginVideo':'driverLoginVideo');
+
+    const video=document.getElementById(
+      type==='adminLogin'
+        ? 'adminLoginVideo'
+        : 'driverLoginVideo'
+    );
+
     const stream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:'user',width:{ideal:720},height:{ideal:1280}},audio:false
+
+      video:{
+        facingMode:'user',
+        width:{ideal:1280},
+        height:{ideal:720}
+      },
+
+      audio:false
+
     });
-    video.srcObject=stream; state.camera[type]=stream; await video.play();
-    if(!silent) toast('Kamera berhasil dibuka.','success');
-    return true;
+
+    video.srcObject=stream;
+
+    state.camera[type]=stream;
+
+    await video.play();
+
+    toast('Kamera berhasil dibuka.','success');
+
   }catch(error){
-    const msg='Kamera tidak dapat digunakan: '+error.message;
-    if(type==='driverLogin') setFaceUI(msg,false,'driver'); else setFaceUI(msg,false,'admin');
-    return false;
+
+    toast(
+      'Kamera tidak dapat digunakan: '+error.message,
+      'error'
+    );
+
   }
+
 }
+
 
 function stopCamera(type){
+
   const stream=state.camera[type];
-  if(stream){stream.getTracks().forEach(track=>track.stop());state.camera[type]=null;}
+
+  if(stream){
+
+    stream.getTracks().forEach(track=>{
+      track.stop();
+    });
+
+    state.camera[type]=null;
+  }
+
 }
+
 
 function capturePhoto(type){
-  // Dipertahankan sebagai kompatibilitas; login otomatis tidak memakai tombol ini.
-  return captureLiveFrame(type);
+
+  const video=document.getElementById(
+    type==='adminLogin'
+      ? 'adminLoginVideo'
+      : 'driverLoginVideo'
+  );
+
+  const canvas=document.getElementById(
+    type==='adminLogin'
+      ? 'adminLoginCanvas'
+      : 'driverLoginCanvas'
+  );
+
+  const preview=document.getElementById(
+    type==='adminLogin'
+      ? 'adminLoginPreview'
+      : 'driverLoginPreview'
+  );
+
+  if(!video.srcObject){
+
+    toast(
+      'Buka kamera terlebih dahulu.',
+      'error'
+    );
+
+    return;
+  }
+
+  if(!video.videoWidth){
+
+    toast(
+      'Kamera belum siap. Tunggu sebentar lalu ambil foto.',
+      'error'
+    );
+
+    return;
+  }
+
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+
+  const ctx=canvas.getContext('2d');
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  const data=canvas.toDataURL(
+    'image/jpeg',
+    .82
+  );
+
+  state.loginPhoto[type]=data;
+
+  preview.src=data;
+  preview.style.display='block';
+
+  toast(
+    'Foto berhasil diambil.',
+    'success'
+  );
+
 }
 
-function normalizeStatus(value){return String(value ?? '').replace(/\u00a0/g,' ').trim().toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ');}
-function isDriverActive(value){return ['aktif','active','1','true','ya'].includes(normalizeStatus(value));}
+
+function normalizeStatus(value){
+  return String(value ?? '')
+    .replace(/\u00a0/g,' ')
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g,' ')
+    .replace(/\s+/g,' ');
+}
+
+function isDriverActive(value){
+  return ['aktif','active','1','true','ya'].includes(normalizeStatus(value));
+}
+
+/* =========================================================
+   FACE VERIFICATION
+========================================================= */
 
 const FACE_MODEL_URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 const FACE_MATCH_THRESHOLD=0.52;
 
 async function ensureFaceModels(){
   if(state.faceModelsReady) return state.faceModelsReady;
+
   state.faceModelsReady=(async()=>{
-    if(typeof faceapi==='undefined') throw new Error('Modul verifikasi wajah belum termuat.');
+    if(typeof faceapi==='undefined'){
+      throw new Error('Modul verifikasi wajah belum termuat. Periksa koneksi internet lalu coba lagi.');
+    }
+
     await Promise.all([
       faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL),
       faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL),
       faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
     ]);
   })();
-  try{await state.faceModelsReady;return true;}catch(e){state.faceModelsReady=null;throw e;}
-}
-function preloadFaceModels(){if(typeof faceapi!=='undefined') ensureFaceModels().catch(()=>{});}
-function faceDistance(a,b){
-  let aa=a,bb=b;
-  if(typeof aa==='string'){try{aa=JSON.parse(aa);}catch(_){aa=[];}}
-  if(typeof bb==='string'){try{bb=JSON.parse(bb);}catch(_){bb=[];}}
-  aa=Array.from(aa||[]);bb=Array.from(bb||[]);
-  if(aa.length!==128||bb.length!==128) throw new Error('Data verifikasi wajah tidak valid.');
-  let sum=0;for(let i=0;i<128;i++){const d=Number(aa[i])-Number(bb[i]);sum+=d*d;}return Math.sqrt(sum);
-}
 
-function setFaceUI(status,locked=false,role='driver'){
-  const p=role==='admin'?'admin':'driver';
-  const guide=document.getElementById(p+'FaceGuide');
-  const box=document.getElementById(p+'FaceStatus');
-  const check=document.getElementById(p+'FaceCheck');
-  const retry=document.getElementById(p+'LoginRefreshBtn');
-  if(guide) guide.classList.toggle('locked',!!locked);
-  if(box){box.classList.toggle('locked',!!locked);box.textContent=status||'';}
-  if(check) check.classList.toggle('hidden',!locked);
-  if(retry && !locked) retry.classList.add('hidden');
-  if(retry && locked) retry.classList.add('hidden');
-}
-
-function showLoginRefresh(role){
-  const p=role==='admin'?'admin':'driver';
-  const btn=document.getElementById(p+'LoginRefreshBtn');
-  if(btn) btn.classList.remove('hidden');
-}
-
-async function refreshLoginCamera(role){
-  const p=role==='admin'?'admin':'driver';
-  const btn=document.getElementById(p+'LoginRefreshBtn');
-  if(btn){btn.classList.add('hidden');btn.disabled=true;}
-  if(role==='admin'){
-    adminStableSince=0;adminStableBox=null;adminStableFrames=0;autoAdminBusy=false;
-  }else{
-    stableSince=0;stableBox=null;stableFrames=0;autoFaceBusy=false;
-  }
   try{
-    stopCamera(p+'Login');
-    await ensureFaceModels();
-    const ok=await startCamera(p+'Login',true);
-    if(!ok) throw new Error('Kamera tidak dapat diaktifkan.');
-    const video=document.getElementById(p+'LoginVideo');
-    if(video) await video.play().catch(()=>{});
-    setFaceUI('Kamera siap. Posisikan wajah dan jangan bergerak.',false,role);
-    setLoginStatus('Silakan coba foto wajah kembali.',false,role);
-  }catch(e){
-    setFaceUI(e.message||'Kamera gagal diaktifkan.',false,role);
-    setLoginStatus(e.message||'Kamera gagal diaktifkan.',true,role);
-    showLoginRefresh(role);
-  }finally{if(btn)btn.disabled=false;}
-}
-
-let autoFaceTimer=null,autoFaceBusy=false,autoFaceCandidate=null;
-let stableSince=0,stableBox=null,stableFrames=0;
-let autoAdminTimer=null,autoAdminBusy=false,autoAdminCandidate=null;
-let adminStableSince=0,adminStableBox=null,adminStableFrames=0;
-
-function updateDriverQrLockUI(){
-  const box=document.getElementById('driverQrLockBox');
-  const text=document.getElementById('driverQrVehicleText');
-  if(!box||!text)return;
-  const code=String(state.pendingAssetCode||'').trim();
-  if(!code){box.classList.remove('ok');text.textContent='Belum ada kendaraan yang dikunci. Scan QR kendaraan terlebih dahulu.';return;}
-  const asset=(state.assets||[]).find(a=>String(a.code||'').toUpperCase()===code.toUpperCase());
-  box.classList.add('ok');
-  text.textContent=asset ? `${asset.code} — ${asset.name||asset.kendaraan||''}${asset.plate?' — '+asset.plate:''}` : 'Kode kendaraan: '+code;
-}
-
-function onDriverNameInput(){
-  const name=(document.getElementById('loginDriverName')?.value||'').trim();
-  const idEl=document.getElementById('loginDriverId'),badge=document.getElementById('autoDriverId');
-  autoFaceCandidate=null;stableSince=0;stableBox=null;stableFrames=0;
-  if(idEl) idEl.value=''; if(badge){badge.textContent='';badge.classList.remove('show');}
-  if(!name){setFaceUI('Menunggu nama...',false,'driver');return;}
-  if(!state.pendingAssetCode){setFaceUI('Scan QR kendaraan terlebih dahulu.',false,'driver');return;}
-  const exact=state.drivers.find(d=>driverNameOf(d).trim().toLowerCase()===name.toLowerCase() && driverIsActive(d));
-  if(!exact){setFaceUI('Nama Driver belum ditemukan.',false,'driver');return;}
-  autoFaceCandidate=exact;
-  if(idEl) idEl.value=driverIdOf(exact);
-  if(badge){badge.textContent='ID otomatis: '+driverIdOf(exact);badge.classList.add('show');}
-  setFaceUI('Nama dikenali. Posisikan wajah...',false,'driver');
-}
-
-function onAdminNameInput(){
-  const name=(document.getElementById('loginAdminName')?.value||'').trim();
-  const idEl=document.getElementById('loginAdminId'),badge=document.getElementById('autoAdminId');
-  autoAdminCandidate=null;adminStableSince=0;adminStableBox=null;adminStableFrames=0;
-  if(idEl) idEl.value='';if(badge){badge.textContent='';badge.classList.remove('show');}
-  if(!name){setFaceUI('Menunggu nama...',false,'admin');return;}
-  const exact=(state.admins||[]).find(a=>String(a.name||a.namaAdmin||'').trim().toLowerCase()===name.toLowerCase() && isDriverActive(a.status));
-  if(!exact){setFaceUI('Nama Admin belum ditemukan.',false,'admin');return;}
-  autoAdminCandidate=exact;
-  if(idEl) idEl.value=String(exact.id||exact.adminId||'').trim();
-  if(badge){badge.textContent='ID otomatis: '+String(exact.id||exact.adminId||'');badge.classList.add('show');}
-  setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
-}
-function onAdminPinInput(){
-  const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
-  if(autoAdminCandidate && /^\d{6}$/.test(pin)) setFaceUI('PIN siap. Posisikan wajah...',false,'admin');
-}
-
-async function detectStableFace(video,role){
-  const det=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:160,scoreThreshold:0.55}));
-  if(!det) return null;
-  const b=det.box;
-  const now=performance.now();
-  const prev=role==='admin'?adminStableBox:stableBox;
-  const area=Math.max(1,b.width*b.height);
-  let stable=false;
-  if(prev){
-    const dx=Math.abs(b.x-prev.x)/Math.max(1,b.width);
-    const dy=Math.abs(b.y-prev.y)/Math.max(1,b.height);
-    const dw=Math.abs(b.width-prev.width)/Math.max(1,b.width);
-    const dh=Math.abs(b.height-prev.height)/Math.max(1,b.height);
-    stable=dx<0.035&&dy<0.035&&dw<0.045&&dh<0.045;
+    await state.faceModelsReady;
+    return true;
+  }catch(error){
+    state.faceModelsReady=null;
+    throw error;
   }
-  if(role==='admin'){
-    if(stable){if(!adminStableSince)adminStableSince=now;adminStableFrames++;}else{adminStableSince=now;adminStableFrames=1;}
-    adminStableBox=b;
-    return {det,stable:adminStableFrames>=2&&(now-adminStableSince)>=260};
-  }
-  if(stable){if(!stableSince)stableSince=now;stableFrames++;}else{stableSince=now;stableFrames=1;}
-  stableBox=b;
-  return {det,stable:stableFrames>=2&&(now-stableSince)>=260};
 }
 
-async function captureLiveFrame(type){
-  const p=type==='adminLogin'?'admin':'driver';
-  const video=document.getElementById(p+'LoginVideo');
-  const canvas=document.getElementById(p+'LoginCanvas');
-  if(!video||!canvas||!video.videoWidth)return null;
-  const w=Math.min(video.videoWidth,640),h=Math.round(w*video.videoHeight/video.videoWidth);
-  canvas.width=w;canvas.height=h;
-  canvas.getContext('2d',{willReadFrequently:true}).drawImage(video,0,0,w,h);
-  return canvas.toDataURL('image/jpeg',0.68);
-}
-
-async function getFaceDescriptorFromVideo(video){
-  await ensureFaceModels();
-  const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.55})).withFaceLandmarks().withFaceDescriptor();
-  if(!result) throw new Error('Wajah tidak ditemukan.');
-  return Array.from(result.descriptor);
-}
-
-async function autoFaceCheck(){
-  if(autoFaceBusy||state.loginBusy||!autoFaceCandidate||!state.camera.driverLogin)return;
-  if(!state.pendingAssetCode){setFaceUI('Scan QR kendaraan terlebih dahulu.',false,'driver');return;}
-  const name=(document.getElementById('loginDriverName')?.value||'').trim();if(!name)return;
-  if(!autoFaceCandidate.faceDescriptor){setFaceUI('Data wajah Driver belum terdaftar.',false,'driver');return;}
-  autoFaceBusy=true;
-  try{
-    const video=document.getElementById('driverLoginVideo');
-    const stable=await detectStableFace(video,'driver');
-    if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'driver');return;}
-    setFaceUI('Wajah diam. Mengunci gambar...',false,'driver');
-    const live=await getFaceDescriptorFromVideo(video);
-    const dist=faceDistance(live,autoFaceCandidate.faceDescriptor);
-    if(dist>FACE_MATCH_THRESHOLD){stableSince=0;stableFrames=0;const v=document.getElementById('driverLoginVideo');if(v) v.play().catch(()=>{});setFaceUI('Wajah tidak cocok. Coba lagi.',false,'driver');showLoginRefresh('driver');return;}
-    const data=await captureLiveFrame('driverLogin');
-    state.loginPhoto.driverLogin=data;
-    const driverVideo=document.getElementById('driverLoginVideo'); if(driverVideo) driverVideo.pause();
-    setFaceUI('Wajah terkunci ✓ Verifikasi berhasil',true,'driver');
-    await loginDriverAutomatic(autoFaceCandidate,live,dist);
-  }catch(e){setFaceUI(e.message||'Verifikasi gagal.',false,'driver');showLoginRefresh('driver');}
-  finally{autoFaceBusy=false;}
-}
-
-async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
-  if(state.loginBusy)return;
-  state.loginBusy=true;
-  try{
-    setLoginStatus('Verifikasi ID dan wajah...',false,'driver');
-    const gps=await requestLoginLocationFast();state.loginGPS=gps;
-    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,qrAssetCode:String(state.pendingAssetCode||'').trim(),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
-    state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps};
-    stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
-  }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
-  finally{state.loginBusy=false;}
-}
-
-function requestLoginLocationFast(){
+function loadImageFromDataUrl(dataUrl){
   return new Promise((resolve,reject)=>{
-    if(!navigator.geolocation){reject(new Error('Browser tidak mendukung lokasi.'));return;}
-    navigator.geolocation.getCurrentPosition(p=>{const c=p.coords;resolve({latitude:Number(c.latitude),longitude:Number(c.longitude),accuracy:Number(c.accuracy||0)});},()=>reject(new Error('Izin lokasi diperlukan untuk login Driver.')),{enableHighAccuracy:false,timeout:2500,maximumAge:30000});
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=()=>reject(new Error('Foto tidak dapat dibaca untuk verifikasi wajah.'));
+    img.src=dataUrl;
   });
 }
-function clearLoginFieldsImmediately(){
-  ['loginDriverName','loginDriverId','loginAdminName','loginAdminId','loginAdminPin'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
-  ['autoDriverId','autoAdminId'].forEach(id=>{const b=document.getElementById(id);if(b){b.textContent='';b.classList.remove('show');}});
-  state.loginPhoto.driverLogin=null;state.loginPhoto.adminLogin=null;
-  localStorage.removeItem('assettrack_admin_id');localStorage.removeItem('assettrack_admin_name');
-}
-async function startAutoFaceLogin(){
-  try{await ensureFaceModels();const ok=await startCamera('driverLogin',true);if(!ok)return;stopAutoFaceLogin();autoFaceTimer=setInterval(autoFaceCheck,120);setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'driver');}
-  catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'driver');}
-}
-function stopAutoFaceLogin(){if(autoFaceTimer){clearInterval(autoFaceTimer);autoFaceTimer=null;}}
 
-/* ===== AUTO ADMIN / SUPER ADMIN FACE LOGIN ===== */
-async function autoAdminFaceCheck(){
-  if(autoAdminBusy||state.loginBusy||!autoAdminCandidate||!state.camera.adminLogin)return;
-  const name=(document.getElementById('loginAdminName')?.value||'').trim();
-  const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
-  if(!name||!/^[0-9]{6}$/.test(pin))return;
-  autoAdminBusy=true;
-  try{
-    const video=document.getElementById('adminLoginVideo');
-    const stable=await detectStableFace(video,'admin');
-    if(!stable){setFaceUI('Mendeteksi wajah... Jangan bergerak',false,'admin');return;}
-    setFaceUI('Wajah diam. Mengunci gambar...',false,'admin');
-    const live=await getFaceDescriptorFromVideo(video);
-    const data=await captureLiveFrame('adminLogin');
-    state.loginPhoto.adminLogin=data;
-    const adminVideo=document.getElementById('adminLoginVideo'); if(adminVideo) adminVideo.pause();
-    setFaceUI('Wajah terkunci ✓ Verifikasi...',true,'admin');
-    await loginAdminAutomatic(autoAdminCandidate,live,data);
-  }catch(e){const v=document.getElementById('adminLoginVideo');if(v) v.play().catch(()=>{});setFaceUI(e.message||'Verifikasi gagal.',false,'admin');showLoginRefresh('admin');}
-  finally{autoAdminBusy=false;}
+async function getFaceDescriptorFromDataUrl(dataUrl){
+  await ensureFaceModels();
+
+  const image=await loadImageFromDataUrl(dataUrl);
+
+  const detections=await faceapi
+    .detectAllFaces(
+      image,
+      new faceapi.TinyFaceDetectorOptions({
+        inputSize:224,
+        scoreThreshold:0.5
+      })
+    )
+    .withFaceLandmarks()
+    .withFaceDescriptors();
+
+  if(detections.length===0){
+    throw new Error('Wajah tidak ditemukan. Pastikan wajah terlihat jelas dan menghadap kamera.');
+  }
+
+  if(detections.length>1){
+    throw new Error('Terdeteksi lebih dari satu wajah. Hanya satu orang boleh berada di depan kamera.');
+  }
+
+  return Array.from(detections[0].descriptor);
 }
-async function loginAdminAutomatic(candidate,liveDescriptor,data){
-  if(state.loginBusy)return;
-  state.loginBusy=true;
-  try{
-    setLoginStatus('Verifikasi ID, PIN dan wajah...',false,'admin');
-    const adminPin=String(document.getElementById('loginAdminPin')?.value||'').trim();
-    const result=await apiPost({action:'adminLoginFastByName',namaAdmin:String(candidate.name||candidate.namaAdmin||'').trim(),pin:adminPin,data:data,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor)});
-    state.user={...result.admin,role:String(result.admin.role||'ADMIN').toUpperCase(),loginPhoto:result.loginPhoto||''};
-    state.loginToken=null;
-    stopAutoAdminFaceLogin();stopCamera('adminLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login '+state.user.role+' berhasil.','success');
-  }catch(error){const v=document.getElementById('adminLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'admin');setLoginStatus(error.message||'Login gagal.',true,'admin');showLoginRefresh('admin');}
-  finally{state.loginBusy=false;}
+
+function faceDistance(a,b){
+  let aa=a;
+  let bb=b;
+
+  if(typeof aa==='string'){
+    try{aa=JSON.parse(aa);}catch(_){aa=[];}
+  }
+
+  if(typeof bb==='string'){
+    try{bb=JSON.parse(bb);}catch(_){bb=[];}
+  }
+
+  aa=Array.from(aa || []);
+  bb=Array.from(bb || []);
+
+  if(aa.length!==128 || bb.length!==128){
+    throw new Error('Data verifikasi wajah tidak valid.');
+  }
+
+  let sum=0;
+
+  for(let i=0;i<128;i++){
+    const diff=Number(aa[i])-Number(bb[i]);
+    sum+=diff*diff;
+  }
+
+  return Math.sqrt(sum);
 }
-async function startAutoAdminFaceLogin(){
-  try{await ensureFaceModels();const ok=await startCamera('adminLogin',true);if(!ok)return;stopAutoAdminFaceLogin();setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'admin');autoAdminTimer=setInterval(autoAdminFaceCheck,120);}
-  catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'admin');}
+
+function setInspectionGPS(gps){
+  if(!gps)return;
+
+  const lat=document.getElementById('latitude');
+  const lng=document.getElementById('longitude');
+  const acc=document.getElementById('gpsAccuracy');
+  const label=document.getElementById('gpsLabel');
+
+  if(lat)lat.value=gps.latitude;
+  if(lng)lng.value=gps.longitude;
+  if(acc)acc.value=gps.accuracy;
+  if(label)label.value=gps.latitude+', '+gps.longitude;
 }
-function stopAutoAdminFaceLogin(){if(autoAdminTimer){clearInterval(autoAdminTimer);autoAdminTimer=null;}}
+
+function requestLoginLocation(){
+  return new Promise((resolve,reject)=>{
+    if(!navigator.geolocation){
+      reject(new Error('Browser tidak mendukung akses lokasi GPS.'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      position=>{
+        const c=position.coords;
+
+        if(
+          !Number.isFinite(Number(c.latitude)) ||
+          !Number.isFinite(Number(c.longitude))
+        ){
+          reject(new Error('Koordinat GPS tidak tersedia.'));
+          return;
+        }
+
+        resolve({
+          latitude:Number(c.latitude),
+          longitude:Number(c.longitude),
+          accuracy:Number(c.accuracy || 0)
+        });
+      },
+      error=>{
+        let message='Akses lokasi GPS diperlukan untuk login Driver.';
+
+        if(error && error.code===1){
+          message='Izin lokasi ditolak. Izinkan akses lokasi untuk Aset Aqiqah Plus, lalu tekan Masuk sebagai Driver lagi.';
+        }else if(error && error.code===2){
+          message='Lokasi GPS tidak tersedia. Aktifkan GPS/lokasi perangkat lalu coba lagi.';
+        }else if(error && error.code===3){
+          message='Pengambilan lokasi GPS terlalu lama. Pastikan GPS aktif lalu coba lagi.';
+        }
+
+        reject(new Error(message));
+      },
+      {
+        enableHighAccuracy:true,
+        timeout:20000,
+        maximumAge:0
+      }
+    );
+  });
+}
 
 /* =========================================================
    DRIVER LOGIN
 ========================================================= */
 
 async function loginDriver(){
-  if(state.loginBusy)return;
-  state.loginBusy=true;
   try{
     state.user=null;
     state.loginToken=null;
@@ -2857,13 +2676,10 @@ async function loginDriver(){
       return;
     }
 
-    setLoginStatus('Memeriksa wajah dan lokasi...');
-    const gpsPromise=requestLoginLocation();
-    const facePromise=getFaceDescriptorFromDataUrl(
+    setLoginStatus('Memeriksa wajah Driver...');
+    const liveDescriptor=await getFaceDescriptorFromDataUrl(
       state.loginPhoto.driverLogin
     );
-
-    const [liveDescriptor,gps]=await Promise.all([facePromise,gpsPromise]);
 
     const localDistance=faceDistance(
       liveDescriptor,
@@ -2876,7 +2692,11 @@ async function loginDriver(){
       );
     }
 
+    setLoginStatus('Meminta izin lokasi GPS...');
+
+    const gps=await requestLoginLocation();
     state.loginGPS=gps;
+
     setLoginStatus('Memverifikasi login Driver...');
 
     const result=await apiPost({
@@ -2884,7 +2704,6 @@ async function loginDriver(){
       driverId:driverId,
       namaDriver:driverName,
       data:state.loginPhoto.driverLogin,
-      qrAssetCode:String(state.pendingAssetCode||'').trim(),
       mimeType:'image/jpeg',
       faceDescriptor:Array.from(liveDescriptor),
       faceDistance:localDistance,
@@ -2917,8 +2736,6 @@ async function loginDriver(){
     state.loginGPS=null;
     setLoginStatus(error.message,true);
     toast(error.message,'error');
-  }finally{
-    state.loginBusy=false;
   }
 }
 
@@ -2928,59 +2745,129 @@ async function loginDriver(){
 ========================================================= */
 
 async function loginAdmin(){
-  // Login Admin/Super Admin sekarang otomatis melalui kamera; fungsi lama dipertahankan untuk kompatibilitas.
-  const name=(document.getElementById('loginAdminName')?.value||'').trim();
-  const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
-  if(!name){setLoginStatus('Nama Admin wajib diisi.',true,'admin');return;}
-  if(!/^[0-9]{6}$/.test(pin)){setLoginStatus('PIN harus 6 digit angka.',true,'admin');return;}
-  if(!autoAdminCandidate) onAdminNameInput();
-  if(!state.camera.adminLogin) await startAutoAdminFaceLogin();
-}
-
-function setLoginStatus(message,error=false,role='driver'){
-  const el=document.getElementById(role==='admin'?'adminLoginStatus':'loginStatus');
-  if(!el)return;
-  el.textContent=message||'';
-  el.style.color=error?'#c62828':'#2e7d32';
-}
-
-
-
-async function loadMenuDisplaySettings(){
-  const box=document.getElementById('menuDisplaySettings'); if(!box)return;
-  box.textContent='Memuat pengaturan tampilan...';
   try{
-    const result=await apiGet('menuConfig');
-    const items=result.menuConfig||[];
-    box.innerHTML=`<div class="menu-display-row menu-display-head"><div>Menu</div><label>Driver</label><label>Admin</label><label>Super Admin</label></div>`+items.map((x,i)=>`<div class="menu-display-row" data-menu-id="${escapeHtml(x.id)}"><div class="menu-name">${escapeHtml(x.icon||'')} ${escapeHtml(x.label||x.id)}</div><label><input type="checkbox" data-role="driver" ${x.driver?'checked':''}></label><label><input type="checkbox" data-role="admin" ${x.admin?'checked':''}></label><label><input type="checkbox" data-role="superAdmin" ${x.superAdmin?'checked':''}></label></div>`).join('');
-  }catch(e){box.textContent='Gagal memuat pengaturan: '+e.message;}
-}
-async function saveMenuDisplaySettings(){
-  if(!isSuperAdmin()){toast('Hanya Super Admin yang dapat mengubah tampilan.','error');return;}
-  const box=document.getElementById('menuDisplaySettings'); if(!box)return;
-  try{
-    const current=await apiGet('menuConfig');
-    const byId={};(current.menuConfig||[]).forEach(x=>byId[x.id]=x);
-    box.querySelectorAll('.menu-display-row[data-menu-id]').forEach(row=>{
-      const id=row.getAttribute('data-menu-id'),x=byId[id];if(!x)return;
-      x.driver=!!row.querySelector('[data-role="driver"]')?.checked;
-      x.admin=!!row.querySelector('[data-role="admin"]')?.checked;
-      x.superAdmin=!!row.querySelector('[data-role="superAdmin"]')?.checked;
+    state.user=null;
+    state.loginToken=null;
+
+    restoreAdminLoginIdentity();
+
+    const id=document.getElementById('loginAdminId').value.trim();
+    const name=document.getElementById('loginAdminName').value.trim();
+    const pin=document.getElementById('loginAdminPin').value.trim();
+
+    if(!/^\d{6}$/.test(pin)){
+      toast('PIN harus 6 digit angka.','error');
+      return;
+    }
+
+    setLoginStatus('Memverifikasi Admin dan PIN...');
+
+    const login=await apiPost({
+      action:'adminLogin',
+      adminId:id,
+      namaAdmin:name,
+      pin:pin
     });
-    const result=await apiPost({action:'saveMenuConfig',menuConfig:Object.values(byId),userId:state.user.adminId||state.user.id,userName:state.user.name||state.user.namaAdmin,role:'SUPER_ADMIN'});
-    toast(result.message||'Tampilan berhasil disimpan.','success');applyMenuConfig(result.menuConfig||Object.values(byId));
-  }catch(e){toast(e.message||'Gagal menyimpan tampilan.','error');}
+
+    state.loginToken=login.loginToken || null;
+    if(!state.loginToken){
+      throw new Error('Token sesi login Admin tidak diterima server.');
+    }
+
+    // Server dapat memilih Super Admin aktif secara otomatis bila ID/Nama tersembunyi kosong.
+    // Simpan identitas yang benar agar login berikutnya otomatis terisi tetapi tetap tersembunyi.
+    const resolvedId=String(login.admin.adminId || login.admin.id || id || '').trim();
+    const resolvedName=String(login.admin.namaAdmin || login.admin.name || name || '').trim();
+
+    document.getElementById('loginAdminId').value=resolvedId;
+    document.getElementById('loginAdminName').value=resolvedName;
+    localStorage.setItem('assettrack_admin_id',resolvedId);
+    localStorage.setItem('assettrack_admin_name',resolvedName);
+
+    if(!state.loginPhoto.adminLogin){
+      setLoginStatus(
+        login.admin.faceDescriptor
+          ? 'ID, Nama, dan PIN benar. Ambil foto kamera untuk verifikasi wajah.'
+          : 'Login pertama: ambil foto wajah yang jelas untuk membuat data foto awal.'
+      );
+      toast(
+        login.admin.faceDescriptor
+          ? 'ID, Nama, dan PIN benar. Sekarang ambil foto kamera.'
+          : 'Belum ada foto referensi. Ambil foto wajah untuk pendaftaran awal.',
+        'info'
+      );
+      return;
+    }
+
+    setLoginStatus('Membaca dan memverifikasi wajah Admin...');
+
+    const liveDescriptor=await getFaceDescriptorFromDataUrl(
+      state.loginPhoto.adminLogin
+    );
+
+    if(login.admin.faceDescriptor){
+      const distance=faceDistance(
+        liveDescriptor,
+        login.admin.faceDescriptor
+      );
+
+      if(distance>FACE_MATCH_THRESHOLD){
+        throw new Error(
+          'Verifikasi wajah gagal. Wajah tidak cocok dengan Admin yang terdaftar.'
+        );
+      }
+    }
+
+    const photoLogin=await apiPost({
+      action:'adminPhotoLogin',
+      adminId:resolvedId,
+      namaAdmin:resolvedName,
+      loginToken:state.loginToken,
+      data:state.loginPhoto.adminLogin,
+      faceDescriptor:Array.from(liveDescriptor),
+      mimeType:'image/jpeg'
+    });
+
+    state.user={
+      ...photoLogin.admin,
+      role:String(photoLogin.admin.role || login.admin.role || 'ADMIN').toUpperCase(),
+      loginPhoto:photoLogin.loginPhoto
+    };
+    state.loginToken=null;
+
+    stopCamera('adminLogin');
+    await enterApplication();
+
+    toast(
+      photoLogin.faceVerification?.mode==='INITIAL_REGISTERED'
+        ? 'Login berhasil. Foto wajah awal berhasil didaftarkan.'
+        : 'Login Admin berhasil dengan verifikasi wajah.',
+      'success'
+    );
+
+  }catch(error){
+    state.user=null;
+    state.loginToken=null;
+    setLoginStatus(error.message,true);
+    toast(error.message,'error');
+  }
 }
-function applyMenuConfig(config){
-  const role=String(state.user?.role||'').toUpperCase();if(!role)return;
-  (config||[]).forEach(x=>{
-    const el=document.querySelector(`[data-page="${String(x.id).replace(/"/g,'\\"')}"]`);
-    if(!el)return;
-    const visible=role==='SUPER_ADMIN'?!!x.superAdmin:role==='ADMIN'?!!x.admin:!!x.driver;
-    if(x.id==='settings'&&role==='SUPER_ADMIN')return;
-    el.classList.toggle('hidden',!visible);
-  });
+
+function setLoginStatus(message,error=false){
+
+  const el=document.getElementById(
+    'loginStatus'
+  );
+
+  el.textContent=message;
+
+  el.style.color=
+    error
+      ? '#c62828'
+      : '#2e7d32';
+
 }
+
 
 /* =========================================================
    APPLICATION
@@ -3015,33 +2902,21 @@ async function enterApplication(){
 
   document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
   document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!isSuperAdmin);
-  apiGet('menuConfig').then(r=>applyMenuConfig(r.menuConfig||[])).catch(()=>{});
 
+  await refreshAll();
   setInspectionGPS(state.loginGPS);
-  updateDriverQrLockUI();
   showPage('dashboard');
-  refreshAll().catch(error=>{
-    document.getElementById('systemStatus').innerHTML=
-      '<span class="badge red">ERROR</span> '+escapeHtml(error.message);
-  });
-  if(state.pendingAssetCode){
-    const waitForAsset=()=>{
-      if(state.assets && state.assets.length)openPendingAsset();
-      else setTimeout(waitForAsset,150);
-    };
-    waitForAsset();
-  }
+  if(state.pendingAssetCode) openPendingAsset();
 }
 
 function openPendingAsset(){
   const code=String(state.pendingAssetCode || '').trim();if(!code)return;
   const asset=state.assets.find(a=>String(a.code).toUpperCase()===code.toUpperCase());
-  if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');state.pendingAssetCode='';state.qrAssetLocked=false;updateDriverQrLockUI();return;}
-  state.qrAsset=asset; state.qrAssetLocked=true; updateDriverQrLockUI();
+  if(!asset){toast('Aset '+code+' dari QR Code tidak ditemukan.','error');state.pendingAssetCode='';return;}
   showPage('inspection');
   const assetSelect=document.getElementById('inspectionAsset');
   if(assetSelect){assetSelect.value=asset.code;onInspectionAssetChange();}
-  populateDriverSelect();applyLoggedInDriverToInspection();
+  populateDriverSelect();applyLoggedInDriverToInspection();state.pendingAssetCode='';
 }
 
 function clearApplicationState(){
@@ -3056,6 +2931,8 @@ function clearApplicationState(){
   state.km=[];
   state.corrections=[];
   state.audit=[];
+  state.videos=[];
+  videosLoaded=false;
 }
 
 function resetLoginForm(){
@@ -3069,6 +2946,8 @@ function resetLoginForm(){
     if(el){ el.removeAttribute('src'); el.style.display='none'; }
   });
 
+  restoreAdminLoginIdentity();
+
   const status=document.getElementById('loginStatus');
   if(status){ status.textContent=''; status.style.color=''; }
 }
@@ -3077,9 +2956,8 @@ function resetToLogin(showToast=true){
   stopCamera('driverLogin');
   stopCamera('adminLogin');
   clearApplicationState();
-  state.pendingAssetCode=''; state.qrAssetLocked=false; state.qrAsset=null;
+  state.pendingAssetCode='';
   resetLoginForm();
-  updateDriverQrLockUI();
 
   document.getElementById('appPage').style.display='none';
   document.getElementById('loginPage').style.display='flex';
@@ -3089,14 +2967,12 @@ function resetToLogin(showToast=true){
   document.getElementById('driverLoginPanel')?.classList.remove('hidden');
   document.getElementById('adminLoginPanel')?.classList.add('hidden');
 
-  Promise.all([apiGet('drivers'),apiGet('admins')]).then(([driverResult,adminResult])=>{
-    state.drivers=driverResult.drivers || [];
-    state.admins=(adminResult.admins || []).map(a=>{ const x={...a}; delete x.faceDescriptor; return x; });
+  apiGet('drivers').then(result=>{
+    state.drivers=result.drivers || [];
     populateDriverLogin();
-    setTimeout(startAutoFaceLogin,120);
   }).catch(error=>{
-    console.warn('Gagal memuat ulang data login:',error.message);
-    setTimeout(startAutoFaceLogin,120);
+    console.warn('Gagal memuat ulang Driver:',error.message);
+    populateDriverLogin();
   });
 
   if(showToast) toast('Anda telah keluar dari Aset Aqiqah Plus.','info');
@@ -3128,7 +3004,6 @@ function toggleSidebar(){
 
 
 function showPage(page){
-  if(page==='settings') setTimeout(loadMenuDisplaySettings,50);
 
   if(!state.user){
     resetToLogin(false);
@@ -3142,6 +3017,10 @@ function showPage(page){
   }
   if(page==='settings' && role!=='SUPER_ADMIN'){
     toast('Pengaturan hanya dapat diakses oleh Super Admin.','error');
+    return;
+  }
+  if(page==='videos' && !['ADMIN','SUPER_ADMIN'].includes(role)){
+    toast('Video Pemeriksaan hanya dapat diakses oleh Admin.','error');
     return;
   }
 
@@ -3190,7 +3069,6 @@ function showPage(page){
 
   if(page==='corrections'){
     renderCorrections();
-    prepareDriverCorrectionForm();
   }
 
   if(page==='reports'){
@@ -3199,6 +3077,10 @@ function showPage(page){
 
   if(page==='audit'){
     renderAudit();
+  }
+
+  if(page==='videos'){
+    loadVideos(false);
   }
 
   if(page==='admins'){
@@ -3219,25 +3101,33 @@ async function refreshAll(){
     const role=String(state.user.role).toUpperCase();
     const isAdmin=['ADMIN','SUPER_ADMIN'].includes(role);
 
-    // Satu request bootstrap menggantikan 3-7 request terpisah.
-    // Ini mempercepat proses setelah login tanpa mengubah struktur database.
-    const bootstrap=await apiGet('bootstrap',{role:role,driverId:role==='DRIVER'?driverIdOf(state.user):''});
+    const [assets,drivers,inspections]=await Promise.all([
+      apiGet('assets'),
+      apiGet('drivers'),
+      apiGet('inspections')
+    ]);
 
-    state.assets=bootstrap.assets || [];
-    state.drivers=bootstrap.drivers || [];
-    state.inspections=bootstrap.inspections || [];
+    state.assets=assets.assets || [];
+    state.drivers=drivers.drivers || [];
+    state.inspections=inspections.rows || [];
     populateDriverLogin();
 
     if(isAdmin){
-      state.admins=bootstrap.admins || [];
-      state.km=bootstrap.km || [];
-      state.corrections=bootstrap.corrections || [];
-      state.audit=bootstrap.audit || [];
+      const [admins,km,corrections,audit]=await Promise.all([
+        apiGet('admins'),
+        apiGet('km'),
+        apiGet('corrections'),
+        apiGet('audit')
+      ]);
+      state.admins=admins.admins || [];
+      state.km=km.rows || [];
+      state.corrections=corrections.rows || [];
+      state.audit=audit.rows || [];
     }else{
       state.admins=[];
       state.km=[];
+      state.corrections=[];
       state.audit=[];
-      state.corrections=bootstrap.corrections || [];
     }
 
     updateDashboard();
@@ -3772,7 +3662,7 @@ function printBarcode(){
   const asset=state.assets.find(x=>String(x.code)===String(code));if(!asset)return;
   const qr=document.getElementById('qrCode');const qrHtml=qr?qr.innerHTML:'';const qrUrl=buildInspectionUrl(asset.code);
   const win=window.open('','_blank');if(!win){toast('Popup cetak diblokir browser. Izinkan popup untuk Aset Aqiqah Plus.','error');return;}
-  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>AssetTrack</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
+  win.document.write(`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>QR Code ${escapeHtml(asset.code)}</title><style>body{font-family:Arial;text-align:center;padding:40px;color:#263238}.qr{display:inline-flex;align-items:center;justify-content:center;padding:14px;border:1px solid #ddd;border-radius:12px;margin:15px}.qr img,.qr canvas{display:block}.code{font-size:22px;font-weight:bold;margin-top:10px}.small{font-size:12px;color:#607d8b;margin-top:12px}</style></head><body><h2>Aset Aqiqah Plus</h2><h3>${escapeHtml(asset.name)}</h3><p>${escapeHtml(asset.plate || '')}</p><div class="qr">${qrHtml}</div><div class="code">${escapeHtml(asset.code)}</div><div>${escapeHtml(asset.plate || '')}</div><div class="small">Scan QR untuk membuka pemeriksaan aset.</div><div class="small">${escapeHtml(qrUrl)}</div></body></html>`);
   win.document.close();win.focus();setTimeout(()=>win.print(),500);
 }
 
@@ -4008,21 +3898,19 @@ function buildMediaFields(){
   ).forEach(([key,label])=>{
 
     photoBox.innerHTML+=`
-      <div class="media-item photo-media-item" data-photo-key="${escapeHtml(key)}">
+
+      <div class="media-item">
+
         <label>${escapeHtml(label)}</label>
-        <input type="file" id="photo_${key}" accept="image/*" capture="environment" ${key==='body'?'multiple':''}>
-        <div class="photo-note-box">
-          <select id="photoStatus_${key}" aria-label="Status ${escapeHtml(label)}">
-            <option value="">Status foto</option>
-            <option value="Baik">✅ Baik</option>
-            <option value="Perlu Perhatian">⚠️ Perlu Perhatian</option>
-            <option value="Rusak">❌ Rusak</option>
-            <option value="Perlu Ganti">🔧 Perlu Ganti</option>
-          </select>
-          <textarea id="photoNote_${key}" rows="2" placeholder="Catatan foto ${escapeHtml(label)}..."></textarea>
-        </div>
-        <small class="photo-note-help">Catatan/status ini ikut disimpan bersama data foto.</small>
+
+        <input
+          type="file"
+          id="photo_${key}"
+          accept="image/*"
+          capture="environment">
+
       </div>
+
     `;
 
   });
@@ -4148,10 +4036,6 @@ async function saveInspectionForm(event){
       x=>driverIdOf(x).toUpperCase()===String(driverId).toUpperCase()
     );
 
-    if(String(state.user?.role||'').toUpperCase()==='DRIVER' && !state.qrAssetLocked){
-      toast('Driver wajib membuka pemeriksaan melalui QR kendaraan.','error'); return;
-    }
-
     if(!code){
 
       toast(
@@ -4201,22 +4085,22 @@ async function saveInspectionForm(event){
         PHOTO_MAP_FRONTEND
       )
     ){
+
       const input=document.getElementById(
         'photo_'+key
       );
 
       if(input?.files?.length){
-        const status=document.getElementById('photoStatus_'+key)?.value || '';
-        const note=document.getElementById('photoNote_'+key)?.value.trim() || '';
-        media[key]=[];
-        const files=Array.from(input.files).slice(0,key==='body'?50:1);
-        for(const file of files){
-          const item=await fileToMedia(file,false);
-          item.status=status;
-          item.note=note;
-          media[key].push(item);
-        }
+
+        media[key]=[
+          await fileToMedia(
+            input.files[0],
+            false
+          )
+        ];
+
       }
+
     }
 
     /*
@@ -4301,8 +4185,6 @@ async function saveInspectionForm(event){
     const payload={
 
       action:'saveInspection',
-      role:String(state.user?.role||''),
-      qrAssetCode:String(state.qrAsset?.code || state.pendingAssetCode || '').trim(),
 
       kodeAset:code,
 
@@ -4425,8 +4307,8 @@ async function fileToMedia(file,isVideo){
 
   const max=
     isVideo
-      ? 20*1024*1024
-      : 8*1024*1024;
+      ? 10*1024*1024
+      : 1.5*1024*1024;
 
   if(file.size>max){
 
@@ -4434,7 +4316,7 @@ async function fileToMedia(file,isVideo){
       (isVideo?'Video':'Foto')+
       ' '+file.name+
       ' melebihi batas '+
-      (isVideo?'20':'8')+
+      (isVideo?'10':'1.5')+
       ' MB.'
     );
 
@@ -5377,49 +5259,6 @@ function renderKM(){
    CORRECTIONS
 ========================================================= */
 
-function correctionColumns(){
-  return [
-    ['KM Start','KM'],['KM Sebelum Isi Bensin','KM'],['KM Sesudah Isi Bensin','KM'],['KM Finish Akhir','KM'],['KM Ganti Oli','KM'],
-    ['Oli Mesin','Pemeriksaan'],['Oli Power Steering','Pemeriksaan'],['Tali Kipas / V-Belt','Pemeriksaan'],['Aki','Pemeriksaan'],
-    ['Ban Kiri Depan','Pemeriksaan'],['Ban Kiri Belakang','Pemeriksaan'],['Ban Kanan Depan','Pemeriksaan'],['Ban Kanan Belakang','Pemeriksaan'],['Ban Serep','Pemeriksaan'],
-    ['Kunci Roda & Dongkrak','Pemeriksaan'],['Rem','Pemeriksaan'],['Kopling','Pemeriksaan'],['Setir','Pemeriksaan'],['Klakson','Pemeriksaan'],['Sabuk Pengaman','Pemeriksaan'],['Catatan','Pemeriksaan']
-  ];
-}
-function prepareDriverCorrectionForm(){
-  const panel=document.getElementById('driverCorrectionPanel');
-  if(!panel)return;
-  const isDriver=String(state.user?.role||'').toUpperCase()==='DRIVER';
-  panel.classList.toggle('hidden',!isDriver);
-  if(!isDriver)return;
-  const sel=document.getElementById('correctionInspection');
-  const col=document.getElementById('correctionColumn');
-  if(!sel||!col)return;
-  const mine=(state.inspections||[]).filter(r=>String(r['Driver ID']||'').toUpperCase()===driverIdOf(state.user).toUpperCase());
-  sel.innerHTML='<option value="">Pilih pemeriksaan</option>'+mine.slice().reverse().map(r=>`<option value="${escapeHtml(r['Inspection ID']||'')}">${escapeHtml(formatDate(r['Waktu Pemeriksaan']||r['Timestamp']))} — ${escapeHtml(r['Kode Aset']||'')} — ${escapeHtml(r['Nama Kendaraan']||'')}</option>`).join('');
-  col.innerHTML='<option value="">Pilih kolom</option>'+correctionColumns().map(x=>`<option value="${escapeHtml(x[0])}">${escapeHtml(x[0])} (${escapeHtml(x[1])})</option>`).join('');
-  sel.onchange=updateCorrectionOldValue; col.onchange=updateCorrectionOldValue;
-  const form=document.getElementById('driverCorrectionForm');
-  if(form&&!form.dataset.bound){form.addEventListener('submit',submitDriverCorrection);form.dataset.bound='1';}
-  updateCorrectionOldValue();
-}
-function updateCorrectionOldValue(){
-  const id=document.getElementById('correctionInspection')?.value||''; const key=document.getElementById('correctionColumn')?.value||'';
-  const row=(state.inspections||[]).find(r=>String(r['Inspection ID'])===String(id));
-  const old=document.getElementById('correctionOld'); if(old)old.value=row&&key?String(row[key]??''):'';
-}
-async function submitDriverCorrection(e){
-  e.preventDefault();
-  try{
-    if(String(state.user?.role||'').toUpperCase()!=='DRIVER')throw new Error('Form ini hanya untuk Driver.');
-    const inspectionId=document.getElementById('correctionInspection').value; const key=document.getElementById('correctionColumn').value;
-    const oldValue=document.getElementById('correctionOld').value; const newValue=document.getElementById('correctionNew').value.trim(); const reason=document.getElementById('correctionReason').value.trim();
-    if(!inspectionId||!key||!reason)throw new Error('Pemeriksaan, kolom, dan alasan wajib diisi.');
-    if(newValue===oldValue)throw new Error('Nilai baru sama dengan nilai lama.');
-    const r=await apiPost({action:'requestCorrection',role:'DRIVER',inspectionId,kolomKoreksi:key,nilaiLama:oldValue,nilaiBaru:newValue,alasan:reason,jenisKoreksi:key.startsWith('KM')?'KM':'Data',driverId:driverIdOf(state.user),namaDriver:driverNameOf(state.user)});
-    toast(r.message||'Koreksi diajukan.','success'); document.getElementById('correctionNew').value='';document.getElementById('correctionReason').value=''; await refreshAll(); prepareDriverCorrectionForm();
-  }catch(err){toast(err.message||'Gagal mengajukan koreksi.','error');}
-}
-
 function renderCorrections(){
 
   const body=document.getElementById(
@@ -5474,7 +5313,7 @@ function renderCorrections(){
       <td>
 
         ${
-          pending && isAdmin()
+          pending && isSuperAdmin()
           ?
 
           `
@@ -5510,10 +5349,10 @@ function renderCorrections(){
 
 async function approveCorrection(id){
 
-  if(!isAdmin()){
+  if(!isSuperAdmin()){
 
     toast(
-      'Hanya Admin atau Super Admin yang dapat menyetujui koreksi.',
+      'Hanya Super Admin yang dapat menyetujui koreksi.',
       'error'
     );
 
@@ -5539,7 +5378,7 @@ async function approveCorrection(id){
         userName:state.user.name ||
           state.user.namaAdmin,
 
-        role:String(state.user.role||'ADMIN').toUpperCase()
+        role:'SUPER_ADMIN'
 
       });
 
@@ -5564,10 +5403,10 @@ async function approveCorrection(id){
 
 async function rejectCorrection(id){
 
-  if(!isAdmin()){
+  if(!isSuperAdmin()){
 
     toast(
-      'Hanya Admin atau Super Admin yang dapat menolak koreksi.',
+      'Hanya Super Admin yang dapat menolak koreksi.',
       'error'
     );
 
@@ -5596,7 +5435,7 @@ async function rejectCorrection(id){
         userName:state.user.name ||
           state.user.namaAdmin,
 
-        role:String(state.user.role||'ADMIN').toUpperCase()
+        role:'SUPER_ADMIN'
 
       });
 
@@ -5616,6 +5455,120 @@ async function rejectCorrection(id){
 
   }
 
+}
+
+
+/* =========================================================
+   VIDEO PEMERIKSAAN
+   Data video dimuat hanya saat menu Video dibuka.
+========================================================= */
+
+let videosLoaded=false;
+
+async function loadVideos(force=false){
+
+  if(!state.user || !isAdmin()) return;
+
+  const status=document.getElementById('videoStatus');
+
+  if(!force && videosLoaded){
+    renderVideos();
+    return;
+  }
+
+  if(status){
+    status.textContent='Memuat daftar video...';
+  }
+
+  try{
+    const result=await apiGet('videos');
+    state.videos=Array.isArray(result.rows) ? result.rows : [];
+    videosLoaded=true;
+    renderVideos();
+
+    if(status){
+      status.textContent=
+        state.videos.length+
+        ' video tersedia. Video tidak dimuat pada Dashboard.';
+    }
+
+  }catch(error){
+
+    if(status){
+      status.textContent='Gagal memuat video: '+error.message;
+    }
+
+    toast('Gagal memuat video: '+error.message,'error');
+  }
+}
+
+
+function renderVideos(){
+
+  const body=document.getElementById('videoBody');
+  if(!body)return;
+
+  const search=String(
+    document.getElementById('videoSearch')?.value || ''
+  ).trim().toLowerCase();
+
+  const type=String(
+    document.getElementById('videoTypeFilter')?.value || ''
+  ).trim();
+
+  const rows=state.videos.filter(row=>{
+
+    const text=[
+      row['Kode Aset'],
+      row['Nama Kendaraan'],
+      row['Driver ID'],
+      row['Nama Driver'],
+      row['Jenis Video'],
+      row['Status']
+    ].join(' ').toLowerCase();
+
+    return (!search || text.includes(search)) &&
+           (!type || String(row['Jenis Video'] || '')===type);
+  });
+
+  body.innerHTML='';
+
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#78909c;padding:20px;">Tidak ada video.</td></tr>';
+    return;
+  }
+
+  [...rows].reverse().forEach(row=>{
+
+    const url=String(row['URL Video'] || '').trim();
+
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+      <td>${escapeHtml(formatDate(row['Waktu']))}</td>
+      <td>${escapeHtml(row['Kode Aset'] || '')}</td>
+      <td>${escapeHtml(row['Nama Kendaraan'] || '')}</td>
+      <td>
+        ${escapeHtml(row['Nama Driver'] || '')}
+        ${row['Driver ID'] ? '<br><small>'+escapeHtml(row['Driver ID'])+'</small>' : ''}
+      </td>
+      <td>${escapeHtml(row['Jenis Video'] || '')}</td>
+      <td>${statusBadge(row['Status'] || '')}</td>
+      <td>
+        ${url ? `
+          <a
+            class="video-link-btn"
+            href="${escapeHtml(url)}"
+            target="_blank"
+            rel="noopener noreferrer">
+            ▶ Lihat Video
+          </a>
+        ` : '<span style="color:#999">URL kosong</span>'}
+      </td>
+    `;
+
+    body.appendChild(tr);
+  });
 }
 
 
@@ -6450,7 +6403,6 @@ document.addEventListener(
     clearApplicationState();
     resetLoginForm();
     document.getElementById('appPage').style.display='none';
-    setTimeout(preloadFaceModels,50);
     document.getElementById('loginPage').style.display='flex';
     document.getElementById('driverTab')?.classList.add('active');
     document.getElementById('adminTab')?.classList.remove('active');
@@ -6460,7 +6412,7 @@ document.addEventListener(
     buildInspectionOptions();
 
     buildMediaFields();
-    startAutoFaceLogin();
+    restoreAdminLoginIdentity();
 
     document.getElementById(
       'inspectionTime'
@@ -6471,15 +6423,15 @@ document.addEventListener(
       Muat data Driver untuk memeriksa ID/Nama saat login.
       Pendaftaran Driver baru dilakukan langsung dari panel login.
     */
-    Promise.all([apiGet('drivers'),apiGet('admins')])
-      .then(([driverResult,adminResult])=>{
-        state.drivers=driverResult.drivers || [];
-        state.admins=(adminResult.admins || []).map(a=>{ const x={...a}; delete x.faceDescriptor; return x; });
+    apiGet('drivers')
+      .then(result=>{
+        state.drivers=result.drivers || [];
         populateDriverLogin();
+        if(state.drivers.length===0) setLoginStatus('Belum ada Driver pada Data Driver.',true);
       })
       .catch(error=>{
-        console.warn('Data login belum dapat dimuat:',error.message);
-        setLoginStatus('Gagal memuat data login: '+error.message,true,'driver');
+        console.warn('Driver belum dapat dimuat:',error.message);
+        setLoginStatus('Gagal memuat daftar Driver: '+error.message,true);
       });
 
   }
