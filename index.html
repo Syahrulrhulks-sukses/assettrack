@@ -1306,14 +1306,15 @@ tr:hover td{
 
     <div id="driverLoginPanel" class="login-panel">
       <div class="login-step-label"><span class="step-icon">▣</span><span>1. Scan QR Code kendaraan</span></div>
-      <div class="login-help" id="driverQrLoginHint">Login Driver wajib dimulai dari QR Code kendaraan. Setelah QR dipindai, akun Google yang aktif di Chrome akan dikenali otomatis.</div>
+      <div class="login-help" id="driverQrLoginHint">Login Driver dimulai dari QR Code kendaraan.</div>
+      <div class="form-group login-name-group">
+        <input id="loginDriverName" type="text" required autocomplete="off" placeholder="Tulis Nama Driver" oninput="onDriverNameInput()">
+      </div>
       <input id="loginDriverId" type="hidden">
-      <input id="loginDriverName" type="hidden">
       <div id="autoDriverId" class="auto-id"></div>
-      <div id="driverEmailIdentity" class="login-help">Menunggu akun Google aktif...</div>
 
       <div class="login-step-label face-step-label"><span class="step-icon">▣</span><span>2. Posisikan wajah Anda di dalam bingkai</span></div>
-      <div class="login-help">Kamera aktif otomatis. Jangan bergerak sampai bingkai berubah biru.</div>
+      <div class="login-help">Kamera aktif otomatis. Ikuti instruksi: <b>tersenyum atau kedip sekali</b>.</div>
 
       <div class="face-login-box" id="driverFaceBox">
         <video id="driverLoginVideo" autoplay playsinline muted></video>
@@ -2785,15 +2786,15 @@ let adminStableSince=0,adminStableBox=null,adminStableFrames=0;
 let adminFaceAttempts=0,adminFaceLocked=false;
 
 function onDriverNameInput(){
-  // Dipertahankan untuk kompatibilitas. Login Driver sekarang tidak memakai input nama.
+  // Login Driver menggunakan Nama + verifikasi wajah. Email Google tidak digunakan.
   initializeDriverLoginIdentity().catch(()=>{});
 }
 
 async function initializeDriverLoginIdentity(){
-  const emailEl=document.getElementById('driverEmailIdentity');
   const hint=document.getElementById('driverQrLoginHint');
   const idEl=document.getElementById('loginDriverId');
   const nameEl=document.getElementById('loginDriverName');
+  const name=String(nameEl?.value||'').trim();
 
   autoFaceCandidate=null;
   driverFaceAttempts=0;
@@ -2802,38 +2803,41 @@ async function initializeDriverLoginIdentity(){
   resetLiveness('driver');
   hideLoginRefresh('driver');
   if(idEl)idEl.value='';
-  if(nameEl)nameEl.value='';
 
   if(!state.pendingAssetCode){
-    if(emailEl)emailEl.textContent='Scan QR Code kendaraan terlebih dahulu.';
     if(hint)hint.textContent='Login Driver wajib dimulai dari QR Code kendaraan.';
     setFaceUI('Scan QR Code kendaraan terlebih dahulu.',false,'driver');
     stopAutoFaceLogin();
     return null;
   }
 
-  if(emailEl)emailEl.textContent='Mengenali akun Google aktif...';
-  const result=await apiGet('currentUserEmail');
-  const email=String(result.email||'').trim().toLowerCase();
-  if(!email){
-    if(emailEl)emailEl.textContent='Akun Google Chrome belum dapat dikenali.';
-    setFaceUI('Login Google diperlukan. Buka web app dengan akun Google Driver yang terdaftar.',false,'driver');
-    throw new Error('Akun Google aktif tidak dapat dikenali. Pastikan Web App dibuka dengan akun Google Driver yang terdaftar.');
+  if(!name){
+    if(hint)hint.textContent='QR kendaraan terdeteksi. Tulis Nama Driver untuk mulai verifikasi wajah.';
+    setFaceUI('Tulis Nama Driver terlebih dahulu.',false,'driver');
+    return null;
   }
 
-  const exact=state.drivers.find(d=>String(d.email||'').trim().toLowerCase()===email && driverIsActive(d));
+  let exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().toLowerCase()===name.toLowerCase());
   if(!exact){
-    if(emailEl)emailEl.textContent='Email belum terdaftar sebagai Driver: '+email;
-    setFaceUI('Email Google belum terdaftar sebagai Driver.',false,'driver');
-    throw new Error('Email Google '+email+' belum terdaftar sebagai Driver aktif.');
+    try{
+      const latest=await apiGet('drivers');
+      state.drivers=latest.drivers || [];
+      exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().toLowerCase()===name.toLowerCase());
+    }catch(_){}
+  }
+
+  if(!exact){
+    if(hint)hint.textContent='Nama Driver belum ditemukan atau Driver tidak aktif.';
+    setFaceUI('Nama Driver tidak ditemukan. Periksa penulisan nama.',false,'driver');
+    return null;
   }
 
   autoFaceCandidate=exact;
   if(idEl)idEl.value=driverIdOf(exact);
-  if(nameEl)nameEl.value=driverNameOf(exact);
-  if(emailEl)emailEl.textContent='Akun: '+email+' ✓ | Driver: '+driverNameOf(exact);
-  if(hint)hint.textContent='QR kendaraan terdeteksi. Akun Google dikenali otomatis. Posisikan wajah di dalam bingkai.';
-  setFaceUI('Akun Driver dikenali. Posisikan wajah...',false,'driver');
+  const autoId=document.getElementById('autoDriverId');
+  if(autoId){autoId.textContent='ID: '+driverIdOf(exact);autoId.classList.add('show');}
+  if(hint)hint.textContent='Driver '+driverNameOf(exact)+' ditemukan. Tersenyum atau kedip sekali di dalam bingkai.';
+  setFaceUI('Wajah siap. Tersenyum atau kedip sekali...',false,'driver');
   return exact;
 }
 
@@ -2978,8 +2982,14 @@ function resetLiveness(role){
 }
 
 async function autoFaceCheck(){
-  if(autoFaceBusy||state.loginBusy||!autoFaceCandidate||!state.camera.driverLogin||driverFaceLocked||driverFaceAttempts>=3)return;
+  if(autoFaceBusy||state.loginBusy||!state.camera.driverLogin||driverFaceLocked||driverFaceAttempts>=3)return;
   if(!state.pendingAssetCode)return;
+  if(!autoFaceCandidate){
+    const name=String(document.getElementById('loginDriverName')?.value||'').trim();
+    if(!name)return;
+    await initializeDriverLoginIdentity();
+    if(!autoFaceCandidate)return;
+  }
   if(!autoFaceCandidate.faceDescriptor){setFaceUI('Data wajah Driver belum terdaftar.',false,'driver');return;}
   autoFaceBusy=true;
   try{
@@ -3021,8 +3031,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
     const gps=await requestLoginLocationFast();
     const distanceToVehicle=haversineMeters(qrGps,gps);
     state.loginGPS=gps;
-    const googleEmail=String(driver?.email||'').trim().toLowerCase();
-    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),email:googleEmail,qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(live?.smile?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
+    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(live?.smile?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
     stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
@@ -3087,12 +3096,15 @@ async function startAutoFaceLogin(){
   }
   try{
     await ensureFaceModels();
-    await initializeDriverLoginIdentity();
-    if(!autoFaceCandidate)return;
     const ok=await startCamera('driverLogin',true);
     if(!ok)return;
     stopAutoFaceLogin();
-    setFaceUI('Kamera aktif. Posisikan wajah...',false,'driver');
+    const name=String(document.getElementById('loginDriverName')?.value||'').trim();
+    if(name){
+      await initializeDriverLoginIdentity();
+    }else{
+      setFaceUI('Kamera aktif. Tulis Nama Driver...',false,'driver');
+    }
     autoFaceTimer=setInterval(autoFaceCheck,FAST_FACE_INTERVAL);
   }catch(e){
     setFaceUI(e.message||'Login Driver belum siap.',false,'driver');
