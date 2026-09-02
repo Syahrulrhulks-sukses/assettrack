@@ -3015,7 +3015,6 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
     if(!qrGps) throw new Error('Lokasi QR kendaraan belum tersedia. Pastikan izin lokasi dan GPS aktif, lalu coba lagi.');
     const gps=await requestLoginLocationFast();
     const distanceToVehicle=haversineMeters(qrGps,gps);
-    if(distanceToVehicle>2) throw new Error('Lokasi login terlalu jauh dari kendaraan ('+distanceToVehicle.toFixed(1)+' m). Maksimal 2 meter dari QR kendaraan.');
     state.loginGPS=gps;
     const googleEmail=String(driver?.email||'').trim().toLowerCase();
     const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),email:googleEmail,qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:'FAST_LIVE',latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
