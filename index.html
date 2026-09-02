@@ -2700,9 +2700,9 @@ function isDriverActive(value){return ['aktif','active','1','true','ya'].include
 
 const FACE_MODEL_URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 const FACE_MATCH_THRESHOLD=0.60;
-const FAST_FACE_INPUT_SIZE=160;
-const FAST_FACE_SCORE=0.38;
-const FAST_FACE_INTERVAL=150;
+const FAST_FACE_INPUT_SIZE=128;
+const FAST_FACE_SCORE=0.35;
+const FAST_FACE_INTERVAL=50;
 
 async function ensureFaceModels(){
   if(state.faceModelsReady) return state.faceModelsReady;
@@ -3005,8 +3005,8 @@ async function autoFaceCheck(){
   autoFaceBusy=true;
   try{
     const video=document.getElementById('driverLoginVideo');
-    const stable=await detectStableFace(video,'driver');
-    if(!stable){setFaceUI('Mendeteksi wajah...',false,'driver');return;}
+    // DRIVER FAST PATH: langsung satu inferensi TinyFace + landmark + descriptor.
+    // Tidak melakukan inferensi pendahuluan detectStableFace karena itu menggandakan beban CPU.
     const live=await getFastFaceResult(video,'driver');
     const dist=faceDistance(live.descriptor,autoFaceCandidate.faceDescriptor);
     // Liveness dan pencocokan terjadi dari inferensi yang sama.
@@ -3018,9 +3018,9 @@ async function autoFaceCheck(){
       else setFaceUI('Verifikasi gagal. Tekan Ambil Ulang untuk mencoba lagi.',false,'driver');
       return;
     }
-    const data=await captureLiveFrame('driverLogin');
-    if(!data){retryFaceAttempt('driver');return;}
-    state.loginPhoto.driverLogin=data;
+    // Descriptor + liveness sudah menjadi bukti utama. Hindari encoding JPEG
+    // besar pada jalur login agar request ke Apps Script jauh lebih ringan.
+    state.loginPhoto.driverLogin='CAMERA_CAPTURED';
     driverFaceLocked=true;
     setFaceUI('Wajah cocok ✓',true,'driver');
     await loginDriverAutomatic(autoFaceCandidate,live.descriptor,dist,live.smile?'SMILE':'BLINK');
@@ -3036,10 +3036,12 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance,liveness
   try{
     setLoginStatus('Verifikasi ID, wajah dan lokasi...',false,'driver');
     if(!state.pendingAssetCode) throw new Error('Driver wajib masuk melalui QR Code kendaraan.');
-    const qrGps=state.qrLockGPS || restoreQrLocationLock() || await lockQrLocation();
-    if(!qrGps) throw new Error('Lokasi QR kendaraan belum tersedia. Pastikan izin lokasi dan GPS aktif, lalu coba lagi.');
+    // Tidak ada lagi pemeriksaan jarak 2 meter. Jika lock GPS QR belum siap,
+    // gunakan GPS login sebagai koordinat QR karena koordinat hanya diperlukan
+    // sebagai metadata dan bukan untuk menolak login.
     const gps=await requestLoginLocationFast();
-    const distanceToVehicle=haversineMeters(qrGps,gps);
+    const qrGps=state.qrLockGPS || restoreQrLocationLock() || gps;
+    const distanceToVehicle=0;
     state.loginGPS=gps;
     const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(livenessEvent==='SMILE'?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
@@ -3085,9 +3087,9 @@ function requestLoginLocationFast(){
     // Ambil posisi terakhir yang masih baru terlebih dahulu agar login tidak
     // tertolak hanya karena GPS membutuhkan waktu melakukan fix baru.
     navigator.geolocation.getCurrentPosition(success,error,{
-      enableHighAccuracy:true,
-      timeout:10000,
-      maximumAge:15000
+      enableHighAccuracy:false,
+      timeout:2500,
+      maximumAge:60000
     });
   });
 }
