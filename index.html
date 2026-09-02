@@ -1747,7 +1747,10 @@ tr:hover td{
               <label>Waktu Pemeriksaan</label>
               <input
                 id="inspectionTime"
-                type="datetime-local">
+                type="datetime-local"
+                readonly
+                aria-readonly="true"
+                title="Tanggal dan waktu pemeriksaan otomatis dan dikunci sistem.">
             </div>
 
             <div class="form-group">
@@ -1842,11 +1845,8 @@ tr:hover td{
             <div class="form-group">
               <label>Status Pemeriksaan</label>
 
-              <select id="statusPemeriksaan">
-                <option value="Selesai">Selesai</option>
-                <option value="Perlu Perhatian">Perlu Perhatian</option>
-                <option value="Tidak Layak">Tidak Layak</option>
-              </select>
+              <select id="statusPemeriksaan"></select>
+              <small id="statusPemeriksaanHint" style="display:block;color:#607d8b;margin-top:5px"></small>
             </div>
 
             <div class="form-group">
@@ -2255,6 +2255,49 @@ tr:hover td{
 
 </section>
 
+
+<!-- =========================================================
+     INSPECTION CAMERA MODALS
+========================================================= -->
+
+<div id="inspectionCameraModal" class="modal">
+  <div class="modal-content" style="max-width:520px">
+    <div class="modal-header">
+      <h3 id="inspectionCameraTitle">Ambil Foto</h3>
+      <button type="button" class="close-btn" onclick="closeInspectionCamera()">✕</button>
+    </div>
+    <div style="padding:12px">
+      <div class="camera-box">
+        <video id="inspectionCameraVideo" autoplay playsinline muted></video>
+        <canvas id="inspectionCameraCanvas" style="display:none"></canvas>
+        <div id="inspectionCameraStatus" class="login-status">Arahkan kamera ke objek.</div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="secondary-btn" onclick="closeInspectionCamera()">Batal</button>
+        <button type="button" id="inspectionTakePhotoBtn" class="primary-btn" style="width:auto" onclick="captureInspectionCameraPhoto()">📷 Ambil Foto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="inspectionVideoModal" class="modal">
+  <div class="modal-content" style="max-width:560px">
+    <div class="modal-header">
+      <h3>🎥 Video Pemeriksaan Lengkap</h3>
+      <button type="button" class="close-btn" onclick="closeInspectionVideoCamera()">✕</button>
+    </div>
+    <div style="padding:12px">
+      <div class="camera-box">
+        <video id="inspectionVideoRecorder" autoplay playsinline muted></video>
+        <div id="inspectionVideoStatus" class="login-status">Rekam satu video yang mencakup body/lecet, kaca, semua ban, ban serep, semua lampu, klakson, dan interior.</div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="secondary-btn" onclick="closeInspectionVideoCamera()">Batal</button>
+        <button type="button" id="inspectionVideoRecordBtn" class="primary-btn" style="width:auto" onclick="toggleInspectionVideoRecording()">⏺ Mulai Rekam</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- =========================================================
      MODAL
@@ -3558,6 +3601,7 @@ function showPage(page){
     renderCorrections();
   }
 
+  if(page==='inspection'){ buildInspectionStatusOptions(); buildInspectionConditionFields(); buildMediaFields(); }
   if(page==='reports'){ renderInspections(); }
   if(page==='service'){ if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Catatan Service hanya dapat diakses Admin atau Super Admin.','error');return;} populateServiceAssetFilter(); renderServices(); }
 
@@ -4200,6 +4244,7 @@ function onInspectionAssetChange(){
 
   populateDriverSelect();
   applyLoggedInDriverToInspection();
+  buildInspectionStatusOptions();
   buildInspectionConditionFields();
 
 }
@@ -4259,65 +4304,24 @@ const INSPECTION_CHECKS_FRONTEND = [
 ];
 function isPowerSteeringVehicle(asset){const text=[asset?.name,asset?.model,asset?.modelTipe,asset?.merek].filter(Boolean).join(' ').toLowerCase();return /l300|power\s*steering/.test(text);}
 function inspectionStatusOptions(selected=''){const opts=['','Baik','Kurang Baik','Perlu Pengecekan','Perlu Service'];return opts.map(x=>`<option value="${escapeHtml(x)}" ${x===selected?'selected':''}>${x?escapeHtml(x):'Pilih'}</option>`).join('');}
-function buildInspectionConditionFields(){const box=document.getElementById('inspectionConditionFields');if(!box)return;const code=document.getElementById('inspectionAsset')?.value||'';const asset=state.assets.find(a=>String(a.code)===String(code));box.innerHTML=INSPECTION_CHECKS_FRONTEND.filter(x=>!x.powerSteeringOnly||isPowerSteeringVehicle(asset)).map(x=>`<div class="photo-media-item"><div class="media-title">${escapeHtml(x.label)}</div><select id="${escapeHtml(x.key)}">${inspectionStatusOptions()}</select></div>`).join('');}
-function collectInspectionDetails(){return [];}
-function buildInspectionOptions(){buildInspectionConditionFields();}
-
-const PHOTO_MAP_FRONTEND={
-  stikOliMesin:'Foto Stik Oli Mesin',stikOliPowerSteering:'Foto Stik Oli Power Steering',taliKipasVbelt:'Foto Tali Kipas / V-Belt',aki:'Foto Aki',radiator:'Foto Radiator',reservoirRadiator:'Foto Reservoir Radiator',reservoirAirWiper:'Foto Reservoir Air Wiper',minyakRem:'Foto Minyak Rem',kunciRodaDongkrak:'Foto Kunci Roda & Dongkrak',kmStart:'Foto KM Start',kmSebelumIsiBensin:'Foto KM Sebelum Isi Bensin',kmSesudahIsiBensin:'Foto KM Sesudah Isi Bensin',kmFinishAkhir:'Foto KM Finish Akhir'
-};
-const VIDEO_MAP_FRONTEND={videoPemeriksaan:'Video Pemeriksaan Lengkap — Body, Kaca, Ban, Lampu & Klakson'};
-
-let inspectionCameraStream=null;
-let inspectionCameraKey='';
-async function openInspectionCamera(key){
-  if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.dailyInspectionMode && !String(key||'').startsWith('km')){
-    toast('Pemeriksaan awal sudah terkunci. Data non-KM tidak dapat diperbarui hari ini.','error');return;
-  }
-  inspectionCameraKey=key;
-  const modal=document.getElementById('inspectionCameraModal');
-  const video=document.getElementById('inspectionCameraVideo');
-  const title=document.getElementById('inspectionCameraTitle');
-  const status=document.getElementById('inspectionCameraStatus');
-  const item=PHOTO_MAP_FRONTEND[key] || key;
-  if(title)title.textContent='Ambil Foto: '+item;
-  if(status)status.textContent='Arahkan kamera ke '+item+'. Foto dari galeri tidak tersedia.';
-  try{
-    inspectionCameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
-    video.srcObject=inspectionCameraStream;
-    await video.play();
-    modal?.classList.add('show');
-  }catch(e){toast('Kamera tidak dapat dibuka. Izinkan akses kamera.','error');}
-}
-function closeInspectionCamera(){
-  const modal=document.getElementById('inspectionCameraModal');
-  if(inspectionCameraStream){inspectionCameraStream.getTracks().forEach(t=>t.stop());inspectionCameraStream=null;}
-  const video=document.getElementById('inspectionCameraVideo');if(video)video.srcObject=null;
-  modal?.classList.remove('show');inspectionCameraKey='';
-}
-async function captureInspectionCameraPhoto(){
-  const key=inspectionCameraKey;const video=document.getElementById('inspectionCameraVideo');
-  if(!key||!video?.videoWidth){toast('Kamera belum siap.','error');return;}
-  try{
-    const canvas=document.getElementById('inspectionCameraCanvas');
-    const w=Math.min(video.videoWidth,1280),h=Math.round(w*video.videoHeight/video.videoWidth);
-    canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(video,0,0,w,h);
-    const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',.82));
-    if(!blob)throw new Error('Foto gagal diambil.');
-    const file=new File([blob],'camera_'+key+'_'+Date.now()+'.jpg',{type:'image/jpeg',lastModified:Date.now()});
-    const input=document.getElementById('photo_'+key);
-    const dt=new DataTransfer();
-    if(key!=='body'){dt.items.add(file);}else dt.items.add(file);
-    input.files=dt.files;
-    previewInspectionPhotos(key);
-    await validatePhotoObject(file,key);
-    const ok=document.querySelector('#photoPreview_'+CSS.escape(key)+' .photo-validation-ok');
-    if(ok)ok.textContent='✓ Objek sesuai dan foto diambil dari kamera.';
-    toast('Foto '+key+' berhasil diambil dari kamera.','success');
-    closeInspectionCamera();
-  }catch(e){toast(e.message||'Foto ditolak.','error');}
-}
-
+function buildInspectionStatusOptions(selected){const role=String(state.user?.role||'DRIVER').toUpperCase();const el=document.getElementById('statusPemeriksaan');const hint=document.getElementById('statusPemeriksaanHint');if(!el)return;const opts=role==='DRIVER'?['Selesai']:['Service','Sudah service','Selesai service','Selesai'];const hasExplicit=selected!==undefined&&selected!==null&&String(selected)!=='';const current=hasExplicit?String(selected):(role==='DRIVER'?'Selesai':'Service');el.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}" ${x===current?'selected':''}>${escapeHtml(x)}</option>`).join('');if(!opts.includes(el.value))el.value=opts[0];if(hint)hint.textContent=role==='DRIVER'?'Setelah memilih Selesai dan menyimpan, pemeriksaan Driver langsung terkunci.':'Admin/Super Admin dapat melanjutkan status sampai Selesai. Setelah Selesai, data pemeriksaan dikunci.';}
+function buildInspectionConditionFields(){const box=document.getElementById('inspectionConditionFields');if(!box)return;const code=document.getElementById('inspectionAsset')?.value||'';const asset=state.assets.find(a=>String(a.code)===String(code));const visible=INSPECTION_CHECKS_FRONTEND.filter(x=>!x.powerSteeringOnly||isPowerSteeringVehicle(asset));box.innerHTML=visible.map(x=>`<div class="photo-media-item" data-photo-key="${escapeHtml(x.key)}"><div class="media-title">${escapeHtml(x.label)}</div><select id="${escapeHtml(x.key)}">${inspectionStatusOptions()}</select><input type="file" id="photo_${escapeHtml(x.key)}" accept="image/*" capture="environment" style="display:none" onchange="previewInspectionPhotos('${escapeJs(x.key)}')"><button type="button" class="capture-btn" onclick="openInspectionCamera('${escapeJs(x.key)}')">📷 Ambil Foto</button><div class="media-validation-note">Foto wajib diambil langsung dari kamera aplikasi.</div><div id="photoPreview_${escapeHtml(x.key)}" class="photo-preview-grid"></div><input id="${escapeHtml(x.key)}_catatan" type="text" placeholder="Catatan MO untuk ${escapeHtml(x.label)} (opsional)"></div>`).join('');}
+function collectInspectionDetails(){const details=[];INSPECTION_CHECKS_FRONTEND.forEach(x=>{const status=document.getElementById(x.key);const note=document.getElementById(x.key+'_catatan');if(status||note)details.push({item:x.label,media:'Foto',status:status?.value||'',catatan:note?.value||''});});return details;}
+function collectInspectionConditionNotes(){const out={};INSPECTION_CHECKS_FRONTEND.forEach(x=>{const el=document.getElementById(x.key+'_catatan');if(el)out[x.key]=el.value||'';});return out;}
+function buildInspectionOptions(){buildInspectionStatusOptions();buildInspectionConditionFields();}
+const PHOTO_MAP_FRONTEND={stikOliMesin:'Foto Stik Oli Mesin',stikOliPowerSteering:'Foto Stik Oli Power Steering',taliKipasVbelt:'Foto Tali Kipas / V-Belt',aki:'Foto Aki',radiator:'Foto Radiator',reservoirRadiator:'Foto Reservoir Radiator',reservoirAirWiper:'Foto Reservoir Air Wiper',minyakRem:'Foto Minyak Rem',kunciRodaDongkrak:'Foto Kunci Roda & Dongkrak',kmStart:'Foto KM Start',kmSebelumIsiBensin:'Foto KM Sebelum Isi Bensin',kmSesudahIsiBensin:'Foto KM Sesudah Isi Bensin',kmFinishAkhir:'Foto KM Finish Akhir'};
+const VIDEO_MAP_FRONTEND={videoPemeriksaan:'Video Pemeriksaan Lengkap — Body, Kaca, Ban, Lampu, Klakson & Interior'};
+let inspectionCameraStream=null,inspectionCameraKey='';
+let inspectionVideoStream=null,inspectionVideoRecorder=null,inspectionVideoChunks=[],inspectionVideoRecording=false;
+async function openInspectionCamera(key){if(String(state.user?.role||'').toUpperCase()==='DRIVER'&&state.dailyInspectionMode){toast('Pemeriksaan sudah dikunci dan tidak dapat diperbarui.','error');return;}inspectionCameraKey=key;const modal=document.getElementById('inspectionCameraModal'),video=document.getElementById('inspectionCameraVideo'),title=document.getElementById('inspectionCameraTitle'),status=document.getElementById('inspectionCameraStatus'),item=PHOTO_MAP_FRONTEND[key]||key;if(title)title.textContent='Ambil Foto: '+item;if(status)status.textContent='Arahkan kamera ke '+item+'. Foto dari galeri tidak tersedia.';try{inspectionCameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});video.srcObject=inspectionCameraStream;await video.play();modal?.classList.add('show');}catch(e){toast('Kamera tidak dapat dibuka. Izinkan akses kamera.','error');}}
+function closeInspectionCamera(){const modal=document.getElementById('inspectionCameraModal');if(inspectionCameraStream){inspectionCameraStream.getTracks().forEach(t=>t.stop());inspectionCameraStream=null;}const video=document.getElementById('inspectionCameraVideo');if(video)video.srcObject=null;modal?.classList.remove('show');inspectionCameraKey='';}
+async function captureInspectionCameraPhoto(){const key=inspectionCameraKey,video=document.getElementById('inspectionCameraVideo');if(!key||!video?.videoWidth){toast('Kamera belum siap.','error');return;}try{const canvas=document.getElementById('inspectionCameraCanvas'),w=Math.min(video.videoWidth,1280),h=Math.round(w*video.videoHeight/video.videoWidth);canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(video,0,0,w,h);const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',.82));if(!blob)throw new Error('Foto gagal diambil.');const file=new File([blob],'camera_'+key+'_'+Date.now()+'.jpg',{type:'image/jpeg',lastModified:Date.now()}),input=document.getElementById('photo_'+key);if(!input)throw new Error('Kolom foto tidak ditemukan.');const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;previewInspectionPhotos(key);await validatePhotoObject(file,key);toast('Foto '+key+' berhasil diambil dari kamera.','success');closeInspectionCamera();}catch(e){toast(e.message||'Foto ditolak.','error');}}
+async function openInspectionVideoCamera(){if(String(state.user?.role||'').toUpperCase()==='DRIVER'&&state.dailyInspectionMode){toast('Pemeriksaan sudah dikunci dan tidak dapat diperbarui.','error');return;}const modal=document.getElementById('inspectionVideoModal'),video=document.getElementById('inspectionVideoRecorder');try{inspectionVideoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:true});video.srcObject=inspectionVideoStream;await video.play();document.getElementById('inspectionVideoStatus').textContent='Rekam satu video: body/lecet, kaca, semua ban, ban serep, semua lampu, klakson, dan interior.';modal?.classList.add('show');}catch(e){toast('Kamera/mikrofon tidak dapat dibuka. Izinkan akses kamera dan mikrofon.','error');}}
+function closeInspectionVideoCamera(){if(inspectionVideoRecording)stopInspectionVideoRecording(true);if(inspectionVideoStream){inspectionVideoStream.getTracks().forEach(t=>t.stop());inspectionVideoStream=null;}const video=document.getElementById('inspectionVideoRecorder');if(video)video.srcObject=null;document.getElementById('inspectionVideoModal')?.classList.remove('show');inspectionVideoChunks=[];inspectionVideoRecorder=null;inspectionVideoRecording=false;const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏺ Mulai Rekam';}
+function chooseVideoMimeType(){const candidates=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];return candidates.find(x=>window.MediaRecorder?.isTypeSupported?.(x))||'';}
+function toggleInspectionVideoRecording(){if(inspectionVideoRecording)stopInspectionVideoRecording(false);else startInspectionVideoRecording();}
+function startInspectionVideoRecording(){if(!inspectionVideoStream){toast('Kamera video belum siap.','error');return;}const mime=chooseVideoMimeType();try{inspectionVideoChunks=[];inspectionVideoRecorder=mime?new MediaRecorder(inspectionVideoStream,{mimeType:mime}):new MediaRecorder(inspectionVideoStream);inspectionVideoRecorder.ondataavailable=e=>{if(e.data?.size)inspectionVideoChunks.push(e.data);};inspectionVideoRecorder.onstop=()=>{const type=inspectionVideoRecorder?.mimeType||mime||'video/webm',blob=new Blob(inspectionVideoChunks,{type});if(blob.size<1000){toast('Video terlalu pendek. Rekam kembali.','error');return;}const file=new File([blob],'video_pemeriksaan_lengkap_'+Date.now()+'.webm',{type,lastModified:Date.now()}),input=document.getElementById('video_videoPemeriksaan');if(!input){toast('Kolom video tidak ditemukan.','error');return;}const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;const meta=document.getElementById('videovideoPemeriksaanCameraMeta');if(meta)meta.textContent='✓ Video berhasil direkam dari kamera.';const preview=document.getElementById('videoPreview_videoPemeriksaan');if(preview){preview.src=URL.createObjectURL(blob);preview.style.display='block';}const note=document.getElementById('videovideoPemeriksaanStatus');if(note)note.textContent='✓ Video siap disimpan.';closeInspectionVideoCamera();toast('Video pemeriksaan lengkap berhasil direkam.','success');};inspectionVideoRecorder.start(500);inspectionVideoRecording=true;const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏹ Stop & Simpan Video';document.getElementById('inspectionVideoStatus').textContent='Sedang merekam... Pastikan semua area pemeriksaan masuk dalam satu video.';}catch(e){toast('Perekaman video tidak dapat dimulai: '+e.message,'error');}}
+function stopInspectionVideoRecording(cancel){if(!inspectionVideoRecorder)return;if(inspectionVideoRecording){try{inspectionVideoRecorder.stop();}catch(_){}inspectionVideoRecording=false;}else if(cancel){try{inspectionVideoRecorder.stop();}catch(_){} }}
 function buildMediaFields(){
   const photoBox=document.getElementById('photoFields');
   const videoBox=document.getElementById('videoFields');
@@ -4325,67 +4329,38 @@ function buildMediaFields(){
   photoBox.innerHTML='';
   videoBox.innerHTML='';
 
-  Object.entries(PHOTO_MAP_FRONTEND).forEach(([key,label])=>{
-    const multiple='';
-    const kmClass=key.startsWith('km') ? ' photo-is-km' : '';
-    photoBox.innerHTML+=`
-      <div class="photo-media-item${kmClass}" data-photo-key="${escapeHtml(key)}">
-        <div class="media-title">${escapeHtml(label)}</div>
-        <input type="file" id="photo_${escapeHtml(key)}" accept="image/*"${multiple} style="display:none"
-               onchange="previewInspectionPhotos('${escapeJs(key)}')">
-        <button type="button" class="capture-btn" onclick="openInspectionCamera('${escapeJs(key)}')">📷 Buka Kamera & Ambil Foto</button>
-        <div class="media-validation-note">🔒 Foto pemeriksaan diambil langsung dari kamera aplikasi. Pilihan foto dari galeri tidak digunakan untuk item pemeriksaan.</div>
-        <div id="photoPreview_${escapeHtml(key)}" class="photo-preview-grid"></div>
-      </div>`;
-  });
+  Object.entries(PHOTO_MAP_FRONTEND)
+    .filter(entry=>String(entry[0]).startsWith('km'))
+    .forEach(entry=>{
+      const key=entry[0],label=entry[1];
+      photoBox.innerHTML+=`
+        <div class="photo-media-item photo-is-km" data-photo-key="${escapeHtml(key)}">
+          <div class="media-title">${escapeHtml(label)}</div>
+          <input type="file" id="photo_${escapeHtml(key)}" accept="image/*" capture="environment" style="display:none" onchange="previewInspectionPhotos('${escapeJs(key)}')">
+          <button type="button" class="capture-btn" onclick="openInspectionCamera('${escapeJs(key)}')">📷 Ambil Foto</button>
+          <div class="media-validation-note">Foto pemeriksaan diambil langsung dari kamera aplikasi.</div>
+          <div id="photoPreview_${escapeHtml(key)}" class="photo-preview-grid"></div>
+          <input class="photo-km-value" id="${escapeHtml(key)}_catatan" type="text" placeholder="Catatan KM (opsional)">
+        </div>`;
+    });
 
-  Object.entries(VIDEO_MAP_FRONTEND).forEach(([key,label])=>{
+  Object.entries(VIDEO_MAP_FRONTEND).forEach(entry=>{
+    const key=entry[0],label=entry[1];
     videoBox.innerHTML+=`
       <div class="media-item">
         <label>${escapeHtml(label)}</label>
-        <input type="file" id="video_${escapeHtml(key)}" accept="video/*" capture="environment">
-        <div class="media-validation-note">🎥 Satu video wajib mencakup body/lecet, kaca, ban kiri-kanan depan-belakang, ban serep, semua lampu menyala, dan klakson.</div>
+        <input type="file" id="video_${escapeHtml(key)}" accept="video/webm,video/mp4" style="display:none">
+        <button type="button" class="capture-btn" onclick="openInspectionVideoCamera()">🎥 Klik Kamera untuk Rekam Video</button>
+        <video id="videoPreview_${escapeHtml(key)}" controls playsinline style="display:none;width:100%;max-height:260px;border-radius:12px;margin-top:10px"></video>
+        <div id="videovideoPemeriksaanCameraMeta" class="media-validation-note">Video wajib diambil langsung dari kamera aplikasi.</div>
+        <div id="videovideoPemeriksaanStatus" class="media-validation-note">Satu video harus mencakup body/lecet, kaca, semua ban, ban serep, semua lampu menyala, klakson, dan interior.</div>
+        <input id="${escapeHtml(key)}_catatan" type="text" placeholder="Catatan MO untuk video (opsional)">
       </div>`;
   });
 }
-
-function photoStatusOptions(selected='Baik'){
-  const opts=['Baik','Perlu Perhatian','Perlu Ganti','Rusak','Catatan Lainnya'];
-  return opts.map(x=>`<option value="${escapeHtml(x)}" ${x===selected?'selected':''}>${escapeHtml(x)}</option>`).join('');
-}
-
-function previewInspectionPhotos(key){
-  const input=document.getElementById('photo_'+key);
-  const box=document.getElementById('photoPreview_'+key);
-  if(!input||!box)return;
-  box.innerHTML='';
-  Array.from(input.files||[]).forEach((file,index)=>{
-    const card=document.createElement('div');
-    card.className='photo-preview-card';
-    card.innerHTML=`
-      <img id="photoThumb_${escapeHtml(key)}_${index}" alt="Pratinjau foto">
-      <div class="photo-meta">
-        <select data-photo-status="${escapeHtml(key)}" data-index="${index}" aria-label="Status foto">
-          ${photoStatusOptions('Baik')}
-        </select>
-        ${key.startsWith('km') ? `<input class="photo-km-value" data-photo-km="${escapeHtml(key)}" data-index="${index}" type="number" step="0.1" inputmode="decimal" placeholder="Angka KM yang terbaca pada foto">` : ''}
-        <input data-photo-note="${escapeHtml(key)}" data-index="${index}" type="text" placeholder="Catatan foto (opsional)">
-      </div>`;
-    box.appendChild(card);
-    const img=card.querySelector('img');
-    const reader=new FileReader();
-    reader.onload=e=>{img.src=e.target.result;};
-    reader.readAsDataURL(file);
-  });
-}
-
-function collectPhotoMeta(key,index){
-  const root=document.getElementById('photoPreview_'+key);
-  const status=root?.querySelector(`[data-photo-status="${CSS.escape(key)}"][data-index="${index}"]`)?.value || 'Baik';
-  const note=root?.querySelector(`[data-photo-note="${CSS.escape(key)}"][data-index="${index}"]`)?.value || '';
-  const kmEl=root?.querySelector(`[data-photo-km="${CSS.escape(key)}"][data-index="${index}"]`);
-  return {status,catatan:note,kmValue:kmEl?.value || ''};
-}
+function photoStatusOptions(selected='Baik'){const opts=['Baik','Perlu Perhatian','Perlu Ganti','Rusak','Catatan Lainnya'];return opts.map(x=>`<option value="${escapeHtml(x)}" ${x===selected?'selected':''}>${escapeHtml(x)}</option>`).join('');}
+function previewInspectionPhotos(key){const input=document.getElementById('photo_'+key),box=document.getElementById('photoPreview_'+key);if(!input||!box)return;box.innerHTML='';Array.from(input.files||[]).forEach((file,index)=>{const card=document.createElement('div');card.className='photo-preview-card';card.innerHTML=`<img id="photoThumb_${escapeHtml(key)}_${index}" alt="Pratinjau foto"><div class="photo-meta"><select data-photo-status="${escapeHtml(key)}" data-index="${index}" aria-label="Status foto">${photoStatusOptions('Baik')}</select></div>`;box.appendChild(card);const img=card.querySelector('img'),reader=new FileReader();reader.onload=e=>{img.src=e.target.result;};reader.readAsDataURL(file);});}
+function collectPhotoMeta(key,index){const root=document.getElementById('photoPreview_'+key),status=root?.querySelector(`[data-photo-status="${CSS.escape(key)}"][data-index="${index}"]`)?.value||'Baik',kmEl=document.getElementById(key+'_catatan');return {status,catatan:kmEl?.value||'',kmValue:kmEl?.value||''};}
 
 function setDailyInspectionUI(enabled,row){
   state.dailyInspectionMode=!!enabled;
@@ -4394,19 +4369,14 @@ function setDailyInspectionUI(enabled,row){
   const banner=document.getElementById('dailyInspectionBanner');
   const btn=document.getElementById('inspectionSubmitBtn');
   if(enabled){
-    if(banner){banner.classList.remove('hidden');banner.innerHTML='🔒 <b>Pemeriksaan hari ini sudah tersimpan.</b> Data awal tidak dapat diedit. Barcode kendaraan ini tetap dapat digunakan sampai akhir hari untuk memperbarui data KM, terutama <b>KM Finish Akhir</b>. Perubahan data pemeriksaan lainnya harus melalui menu Koreksi.';}
-    if(btn)btn.textContent='↻ Update KM Hari Ini';
+    if(banner){banner.classList.remove('hidden');banner.innerHTML='🔒 <b>Pemeriksaan hari ini sudah berstatus Selesai dan terkunci.</b> Data pemeriksaan tidak dapat diedit lagi. Driver berikutnya tetap dapat scan QR untuk membuat sesi pemeriksaan lanjutan.';}
+    if(btn)btn.textContent='🔒 Pemeriksaan Terkunci';
     document.querySelectorAll('#inspectionForm input,#inspectionForm select,#inspectionForm textarea').forEach(el=>{
-      const id=el.id||'';
-      const isKmPhotoMeta=!!el.closest?.('.photo-is-km');
-      const allowed=id==='kmBeforeFuel'||id==='kmAfterFuel'||id==='kmFinish'||id==='kmOilChange'||id==='inspectionSubmitBtn'||id.startsWith('photo_km')||isKmPhotoMeta;
-      if(el.type==='file') el.disabled=!id.startsWith('photo_km');
-      else if(isKmPhotoMeta) el.disabled=false;
-      else if(['kmBeforeFuel','kmAfterFuel','kmFinish','kmOilChange'].includes(id)) el.disabled=false;
-      else if(id==='inspectionSubmitBtn') el.disabled=false;
-      else el.disabled=true;
+      el.disabled=true;
     });
     document.querySelectorAll('#videoFields input').forEach(el=>el.disabled=true);
+    document.querySelectorAll('#inspectionForm button').forEach(el=>{if(el.id!=='inspectionSubmitBtn')el.disabled=true;});
+    if(btn)btn.disabled=true;
   }else{
     if(banner){banner.classList.add('hidden');banner.innerHTML='';}
     if(btn)btn.textContent='💾 Simpan Pemeriksaan';
@@ -4418,6 +4388,16 @@ function setDailyInspectionUI(enabled,row){
     });
     document.querySelectorAll('#videoFields input').forEach(el=>el.disabled=false);
   }
+}
+
+function applyDailyInspectionToForm(row){
+  if(!row)return;
+  const fields=[['kmStart','KM Start'],['kmBeforeFuel','KM Sebelum Isi Bensin'],['kmAfterFuel','KM Sesudah Isi Bensin'],['kmFinish','KM Finish Akhir'],['kmOilChange','KM Ganti Oli'],['inspectionNotes','Catatan']];
+  fields.forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.value=row[key]??'';});
+  const t=document.getElementById('inspectionTime');if(t)t.value=toDateTimeLocal(row['Waktu Pemeriksaan']||row['Timestamp']);
+  INSPECTION_CHECKS_FRONTEND.forEach(x=>{const s=document.getElementById(x.key),n=document.getElementById(x.key+'_catatan');if(s)s.value=row[x.label]||'';if(n)n.value=row['Catatan '+x.label]||'';});
+  buildInspectionStatusOptions(String(row['Status Pemeriksaan']||'Selesai'));
+  setDailyInspectionUI(true,row);
 }
 
 async function loadDailyInspectionForAsset(code){
@@ -4671,29 +4651,35 @@ async function saveInspectionForm(event){
       );
 
       if(input?.files?.length){
-
-        media[key]=[
-          await fileToMedia(
-            input.files[0],
-            true
-          )
-        ];
-
+        const item=await fileToMedia(input.files[0],true);
+        item.capturedFromCamera=true;
+        item.catatan=document.getElementById(key+'_catatan')?.value||'';
+        media[key]=[item];
       }
 
     }
 
-    if(String(state.user?.role||'').toUpperCase()==='DRIVER' && state.dailyHandoverMode){
-      const required=['videoPemeriksaan'];
-      const missing=required.filter(k=>!media[k]?.length);
-      if(missing.length) throw new Error('Serah terima wajib: 1 Video Pemeriksaan Lengkap.');
-      const kmStartValue=document.getElementById('kmStart')?.value||'';
-      if(kmStartValue==='') throw new Error('KM saat menerima kendaraan wajib diisi dan difoto.');
-      if(!media.kmStart?.length) throw new Error('Foto KM saat menerima kendaraan wajib diambil.');
+    if(String(state.user?.role||'').toUpperCase()==='DRIVER'){
+      if(!media.videoPemeriksaan?.length) throw new Error('Driver wajib merekam 1 Video Pemeriksaan Lengkap dari kamera.');
+      if(state.dailyHandoverMode){
+        const kmStartValue=document.getElementById('kmStart')?.value||'';
+        if(kmStartValue==='') throw new Error('KM saat menerima kendaraan wajib diisi dan difoto.');
+        if(!media.kmStart?.length) throw new Error('Foto KM saat menerima kendaraan wajib diambil.');
+      }
     }
 
+    // Setiap item mesin/perlengkapan wajib memiliki status dan 1 foto dari kamera.
     const conditions={};
-    INSPECTION_CHECKS_FRONTEND.forEach(x=>{const el=document.getElementById(x.key);if(el)conditions[x.key]=el.value||'';});
+    const assetForChecks=state.assets.find(a=>String(a.code)===String(code));
+    for(const x of INSPECTION_CHECKS_FRONTEND){
+      if(x.powerSteeringOnly && !isPowerSteeringVehicle(assetForChecks)) continue;
+      const el=document.getElementById(x.key);
+      const photo=document.getElementById('photo_'+x.key);
+      if(!el || !el.value) throw new Error('Status '+x.label+' wajib dipilih.');
+      if(!photo?.files?.length) throw new Error('Foto '+x.label+' wajib diambil dari kamera.');
+      conditions[x.key]=el.value;
+    }
+    if(!media.videoPemeriksaan?.length) throw new Error('1 Video Pemeriksaan Lengkap wajib direkam dari kamera.');
 
 
     const payload={
@@ -4710,6 +4696,7 @@ async function saveInspectionForm(event){
         document.getElementById(
           'inspectionTime'
         ).value,
+      waktuPemeriksaanLocked:true,
 
       latitude:lat,
 
@@ -4756,6 +4743,7 @@ async function saveInspectionForm(event){
         ).value,
 
       conditions:conditions,
+      conditionNotes:collectInspectionConditionNotes(),
       sesi: state.dailyHandoverMode ? 0 : 1,
       jenisPemeriksaan: state.dailyHandoverMode ? 'SERAH TERIMA' : 'AWAL',
       previousInspectionId: state.previousInspectionId || '',
@@ -5040,6 +5028,8 @@ function resetInspectionForm(){
     'inspectionTime'
   ).value=
     getCurrentDateTimeLocal();
+  document.getElementById('inspectionTime')?.setAttribute('readonly','readonly');
+  buildInspectionStatusOptions();
 
   document.getElementById(
     'latitude'
@@ -5071,6 +5061,10 @@ function resetInspectionForm(){
   state.previousInspectionId='';
   setDailyInspectionUI(false);
   document.querySelectorAll('[id^=photoPreview_]').forEach(el=>el.innerHTML='');
+  document.querySelectorAll('[id^=videoPreview_]').forEach(el=>{el.removeAttribute('src');el.style.display='none';});
+  closeInspectionCamera();
+  closeInspectionVideoCamera();
+  buildInspectionOptions();
 
 }
 
