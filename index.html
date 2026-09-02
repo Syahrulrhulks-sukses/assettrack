@@ -2893,16 +2893,17 @@ async function getFastFaceResult(video,role){
   const eyes=extractEyePoints(result.landmarks);
   let ear=0;
   if(eyes) ear=(eyeAspectRatio(eyes.left)+eyeAspectRatio(eyes.right))/2;
+  const mar=mouthAspectRatio(result.landmarks);
   const st=role==='admin'?adminLivenessState:driverLivenessState;
   if(!st.startedAt) st.startedAt=performance.now();
-  if(st.baseline===null){st.baseline=ear||0;st.lastEar=ear||0;st.motionFrames=0;}
-  else if(ear && st.lastEar && Math.abs(ear-st.lastEar)>0.035){st.motionFrames=(st.motionFrames||0)+1;}
+  if(st.baseline===null){st.baseline=ear||0;st.lastEar=ear||0;st.lastMar=mar||0;}
+  const blinkLike=!!ear && !!st.baseline && ear < st.baseline*0.72;
+  const smileLike=!!mar && mar > Math.max(0.30,(st.lastMar||0)*1.18);
+  if(blinkLike) st.blinkDetected=true;
+  if(smileLike) st.smileDetected=true;
   st.lastEar=ear||st.lastEar||0;
-  // Liveness ringan: perubahan landmark mata antar-frame. Tidak ada inferensi kedua.
-  const blinkLike=!!ear && !!st.baseline && ear < st.baseline*0.78;
-  const passiveLive=!!st.motionFrames && st.motionFrames>=1;
-  if(blinkLike||passiveLive) st.blinkDetected=true;
-  return {result,descriptor:Array.from(result.descriptor),liveness:!!st.blinkDetected,ear};
+  st.lastMar=mar||st.lastMar||0;
+  return {result,descriptor:Array.from(result.descriptor),liveness:!!(st.blinkDetected||st.smileDetected),ear,mar,blink:!!st.blinkDetected,smile:!!st.smileDetected};
 }
 
 function isFrameClear(video){
@@ -2940,12 +2941,22 @@ function retryFaceAttempt(role){
   if((role==='admin'?adminFaceAttempts:driverFaceAttempts)>=3) showLoginRefresh(role);
 }
 
-let driverLivenessState={baseline:null,blinkDetected:false,startedAt:0};
-let adminLivenessState={baseline:null,blinkDetected:false,startedAt:0};
+let driverLivenessState={baseline:null,blinkDetected:false,smileDetected:false,startedAt:0,lastEar:0,lastMar:0};
+let adminLivenessState={baseline:null,blinkDetected:false,smileDetected:false,startedAt:0,lastEar:0,lastMar:0};
 function eyeAspectRatio(points){
   if(!points||points.length<6)return 1;
   const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
   return (d(points[1],points[5])+d(points[2],points[4]))/(2*Math.max(1,d(points[0],points[3])));
+}
+function mouthAspectRatio(landmarks){
+  try{
+    const p=landmarks.positions;
+    const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+    // 68-point landmark: 48..67 adalah bibir. Nilai meningkat saat mulut tersenyum/terbuka.
+    const width=d(p[48],p[54]);
+    const open=(d(p[51],p[57])+d(p[52],p[56])+d(p[53],p[55]))/3;
+    return open/Math.max(1,width);
+  }catch(_){return 0;}
 }
 function extractEyePoints(landmarks){
   try{
@@ -2954,22 +2965,16 @@ function extractEyePoints(landmarks){
   }catch(_){return null;}
 }
 async function checkLivenessBlink(video,role){
-  await ensureFaceModels();
-  const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:.55})).withFaceLandmarks();
-  if(!result)return {ok:false,reason:'Wajah tidak terlihat.'};
-  const eyes=extractEyePoints(result.landmarks);
-  if(!eyes)return {ok:false,reason:'Landmark wajah belum tersedia.'};
-  const ear=(eyeAspectRatio(eyes.left)+eyeAspectRatio(eyes.right))/2;
-  const st=role==='admin'?adminLivenessState:driverLivenessState;
-  if(!st.startedAt)st.startedAt=performance.now();
-  if(st.baseline===null){st.baseline=ear;return {ok:false,reason:'Silakan kedip sekali untuk memastikan Anda orang nyata.'};}
-  if(ear < st.baseline*.72){st.blinkDetected=true;return {ok:true,reason:'Liveness terdeteksi.'};}
-  if(performance.now()-st.startedAt>3500)return {ok:false,expired:true,reason:'Liveness gagal. Silakan kedip sekali dan coba lagi.'};
-  return {ok:false,reason:'Silakan kedip sekali.'};
+  const live=await getFastFaceResult(video,role);
+  if(live.liveness)return {ok:true,reason:live.smile?'Senyum terdeteksi.':'Kedipan terdeteksi.'};
+  if(performance.now()-(role==='admin'?adminLivenessState:driverLivenessState).startedAt>3500)
+    return {ok:false,expired:true,reason:'Silakan tersenyum atau kedip sekali, lalu coba lagi.'};
+  return {ok:false,reason:'Silakan tersenyum atau kedip sekali.'};
 }
+
 function resetLiveness(role){
   const st=role==='admin'?adminLivenessState:driverLivenessState;
-  st.baseline=null;st.blinkDetected=false;st.startedAt=performance.now();
+  st.baseline=null;st.blinkDetected=false;st.smileDetected=false;st.lastEar=0;st.lastMar=0;st.startedAt=performance.now();
 }
 
 async function autoFaceCheck(){
@@ -2984,7 +2989,7 @@ async function autoFaceCheck(){
     const live=await getFastFaceResult(video,'driver');
     const dist=faceDistance(live.descriptor,autoFaceCandidate.faceDescriptor);
     // Liveness dan pencocokan terjadi dari inferensi yang sama.
-    if(!live.liveness){setFaceUI('Wajah terdeteksi. Gerakkan mata/wajah sedikit...',false,'driver');return;}
+    if(!live.liveness){setFaceUI('Silakan tersenyum atau kedip sekali...',false,'driver');return;}
     driverFaceAttempts++;
     if(dist>FACE_MATCH_THRESHOLD){
       retryFaceAttempt('driver');
@@ -3017,7 +3022,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
     const distanceToVehicle=haversineMeters(qrGps,gps);
     state.loginGPS=gps;
     const googleEmail=String(driver?.email||'').trim().toLowerCase();
-    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),email:googleEmail,qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:'FAST_LIVE',latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
+    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),email:googleEmail,qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(live?.smile?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
     stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
@@ -3109,7 +3114,7 @@ async function autoAdminFaceCheck(){
     const stable=await detectStableFace(video,'admin');
     if(!stable){setFaceUI('Mendeteksi wajah...',false,'admin');return;}
     const live=await getFastFaceResult(video,'admin');
-    if(!live.liveness){setFaceUI('Wajah terdeteksi. Gerakkan mata/wajah sedikit...',false,'admin');return;}
+    if(!live.liveness){setFaceUI('Silakan tersenyum atau kedip sekali...',false,'admin');return;}
     adminFaceAttempts++;
     const data=await captureLiveFrame('adminLogin');
     if(!data){retryFaceAttempt('admin');return;}
