@@ -2679,9 +2679,17 @@ let autoAdminTimer=null,autoAdminBusy=false,autoAdminCandidate=null;
 let adminStableSince=0,adminStableBox=null,adminStableFrames=0;
 let adminFaceAttempts=0,adminFaceLocked=false;
 
+let driverNameLookupTimer=null;
+let adminNameLookupTimer=null;
+
+function normalizeLoginName(value){
+  return String(value||'').replace(/\u00a0/g,' ').trim().replace(/\s+/g,' ').toLowerCase();
+}
+
 function onDriverNameInput(){
-  // Login Driver menggunakan Nama + verifikasi wajah. Email Google tidak digunakan.
-  initializeDriverLoginIdentity().catch(()=>{});
+  // Nama HARUS lengkap. Selama masih mengetik tidak ada pencarian dan kamera tetap MATI.
+  clearTimeout(driverNameLookupTimer);
+  driverNameLookupTimer=setTimeout(()=>initializeDriverLoginIdentity().catch(()=>{}),180);
 }
 
 async function initializeDriverLoginIdentity(){
@@ -2706,23 +2714,29 @@ async function initializeDriverLoginIdentity(){
   }
 
   if(!name){
-    if(hint)hint.textContent='QR kendaraan terdeteksi. Tulis Nama Driver untuk mulai verifikasi wajah.';
-    setFaceUI('Tulis Nama Driver terlebih dahulu.',false,'driver');
+    if(hint)hint.textContent='QR kendaraan terdeteksi. Tulis Nama Driver lengkap.';
+    setFaceUI('Tulis Nama Driver lengkap terlebih dahulu.',false,'driver');
+    stopCamera('driverLogin');
+    stopAutoFaceLogin();
     return null;
   }
 
-  let exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().replace(/\s+/g,' ').toLowerCase()===name.replace(/\s+/g,' ').toLowerCase());
-  if(!exact){
+  // Pencarian hanya dilakukan setelah pengguna berhenti mengetik nama lengkap.
+  const wanted=normalizeLoginName(name);
+  let exact=state.drivers.find(d=>driverIsActive(d) && normalizeLoginName(driverNameOf(d))===wanted);
+  if(!exact && !(state.drivers||[]).length){
     try{
       const latest=await apiGet('drivers');
       state.drivers=latest.drivers || [];
-      exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().replace(/\s+/g,' ').toLowerCase()===name.replace(/\s+/g,' ').toLowerCase());
+      exact=state.drivers.find(d=>driverIsActive(d) && normalizeLoginName(driverNameOf(d))===wanted);
     }catch(_){}
   }
 
   if(!exact){
-    if(hint)hint.textContent='Nama Driver belum ditemukan atau Driver tidak aktif.';
-    setFaceUI('Nama Driver tidak ditemukan. Periksa penulisan nama.',false,'driver');
+    if(hint)hint.textContent='Nama Driver belum ditemukan. Ketik nama lengkap sesuai Data Driver.';
+    setFaceUI('Nama Driver belum ditemukan.',false,'driver');
+    stopCamera('driverLogin');
+    stopAutoFaceLogin();
     return null;
   }
 
@@ -2730,23 +2744,50 @@ async function initializeDriverLoginIdentity(){
   if(idEl)idEl.value=driverIdOf(exact);
   const autoId=document.getElementById('autoDriverId');
   if(autoId){autoId.textContent='ID: '+driverIdOf(exact);autoId.classList.add('show');}
-  if(hint)hint.textContent='Driver '+driverNameOf(exact)+' ditemukan. Tersenyum atau kedip sekali di dalam bingkai.';
-  setFaceUI('Wajah siap. Tersenyum atau kedip sekali...',false,'driver');
+  if(hint)hint.textContent='Driver '+driverNameOf(exact)+' ditemukan. Kamera akan aktif otomatis.';
+  setFaceUI('Nama Driver ditemukan. Mengaktifkan kamera...',false,'driver');
+  startAutoFaceLogin().catch(()=>{});
   return exact;
 }
 
 function onAdminNameInput(){
+  // Nama HARUS lengkap. Selama masih mengetik tidak ada pencarian dan kamera tetap MATI.
+  clearTimeout(adminNameLookupTimer);
   const name=(document.getElementById('loginAdminName')?.value||'').trim();
   const idEl=document.getElementById('loginAdminId'),badge=document.getElementById('autoAdminId');
   autoAdminCandidate=null;adminStableSince=0;adminStableBox=null;adminStableFrames=0;adminFaceAttempts=0;adminFaceLocked=false;resetLiveness('admin');hideLoginRefresh('admin');
   if(idEl) idEl.value='';if(badge){badge.textContent='';badge.classList.remove('show');}
-  if(!name){setFaceUI('Menunggu nama...',false,'admin');return;}
-  const exact=(state.admins||[]).find(a=>String(a.name||a.namaAdmin||'').trim().toLowerCase()===name.toLowerCase() && isDriverActive(a.status));
-  if(!exact){setFaceUI('Nama Admin belum ditemukan.',false,'admin');return;}
+  stopCamera('adminLogin');
+  stopAutoAdminFaceLogin();
+  if(!name){setFaceUI('Menunggu nama lengkap...',false,'admin');return;}
+  setFaceUI('Menunggu nama lengkap...',false,'admin');
+  adminNameLookupTimer=setTimeout(()=>resolveAdminNameAfterComplete(),180);
+}
+
+async function resolveAdminNameAfterComplete(){
+  const name=(document.getElementById('loginAdminName')?.value||'').trim();
+  const idEl=document.getElementById('loginAdminId'),badge=document.getElementById('autoAdminId');
+  if(!name)return;
+  const wanted=normalizeLoginName(name);
+  let exact=(state.admins||[]).find(a=>isDriverActive(a.status) && normalizeLoginName(a.name||a.namaAdmin)===wanted);
+  if(!exact && !(state.admins||[]).length){
+    try{
+      const latest=await apiGet('admins');
+      state.admins=(latest.admins||[]).map(a=>{const x={...a};delete x.faceDescriptor;return x;});
+      exact=state.admins.find(a=>isDriverActive(a.status) && normalizeLoginName(a.name||a.namaAdmin)===wanted);
+    }catch(_){ }
+  }
+  if(!exact){
+    setFaceUI('Nama Admin belum ditemukan.',false,'admin');
+    stopCamera('adminLogin');
+    stopAutoAdminFaceLogin();
+    return;
+  }
   autoAdminCandidate=exact;
   if(idEl) idEl.value=String(exact.id||exact.adminId||'').trim();
   if(badge){badge.textContent='ID otomatis: '+String(exact.id||exact.adminId||'');badge.classList.add('show');}
   setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
+  startAutoAdminFaceLogin().catch(()=>{});
 }
 function onAdminPinInput(){
   const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
@@ -2993,10 +3034,17 @@ function clearLoginFieldsImmediately(){
   localStorage.removeItem('assettrack_admin_id');localStorage.removeItem('assettrack_admin_name');
 }
 async function startAutoFaceLogin(){
+  // Dipanggil saat QR siap. Kamera TIDAK dinyalakan sebelum nama lengkap ditemukan.
   resetLiveness('driver');
   stopAutoFaceLogin();
+  stopCamera('driverLogin');
   if(!state.pendingAssetCode){
     setFaceUI('Scan QR Code kendaraan terlebih dahulu.',false,'driver');
+    return;
+  }
+  const name=String(document.getElementById('loginDriverName')?.value||'').trim();
+  if(!name || !autoFaceCandidate){
+    setFaceUI('Tulis Nama Driver lengkap terlebih dahulu.',false,'driver');
     return;
   }
   try{
@@ -3004,12 +3052,7 @@ async function startAutoFaceLogin(){
     const ok=await startCamera('driverLogin',true);
     if(!ok)return;
     stopAutoFaceLogin();
-    const name=String(document.getElementById('loginDriverName')?.value||'').trim();
-    if(name){
-      await initializeDriverLoginIdentity();
-    }else{
-      setFaceUI('Kamera aktif. Tulis Nama Driver. Setelah itu cukup senyum atau kedip sekali.',false,'driver');
-    }
+    setFaceUI('Kamera aktif. Tersenyum atau kedip sekali.',false,'driver');
     autoFaceTimer=setInterval(autoFaceCheck,FAST_FACE_INTERVAL);
   }catch(e){
     setFaceUI(e.message||'Login Driver belum siap.',false,'driver');
@@ -3058,9 +3101,22 @@ async function loginAdminAutomatic(candidate,liveDescriptor,data){
   finally{state.loginBusy=false;}
 }
 async function startAutoAdminFaceLogin(){
+  // Kamera hanya aktif setelah nama lengkap ditemukan.
   resetLiveness('admin');
-  try{await ensureFaceModels();const ok=await startCamera('adminLogin',true);if(!ok)return;stopAutoAdminFaceLogin();setFaceUI('Kamera aktif. Tulis nama untuk mulai...',false,'admin');autoAdminTimer=setInterval(autoAdminFaceCheck,FAST_FACE_INTERVAL);}
-  catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'admin');}
+  stopAutoAdminFaceLogin();
+  stopCamera('adminLogin');
+  if(!autoAdminCandidate){
+    setFaceUI('Tulis Nama Admin/Super Admin lengkap terlebih dahulu.',false,'admin');
+    return;
+  }
+  try{
+    await ensureFaceModels();
+    const ok=await startCamera('adminLogin',true);
+    if(!ok)return;
+    stopAutoAdminFaceLogin();
+    setFaceUI('Kamera aktif. Masukkan PIN lalu tersenyum atau kedip sekali.',false,'admin');
+    autoAdminTimer=setInterval(autoAdminFaceCheck,FAST_FACE_INTERVAL);
+  }catch(e){setFaceUI('Kamera/verifikasi wajah belum siap.',false,'admin');}
 }
 function stopAutoAdminFaceLogin(){if(autoAdminTimer){clearInterval(autoAdminTimer);autoAdminTimer=null;}}
 
@@ -3211,7 +3267,7 @@ async function loginAdmin(){
   const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
   if(!name){setLoginStatus('Nama Admin wajib diisi.',true,'admin');return;}
   if(!/^[0-9]{6}$/.test(pin)){setLoginStatus('PIN harus 6 digit angka.',true,'admin');return;}
-  if(!autoAdminCandidate) onAdminNameInput();
+  if(!autoAdminCandidate){ onAdminNameInput(); return; }
   if(!state.camera.adminLogin) await startAutoAdminFaceLogin();
 }
 
