@@ -3023,14 +3023,14 @@ async function autoFaceCheck(){
     state.loginPhoto.driverLogin=data;
     driverFaceLocked=true;
     setFaceUI('Wajah cocok ✓',true,'driver');
-    await loginDriverAutomatic(autoFaceCandidate,live.descriptor,dist);
+    await loginDriverAutomatic(autoFaceCandidate,live.descriptor,dist,live.smile?'SMILE':'BLINK');
   }catch(e){
     if(driverFaceAttempts<DRIVER_MAX_ATTEMPTS)retryFaceAttempt('driver');else showLoginRefresh('driver');
     setFaceUI(e.message||'Verifikasi gagal.',false,'driver');
   }finally{autoFaceBusy=false;}
 }
 
-async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
+async function loginDriverAutomatic(driver,liveDescriptor,localDistance,livenessEvent){
   if(state.loginBusy)return;
   state.loginBusy=true;
   try{
@@ -3041,7 +3041,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance){
     const gps=await requestLoginLocationFast();
     const distanceToVehicle=haversineMeters(qrGps,gps);
     state.loginGPS=gps;
-    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(live?.smile?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
+    const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(livenessEvent==='SMILE'?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
     stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
