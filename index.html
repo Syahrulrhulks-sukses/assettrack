@@ -2699,10 +2699,10 @@ function normalizeStatus(value){return String(value ?? '').replace(/\u00a0/g,' '
 function isDriverActive(value){return ['aktif','active','1','true','ya'].includes(normalizeStatus(value));}
 
 const FACE_MODEL_URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-const FACE_MATCH_THRESHOLD=0.55;
+const FACE_MATCH_THRESHOLD=0.60;
 const FAST_FACE_INPUT_SIZE=160;
-const FAST_FACE_SCORE=0.50;
-const FAST_FACE_INTERVAL=80;
+const FAST_FACE_SCORE=0.38;
+const FAST_FACE_INTERVAL=150;
 
 async function ensureFaceModels(){
   if(state.faceModelsReady) return state.faceModelsReady;
@@ -2781,6 +2781,7 @@ async function refreshLoginCamera(role){
 let autoFaceTimer=null,autoFaceBusy=false,autoFaceCandidate=null;
 let stableSince=0,stableBox=null,stableFrames=0;
 let driverFaceAttempts=0,driverFaceLocked=false;
+const DRIVER_MAX_ATTEMPTS=5;
 let autoAdminTimer=null,autoAdminBusy=false,autoAdminCandidate=null;
 let adminStableSince=0,adminStableBox=null,adminStableFrames=0;
 let adminFaceAttempts=0,adminFaceLocked=false;
@@ -2817,12 +2818,12 @@ async function initializeDriverLoginIdentity(){
     return null;
   }
 
-  let exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().toLowerCase()===name.toLowerCase());
+  let exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().replace(/\s+/g,' ').toLowerCase()===name.replace(/\s+/g,' ').toLowerCase());
   if(!exact){
     try{
       const latest=await apiGet('drivers');
       state.drivers=latest.drivers || [];
-      exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().toLowerCase()===name.toLowerCase());
+      exact=state.drivers.find(d=>driverIsActive(d) && driverNameOf(d).trim().replace(/\s+/g,' ').toLowerCase()===name.replace(/\s+/g,' ').toLowerCase());
     }catch(_){}
   }
 
@@ -2897,17 +2898,23 @@ async function getFastFaceResult(video,role){
   const eyes=extractEyePoints(result.landmarks);
   let ear=0;
   if(eyes) ear=(eyeAspectRatio(eyes.left)+eyeAspectRatio(eyes.right))/2;
-  const mar=mouthAspectRatio(result.landmarks);
+  const mouth=mouthAspectRatio(result.landmarks);
+  const mar=Number(mouth.mar||0);
+  const smileShape=Number(mouth.smileShape||0);
   const st=role==='admin'?adminLivenessState:driverLivenessState;
   if(!st.startedAt) st.startedAt=performance.now();
-  if(st.baseline===null){st.baseline=ear||0;st.lastEar=ear||0;st.lastMar=mar||0;}
-  const blinkLike=!!ear && !!st.baseline && ear < st.baseline*0.72;
-  const smileLike=!!mar && mar > Math.max(0.30,(st.lastMar||0)*1.18);
+  if(st.baseline===null){st.baseline=ear||0;st.lastEar=ear||0;st.lastMar=mar||0;st.lastSmileShape=smileShape||0;}
+  // Kedip dibuat lebih toleran karena kamera HP berbeda-beda.
+  const blinkLike=!!ear && !!st.baseline && ear < st.baseline*0.80;
+  // Senyum dinilai dari bentuk sudut bibir + sedikit perubahan bukaan mulut.
+  const smileLike=(smileShape > Math.max(0.045,(st.lastSmileShape||0)+0.018)) ||
+                   (mar > Math.max(0.22,(st.lastMar||0)*1.08));
   if(blinkLike) st.blinkDetected=true;
   if(smileLike) st.smileDetected=true;
   st.lastEar=ear||st.lastEar||0;
   st.lastMar=mar||st.lastMar||0;
-  return {result,descriptor:Array.from(result.descriptor),liveness:!!(st.blinkDetected||st.smileDetected),ear,mar,blink:!!st.blinkDetected,smile:!!st.smileDetected};
+  st.lastSmileShape=smileShape||st.lastSmileShape||0;
+  return {result,descriptor:Array.from(result.descriptor),liveness:!!(st.blinkDetected||st.smileDetected),ear,mar,smileShape,blink:!!st.blinkDetected,smile:!!st.smileDetected};
 }
 
 function isFrameClear(video){
@@ -2945,8 +2952,8 @@ function retryFaceAttempt(role){
   if((role==='admin'?adminFaceAttempts:driverFaceAttempts)>=3) showLoginRefresh(role);
 }
 
-let driverLivenessState={baseline:null,blinkDetected:false,smileDetected:false,startedAt:0,lastEar:0,lastMar:0};
-let adminLivenessState={baseline:null,blinkDetected:false,smileDetected:false,startedAt:0,lastEar:0,lastMar:0};
+let driverLivenessState={baseline:null,blinkDetected:false,smileDetected:false,startedAt:0,lastEar:0,lastMar:0,lastSmileShape:0};
+let adminLivenessState={baseline:null,blinkDetected:false,smileDetected:false,startedAt:0,lastEar:0,lastMar:0,lastSmileShape:0};
 function eyeAspectRatio(points){
   if(!points||points.length<6)return 1;
   const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -2956,11 +2963,15 @@ function mouthAspectRatio(landmarks){
   try{
     const p=landmarks.positions;
     const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-    // 68-point landmark: 48..67 adalah bibir. Nilai meningkat saat mulut tersenyum/terbuka.
+    // Gunakan dua sinyal: bukaan mulut + bentuk senyum.
+    // MAR saja kurang cocok untuk mendeteksi senyum karena senyum tidak selalu membuka mulut.
     const width=d(p[48],p[54]);
     const open=(d(p[51],p[57])+d(p[52],p[56])+d(p[53],p[55]))/3;
-    return open/Math.max(1,width);
-  }catch(_){return 0;}
+    const cornerY=(p[48].y+p[54].y)/2;
+    const centerY=(p[51].y+p[57].y)/2;
+    const smileShape=(centerY-cornerY)/Math.max(1,width);
+    return {mar:open/Math.max(1,width),smileShape};
+  }catch(_){return {mar:0,smileShape:0};}
 }
 function extractEyePoints(landmarks){
   try{
@@ -2978,11 +2989,11 @@ async function checkLivenessBlink(video,role){
 
 function resetLiveness(role){
   const st=role==='admin'?adminLivenessState:driverLivenessState;
-  st.baseline=null;st.blinkDetected=false;st.smileDetected=false;st.lastEar=0;st.lastMar=0;st.startedAt=performance.now();
+  st.baseline=null;st.blinkDetected=false;st.smileDetected=false;st.lastEar=0;st.lastMar=0;st.lastSmileShape=0;st.startedAt=performance.now();
 }
 
 async function autoFaceCheck(){
-  if(autoFaceBusy||state.loginBusy||!state.camera.driverLogin||driverFaceLocked||driverFaceAttempts>=3)return;
+  if(autoFaceBusy||state.loginBusy||!state.camera.driverLogin||driverFaceLocked||driverFaceAttempts>=DRIVER_MAX_ATTEMPTS)return;
   if(!state.pendingAssetCode)return;
   if(!autoFaceCandidate){
     const name=String(document.getElementById('loginDriverName')?.value||'').trim();
@@ -3003,19 +3014,18 @@ async function autoFaceCheck(){
     driverFaceAttempts++;
     if(dist>FACE_MATCH_THRESHOLD){
       retryFaceAttempt('driver');
-      if(driverFaceAttempts<3)setFaceUI('Wajah tidak cocok. Percobaan '+driverFaceAttempts+'/3.',false,'driver');
-      else setFaceUI('Verifikasi gagal 3 kali. Tekan Ambil Ulang.',false,'driver');
+      if(driverFaceAttempts<DRIVER_MAX_ATTEMPTS)setFaceUI('Wajah tidak cocok. Percobaan '+driverFaceAttempts+'/3.',false,'driver');
+      else setFaceUI('Verifikasi gagal. Tekan Ambil Ulang untuk mencoba lagi.',false,'driver');
       return;
     }
     const data=await captureLiveFrame('driverLogin');
     if(!data){retryFaceAttempt('driver');return;}
     state.loginPhoto.driverLogin=data;
     driverFaceLocked=true;
-    const driverVideo=document.getElementById('driverLoginVideo');if(driverVideo)driverVideo.pause();
     setFaceUI('Wajah cocok ✓',true,'driver');
     await loginDriverAutomatic(autoFaceCandidate,live.descriptor,dist);
   }catch(e){
-    if(driverFaceAttempts<3)retryFaceAttempt('driver');else showLoginRefresh('driver');
+    if(driverFaceAttempts<DRIVER_MAX_ATTEMPTS)retryFaceAttempt('driver');else showLoginRefresh('driver');
     setFaceUI(e.message||'Verifikasi gagal.',false,'driver');
   }finally{autoFaceBusy=false;}
 }
@@ -3103,7 +3113,7 @@ async function startAutoFaceLogin(){
     if(name){
       await initializeDriverLoginIdentity();
     }else{
-      setFaceUI('Kamera aktif. Tulis Nama Driver...',false,'driver');
+      setFaceUI('Kamera aktif. Tulis Nama Driver. Setelah itu cukup senyum atau kedip sekali.',false,'driver');
     }
     autoFaceTimer=setInterval(autoFaceCheck,FAST_FACE_INTERVAL);
   }catch(e){
