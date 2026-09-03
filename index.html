@@ -2638,7 +2638,7 @@ const FACE_MODEL_URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 const FACE_MATCH_THRESHOLD=0.60;
 const FAST_FACE_INPUT_SIZE=128;
 const FAST_FACE_SCORE=0.35;
-const FAST_FACE_INTERVAL=50;
+const FAST_FACE_INTERVAL=70;
 
 async function ensureFaceModels(){
   if(state.faceModelsReady) return state.faceModelsReady;
@@ -2732,7 +2732,7 @@ function normalizeLoginName(value){
 function onDriverNameInput(){
   // Nama HARUS lengkap. Selama masih mengetik tidak ada pencarian dan kamera tetap MATI.
   clearTimeout(driverNameLookupTimer);
-  driverNameLookupTimer=setTimeout(()=>initializeDriverLoginIdentity().catch(()=>{}),180);
+  driverNameLookupTimer=setTimeout(()=>initializeDriverLoginIdentity().catch(()=>{}),80);
 }
 
 async function initializeDriverLoginIdentity(){
@@ -2804,7 +2804,7 @@ function onAdminNameInput(){
   stopAutoAdminFaceLogin();
   if(!name){setFaceUI('Menunggu nama lengkap...',false,'admin');return;}
   setFaceUI('Menunggu nama lengkap...',false,'admin');
-  adminNameLookupTimer=setTimeout(()=>resolveAdminNameAfterComplete(),180);
+  adminNameLookupTimer=setTimeout(()=>resolveAdminNameAfterComplete(),80);
 }
 
 async function resolveAdminNameAfterComplete(){
@@ -3016,7 +3016,8 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance,liveness
     // Tidak ada lagi pemeriksaan jarak 2 meter. Jika lock GPS QR belum siap,
     // gunakan GPS login sebagai koordinat QR karena koordinat hanya diperlukan
     // sebagai metadata dan bukan untuk menolak login.
-    const gps=await requestLoginLocationFast();
+    const cachedGps=state.qrLockGPS || restoreQrLocationLock() || state.loginGPS || null;
+    const gps=cachedGps || await requestLoginLocationFast();
     const qrGps=state.qrLockGPS || restoreQrLocationLock() || gps;
     const distanceToVehicle=0;
     state.loginGPS=gps;
@@ -3114,8 +3115,7 @@ async function autoAdminFaceCheck(){
   autoAdminBusy=true;
   try{
     const video=document.getElementById('adminLoginVideo');
-    const stable=await detectStableFace(video,'admin');
-    if(!stable){setFaceUI('Mendeteksi wajah...',false,'admin');return;}
+    // FAST PATH: satu inferensi TinyFace + landmark + descriptor + liveness.
     const live=await getFastFaceResult(video,'admin');
     if(!live.liveness){setFaceUI('Silakan tersenyum atau kedip sekali...',false,'admin');return;}
     adminFaceAttempts++;
@@ -3136,7 +3136,9 @@ async function loginAdminAutomatic(candidate,liveDescriptor,data){
   state.loginBusy=true;
   try{
     setLoginStatus('Verifikasi ID, PIN dan wajah...',false,'admin');
-    const result=await apiPost({action:'adminLoginFastByName',namaAdmin:String(candidate.name||candidate.namaAdmin||'').trim(),pin:document.getElementById('loginAdminPin').value.trim(),data:data,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor)});
+    // Admin yang sudah terdaftar cukup mengirim descriptor wajah + PIN.
+    // Frame JPEG tidak dikirim pada login normal agar request lebih cepat.
+    const result=await apiPost({action:'adminLoginFastByName',namaAdmin:String(candidate.name||candidate.namaAdmin||'').trim(),pin:document.getElementById('loginAdminPin').value.trim(),faceDescriptor:Array.from(liveDescriptor)});
     state.user={...result.admin,role:String(result.admin.role||'ADMIN').toUpperCase(),loginPhoto:result.loginPhoto||''};
     state.loginToken=null;
     stopAutoAdminFaceLogin();stopCamera('adminLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login '+state.user.role+' berhasil.','success');
@@ -4791,6 +4793,9 @@ async function saveInspectionForm(event){
         data:videoUpload.item.data,
         mimeType:videoUpload.item.type || 'video/webm',
         extension:(videoUpload.item.name||'video.webm').split('.').pop() || 'webm',
+        capturedFromCamera:true,
+        driverId:driverIdOf(driver),
+        namaDriver:driverNameOf(driver),
         catatan:videoUpload.item.catatan || ''
       });
       toast('Pemeriksaan dan video berhasil disimpan ke Google Drive.', 'success');
