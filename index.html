@@ -4320,7 +4320,7 @@ async function openInspectionVideoCamera(){if(String(state.user?.role||'').toUpp
 function closeInspectionVideoCamera(){if(inspectionVideoRecording)stopInspectionVideoRecording(true);if(inspectionVideoStream){inspectionVideoStream.getTracks().forEach(t=>t.stop());inspectionVideoStream=null;}const video=document.getElementById('inspectionVideoRecorder');if(video)video.srcObject=null;document.getElementById('inspectionVideoModal')?.classList.remove('show');inspectionVideoChunks=[];inspectionVideoRecorder=null;inspectionVideoRecording=false;const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏺ Mulai Rekam';}
 function chooseVideoMimeType(){const candidates=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];return candidates.find(x=>window.MediaRecorder?.isTypeSupported?.(x))||'';}
 function toggleInspectionVideoRecording(){if(inspectionVideoRecording)stopInspectionVideoRecording(false);else startInspectionVideoRecording();}
-function startInspectionVideoRecording(){if(!inspectionVideoStream){toast('Kamera video belum siap.','error');return;}const mime=chooseVideoMimeType();try{inspectionVideoChunks=[];inspectionVideoRecorder=mime?new MediaRecorder(inspectionVideoStream,{mimeType:mime}):new MediaRecorder(inspectionVideoStream);inspectionVideoRecorder.ondataavailable=e=>{if(e.data?.size)inspectionVideoChunks.push(e.data);};inspectionVideoRecorder.onstop=()=>{const type=inspectionVideoRecorder?.mimeType||mime||'video/webm',blob=new Blob(inspectionVideoChunks,{type});if(blob.size<1000){toast('Video terlalu pendek. Rekam kembali.','error');return;}const file=new File([blob],'video_pemeriksaan_lengkap_'+Date.now()+'.webm',{type,lastModified:Date.now()}),input=document.getElementById('video_videoPemeriksaan');if(!input){toast('Kolom video tidak ditemukan.','error');return;}const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;const meta=document.getElementById('videovideoPemeriksaanCameraMeta');if(meta)meta.textContent='✓ Video berhasil direkam dari kamera.';const preview=document.getElementById('videoPreview_videoPemeriksaan');if(preview){preview.src=URL.createObjectURL(blob);preview.style.display='block';}const note=document.getElementById('videovideoPemeriksaanStatus');if(note)note.textContent='✓ Video siap disimpan.';closeInspectionVideoCamera();toast('Video pemeriksaan lengkap berhasil direkam.','success');};inspectionVideoRecorder.start(500);inspectionVideoRecording=true;const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏹ Stop & Simpan Video';document.getElementById('inspectionVideoStatus').textContent='Sedang merekam... Pastikan semua area pemeriksaan masuk dalam satu video.';}catch(e){toast('Perekaman video tidak dapat dimulai: '+e.message,'error');}}
+function startInspectionVideoRecording(){if(!inspectionVideoStream){toast('Kamera video belum siap.','error');return;}const mime=chooseVideoMimeType();try{inspectionVideoChunks=[];inspectionVideoRecorder=mime?new MediaRecorder(inspectionVideoStream,{mimeType:mime,videoBitsPerSecond:1500000}):new MediaRecorder(inspectionVideoStream,{videoBitsPerSecond:1500000});inspectionVideoRecorder.ondataavailable=e=>{if(e.data?.size)inspectionVideoChunks.push(e.data);};inspectionVideoRecorder.onstop=()=>{const type=inspectionVideoRecorder?.mimeType||mime||'video/webm',blob=new Blob(inspectionVideoChunks,{type});if(blob.size<1000){toast('Video terlalu pendek. Rekam kembali.','error');return;}const file=new File([blob],'video_pemeriksaan_lengkap_'+Date.now()+'.webm',{type,lastModified:Date.now()}),input=document.getElementById('video_videoPemeriksaan');if(!input){toast('Kolom video tidak ditemukan.','error');return;}const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;const meta=document.getElementById('videovideoPemeriksaanCameraMeta');if(meta)meta.textContent='✓ Video berhasil direkam dari kamera.';const preview=document.getElementById('videoPreview_videoPemeriksaan');if(preview){preview.src=URL.createObjectURL(blob);preview.style.display='block';}const note=document.getElementById('videovideoPemeriksaanStatus');if(note)note.textContent='✓ Video siap disimpan.';closeInspectionVideoCamera();toast('Video pemeriksaan lengkap berhasil direkam.','success');};inspectionVideoRecorder.start(500);inspectionVideoRecording=true;const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏹ Stop & Simpan Video';document.getElementById('inspectionVideoStatus').textContent='Sedang merekam... Pastikan semua area pemeriksaan masuk dalam satu video.';}catch(e){toast('Perekaman video tidak dapat dimulai: '+e.message,'error');}}
 function stopInspectionVideoRecording(cancel){if(!inspectionVideoRecorder)return;if(inspectionVideoRecording){try{inspectionVideoRecorder.stop();}catch(_){}inspectionVideoRecording=false;}else if(cancel){try{inspectionVideoRecorder.stop();}catch(_){} }}
 function buildMediaFields(){
   const photoBox=document.getElementById('photoFields');
@@ -4638,29 +4638,23 @@ async function saveInspectionForm(event){
 
     /*
       Video
+      Video tidak ikut dikirim dalam payload saveInspection.
+      Setelah Inspection ID berhasil dibuat, video dikirim melalui uploadVideo
+      agar penyimpanan Drive + Sheet lebih andal dan tidak membuat request utama terlalu besar.
     */
-
-    for(
-      const [key] of Object.entries(
-        VIDEO_MAP_FRONTEND
-      )
-    ){
-
-      const input=document.getElementById(
-        'video_'+key
-      );
-
+    let videoUpload=null;
+    for(const [key] of Object.entries(VIDEO_MAP_FRONTEND)){
+      const input=document.getElementById('video_'+key);
       if(input?.files?.length){
         const item=await fileToMedia(input.files[0],true);
         item.capturedFromCamera=true;
         item.catatan=document.getElementById(key+'_catatan')?.value||'';
-        media[key]=[item];
+        videoUpload={key,item};
       }
-
     }
 
     if(String(state.user?.role||'').toUpperCase()==='DRIVER'){
-      if(!media.videoPemeriksaan?.length) throw new Error('Driver wajib merekam 1 Video Pemeriksaan Lengkap dari kamera.');
+      if(!videoUpload) throw new Error('Driver wajib merekam 1 Video Pemeriksaan Lengkap dari kamera.');
       if(state.dailyHandoverMode){
         const kmStartValue=document.getElementById('kmStart')?.value||'';
         if(kmStartValue==='') throw new Error('KM saat menerima kendaraan wajib diisi dan difoto.');
@@ -4679,7 +4673,7 @@ async function saveInspectionForm(event){
       if(!photo?.files?.length) throw new Error('Foto '+x.label+' wajib diambil dari kamera.');
       conditions[x.key]=el.value;
     }
-    if(!media.videoPemeriksaan?.length) throw new Error('1 Video Pemeriksaan Lengkap wajib direkam dari kamera.');
+    if(!videoUpload) throw new Error('1 Video Pemeriksaan Lengkap wajib direkam dari kamera.');
 
 
     const payload={
@@ -4787,10 +4781,22 @@ async function saveInspectionForm(event){
       payload
     );
 
-    toast(
-      result.message,
-      'success'
-    );
+    if(videoUpload?.item?.data){
+      toast('Menyimpan video pemeriksaan ke Google Drive...', 'info');
+      await apiPost({
+        action:'uploadVideo',
+        inspectionId:result.inspectionId,
+        kodeAset:code,
+        category:videoUpload.key,
+        data:videoUpload.item.data,
+        mimeType:videoUpload.item.type || 'video/webm',
+        extension:(videoUpload.item.name||'video.webm').split('.').pop() || 'webm',
+        catatan:videoUpload.item.catatan || ''
+      });
+      toast('Pemeriksaan dan video berhasil disimpan ke Google Drive.', 'success');
+    }else{
+      toast(result.message, 'success');
+    }
 
     resetInspectionForm();
 
