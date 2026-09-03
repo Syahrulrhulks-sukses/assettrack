@@ -10,6 +10,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
 <style>
 *{
@@ -1279,6 +1281,11 @@ tr:hover td{
   z-index:1;
 }
 
+/* ===== PETA RUTE DRIVER ===== */
+#driverRouteMap{width:100%;height:calc(100vh - 250px);min-height:430px;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;background:#eef2f7;}
+.route-map-note{padding:10px 12px;border-radius:10px;background:#f5f7fa;color:#607d8b;font-size:12px;margin-bottom:12px;}
+.route-map-status{font-size:13px;color:#607d8b;margin-top:10px;}
+@media(max-width:750px){#driverRouteMap{height:65vh;min-height:360px;}}
 </style>
 </head>
 
@@ -1474,6 +1481,8 @@ tr:hover td{
     </button>
 
     <button class="nav-btn service-nav-btn" data-page="service" onclick="showPage('service')">🔧 Catatan Service</button>
+
+    <button class="nav-btn" data-page="routes" onclick="showPage('routes')">🗺️ Rute Driver</button>
 
     <button
       class="nav-btn"
@@ -2080,6 +2089,28 @@ tr:hover td{
     </div>
 
     <!-- =====================================================
+         RUTE DRIVER
+    ====================================================== -->
+
+    <div id="page-routes" class="page">
+      <div class="page-title">
+        <h2>Rute Driver</h2>
+        <p>Menampilkan garis rute yang benar-benar dilewati Driver</p>
+      </div>
+      <div class="panel">
+        <div class="toolbar">
+          <select id="routeFilterDriver" onchange="loadDriverRoutes()" style="max-width:240px"><option value="">Semua Driver</option></select>
+          <select id="routeFilterAsset" onchange="loadDriverRoutes()" style="max-width:240px"><option value="">Semua Mobil</option></select>
+          <input id="routeFilterDate" type="date" onchange="loadDriverRoutes()" style="max-width:180px">
+          <button class="secondary-btn" onclick="loadDriverRoutes()">🔄 Tampilkan Rute</button>
+        </div>
+        <div class="route-map-note">🗺️ Garis pada peta berasal dari titik GPS perjalanan Driver yang tersimpan. Bukan rute rekomendasi.</div>
+        <div id="driverRouteMap"></div>
+        <div id="driverRouteStatus" class="route-map-status">Pilih Driver/mobil/tanggal untuk menampilkan rute.</div>
+      </div>
+    </div>
+
+    <!-- =====================================================
          AUDIT
     ====================================================== -->
 
@@ -2375,6 +2406,9 @@ const state = {
   corrections:[],
   audit:[],
   services:[],
+  routes:[],
+  routeMap:null,
+  routeLayer:null,
 
   selectedAsset:null,
   qrLockGPS:null,
@@ -3023,7 +3057,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance,liveness
     state.loginGPS=gps;
     const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(livenessEvent==='SMILE'?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
-    stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();toast('Login Driver berhasil.','success');
+    stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();startDriverRouteTracking();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
   finally{state.loginBusy=false;}
 }
@@ -3406,6 +3440,7 @@ async function enterApplication(){
   document.querySelector('[data-page="admins"]')?.classList.toggle('hidden',!isAdmin);
   document.querySelector('[data-page="settings"]')?.classList.toggle('hidden',!(isAdmin||isSuperAdmin));
   document.querySelector('[data-page="service"]')?.classList.toggle('hidden',!isAdmin);
+  document.querySelector('[data-page="routes"]')?.classList.toggle('hidden',!isAdmin);
   const pinPanel=document.getElementById('superAdminPinPanel'); if(pinPanel) pinPanel.style.display=isSuperAdmin?'':'none';
   const adminPinPanel=document.getElementById('adminPinPanel'); if(adminPinPanel) adminPinPanel.style.display=(role==='ADMIN')?'':'none';
   const desc=document.getElementById('settingsDescription'); if(desc) desc.textContent=isSuperAdmin?'Pengaturan Super Admin Aset Aqiqah Plus':'Pengaturan tampilan menu Driver';
@@ -3453,6 +3488,7 @@ async function openPendingAssetFast(){
 function openPendingAsset(){openPendingAssetFast();}
 
 function clearApplicationState(){
+  stopDriverRouteTracking();
   state.user=null;
   state.loginToken=null;
   state.loginGPS=null;
@@ -3513,6 +3549,106 @@ function resetToLogin(showToast=true){
   if(showToast) toast('Anda telah keluar dari Aset Aqiqah Plus.','info');
 }
 
+
+/* =========================================================
+   RUTE DRIVER — GPS BREADCRUMB
+========================================================= */
+const DRIVER_ROUTE_INTERVAL_MS=10000;
+let driverRouteWatchId=null;
+let driverRouteLastSent=0;
+let driverRoutePending=[];
+let driverRouteFlushBusy=false;
+
+function routeSessionId(){
+  if(!state.user || String(state.user.role||'').toUpperCase()!=='DRIVER')return '';
+  if(!state.user.routeSessionId) state.user.routeSessionId='RTE-'+Date.now()+'-'+Math.random().toString(36).slice(2,9);
+  return state.user.routeSessionId;
+}
+
+function queueDriverRoutePoint(pos){
+  if(!state.user || String(state.user.role||'').toUpperCase()!=='DRIVER')return;
+  const c=pos&&pos.coords;if(!c)return;
+  const lat=Number(c.latitude),lng=Number(c.longitude),acc=Number(c.accuracy||0);
+  if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
+  const now=Date.now();
+  if(driverRouteLastSent && now-driverRouteLastSent<DRIVER_ROUTE_INTERVAL_MS)return;
+  driverRouteLastSent=now;
+  driverRoutePending.push({latitude:lat,longitude:lng,accuracy:Number.isFinite(acc)?acc:0,timestamp:new Date(now).toISOString()});
+  if(driverRoutePending.length>=3)flushDriverRoutePoints();
+}
+
+async function flushDriverRoutePoints(){
+  if(driverRouteFlushBusy||!driverRoutePending.length||!state.user)return;
+  driverRouteFlushBusy=true;
+  const points=driverRoutePending.splice(0,20);
+  try{
+    await apiPost({action:'saveRoutePoints',role:'DRIVER',driverId:driverIdOf(state.user),namaDriver:driverNameOf(state.user),kodeAset:state.inspectionLockedAssetCode||state.user.qrAssetCode||'',routeSessionId:routeSessionId(),points:points});
+  }catch(e){
+    driverRoutePending=points.concat(driverRoutePending).slice(-50);
+    console.warn('Rute Driver belum tersimpan:',e.message);
+  }finally{driverRouteFlushBusy=false;}
+}
+
+function startDriverRouteTracking(){
+  if(!state.user || String(state.user.role||'').toUpperCase()!=='DRIVER' || !navigator.geolocation)return;
+  stopDriverRouteTracking();
+  routeSessionId();
+  driverRouteLastSent=0;driverRoutePending=[];
+  const opts={enableHighAccuracy:true,maximumAge:10000,timeout:15000};
+  driverRouteWatchId=navigator.geolocation.watchPosition(queueDriverRoutePoint,err=>console.warn('GPS rute:',err&&err.message||err),opts);
+  if(state.loginGPS){queueDriverRoutePoint({coords:{latitude:state.loginGPS.latitude,longitude:state.loginGPS.longitude,accuracy:state.loginGPS.accuracy||0}});}
+}
+
+function stopDriverRouteTracking(){
+  if(driverRouteWatchId!==null && navigator.geolocation){try{navigator.geolocation.clearWatch(driverRouteWatchId);}catch(_){} }
+  driverRouteWatchId=null;
+  if(driverRoutePending.length && state.user)flushDriverRoutePoints();
+  driverRoutePending=[];driverRouteLastSent=0;
+}
+
+function populateRouteFilters(){
+  const d=document.getElementById('routeFilterDriver'),a=document.getElementById('routeFilterAsset');
+  if(d){const old=d.value;d.innerHTML='<option value="">Semua Driver</option>'+(state.drivers||[]).map(x=>`<option value="${escapeHtml(driverIdOf(x))}">${escapeHtml(driverNameOf(x))}</option>`).join('');d.value=old;}
+  if(a){const old=a.value;a.innerHTML='<option value="">Semua Mobil</option>'+(state.assets||[]).map(x=>`<option value="${escapeHtml(x.code||x.kodeAset||'')}">${escapeHtml((x.code||x.kodeAset||'')+' — '+(x.name||x.namaKendaraan||''))}</option>`).join('');a.value=old;}
+}
+
+function initDriverRouteMap(){
+  const el=document.getElementById('driverRouteMap');if(!el||typeof L==='undefined')return;
+  if(!state.routeMap){
+    state.routeMap=L.map(el,{zoomControl:true}).setView([-6.9,109.1],12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(state.routeMap);
+    state.routeLayer=L.layerGroup().addTo(state.routeMap);
+  }
+  setTimeout(()=>state.routeMap&&state.routeMap.invalidateSize(),100);
+}
+
+async function loadDriverRoutes(){
+  const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role))return;
+  initDriverRouteMap();
+  const status=document.getElementById('driverRouteStatus');if(status)status.textContent='Memuat rute...';
+  try{
+    const result=await apiGet('routes',{role:role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||''});
+    state.routes=result.routes||[];renderDriverRoutes();
+  }catch(e){if(status)status.textContent='Rute gagal dimuat: '+e.message;}
+}
+
+function renderDriverRoutes(){
+  initDriverRouteMap();
+  if(!state.routeMap)return;
+  state.routeLayer.clearLayers();
+  const rows=state.routes||[];
+  if(!rows.length){document.getElementById('driverRouteStatus').textContent='Tidak ada data rute pada filter yang dipilih.';state.routeMap.setView([-6.9,109.1],12);return;}
+  const points=rows.map(x=>[Number(x.Latitude),Number(x.Longitude)]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));
+  if(!points.length){document.getElementById('driverRouteStatus').textContent='Data GPS rute tidak valid.';return;}
+  const line=L.polyline(points,{weight:5,smoothFactor:1});state.routeLayer.addLayer(line);
+  state.routeLayer.addLayer(L.marker(points[0]).bindPopup('Titik awal rute'));
+  state.routeLayer.addLayer(L.marker(points[points.length-1]).bindPopup('Titik akhir rute'));
+  state.routeMap.fitBounds(line.getBounds(),{padding:[25,25]});
+  const drivers=[...new Set(rows.map(x=>x['Nama Driver']).filter(Boolean))].join(', ');
+  const cars=[...new Set(rows.map(x=>x['Nama Kendaraan']).filter(Boolean))].join(', ');
+  const status=document.getElementById('driverRouteStatus');
+  if(status)status.textContent=`Rute tampil: ${drivers||'-'} • ${cars||'-'} • ${points.length} titik GPS`;
+}
 
 /* =========================================================
    LOGOUT
@@ -3606,6 +3742,7 @@ function showPage(page){
   if(page==='inspection'){ buildInspectionStatusOptions(); buildInspectionConditionFields(); buildMediaFields(); }
   if(page==='reports'){ renderInspections(); }
   if(page==='service'){ if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(role)){toast('Catatan Service tidak dapat diakses akun ini.','error');return;} populateServiceAssetFilter(); renderServices(); }
+  if(page==='routes'){ if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Rute Driver hanya dapat dilihat oleh Admin atau Super Admin.','error');return;} populateRouteFilters(); initDriverRouteMap(); loadDriverRoutes(); }
 
   if(page==='audit'){
     renderAudit();
