@@ -1295,6 +1295,9 @@ tr:hover td{
 .route-day-card small{color:#64748b;}
 .mo-status-select{min-width:150px;}
 @media(max-width:750px){#driverRouteMap{height:65vh;min-height:360px;}}
+
+.driver-complete-status{background:#39ff5a !important;border:2px solid #16a34a !important;color:#064e16 !important;font-weight:900 !important;text-align:center !important;box-shadow:0 0 0 2px rgba(22,163,74,.08) !important;}
+.inspection-locked-field{background:#eef7ff !important;color:#123b6d !important;font-weight:800 !important;}
 </style>
 </head>
 
@@ -1731,12 +1734,10 @@ tr:hover td{
 
             <div class="form-group">
               <label>Kode Aset</label>
-
-              <select id="inspectionAsset"
-                      onchange="onInspectionAssetChange()"
-                      required>
+              <select id="inspectionAsset" onchange="onInspectionAssetChange()" required>
                 <option value="">Pilih aset</option>
               </select>
+              <small style="color:#607d8b">🔒 Untuk Driver: terkunci dari barcode/QR kendaraan.</small>
             </div>
 
             <div class="form-group">
@@ -1751,7 +1752,6 @@ tr:hover td{
 
             <div class="form-group">
               <label>Driver</label>
-
               <select id="inspectionDriver" required>
                 <option value="">Pilih driver</option>
               </select>
@@ -1855,8 +1855,6 @@ tr:hover td{
               🔧 Pemeriksaan Mesin & Perlengkapan
             </div>
             <div id="inspectionConditionFields" class="media-grid full-width"></div>
-            <div class="section-title">📸 Foto Pemeriksaan</div>
-            <div id="photoFields" class="media-grid full-width"></div>
             <div class="section-title">🎥 1 Video Pemeriksaan Lengkap</div>
             <div id="videoFields" class="media-grid full-width"></div>
 
@@ -2109,7 +2107,7 @@ tr:hover td{
       <div class="panel">
         <div class="toolbar">
           <select id="moFilterAsset" onchange="renderMOServiceRequests()" style="max-width:260px"><option value="">Semua Mobil</option></select>
-          <select id="moFilterStatus" onchange="renderMOServiceRequests()" style="max-width:220px;display:none"><option value="">Semua Status</option><option>Diajukan</option><option>Ditinjau</option><option>Disetujui</option><option>Ditolak</option><option>Dijadwalkan</option><option>Dalam Service</option><option>Selesai</option></select>
+          <select id="moFilterStatus" onchange="renderMOServiceRequests()" style="max-width:220px;display:none"><option value="">Semua Status</option><option>Diajukan</option><option>Approve</option><option>Tolak</option><option>Sedang Pengerjaan</option><option>Kroescek Pengerjaan</option><option>Selesai</option></select>
           <input id="moSearch" placeholder="Cari driver, mobil, keluhan..." oninput="renderMOServiceRequests()">
           <button class="primary-btn" style="width:auto" onclick="openMOServiceForm()">+ Pengajuan Service</button>
         </div>
@@ -3530,7 +3528,9 @@ function lockInspectionAsset(asset){
   const code=String(asset?.code||'').trim(); if(!code)return;
   state.inspectionLockedAssetCode=code;
   const sel=document.getElementById('inspectionAsset');
-  if(sel){sel.value=code;sel.disabled=String(state.user?.role||'').toUpperCase()==='DRIVER';}
+  if(sel){sel.value=code;sel.readOnly=true;sel.disabled=false;sel.classList.add('inspection-locked-field');}
+  const veh=document.getElementById('inspectionVehicle');if(veh){veh.value=asset?.name||asset?.namaKendaraan||'';veh.classList.add('inspection-locked-field');}
+  const plate=document.getElementById('inspectionPlate');if(plate){plate.value=asset?.plate||asset?.nomorPolisi||'';plate.classList.add('inspection-locked-field');}
   const gpsBtn=document.querySelector('#page-inspection button[onclick="getGPS()"]');
   if(gpsBtn && String(state.user?.role||'').toUpperCase()==='DRIVER'){gpsBtn.disabled=true;gpsBtn.style.display='none';}
   state.inspectionGPSLocked=String(state.user?.role||'').toUpperCase()==='DRIVER';
@@ -3546,7 +3546,7 @@ async function openPendingAssetFast(){
   const inspectionPage=document.getElementById('page-inspection');
   if(inspectionPage && String(state.user?.role||'').toUpperCase()==='DRIVER') inspectionPage.classList.add('driver-locked');
   const assetSelect=document.getElementById('inspectionAsset');
-  if(assetSelect){assetSelect.value=asset.code;assetSelect.disabled=String(state.user?.role||'').toUpperCase()==='DRIVER';onInspectionAssetChange();}
+  if(assetSelect){assetSelect.value=asset.code;assetSelect.readOnly=true;assetSelect.disabled=false;onInspectionAssetChange();} lockInspectionAsset(asset);
   populateDriverSelect();applyLoggedInDriverToInspection();lockInspectionAsset(asset);
   if(String(state.user?.role||'').toUpperCase()==='DRIVER'){
     try{await loadDailyInspectionForAsset(asset.code);}catch(_){ }
@@ -3888,7 +3888,7 @@ function showPage(page){
     renderCorrections();
   }
 
-  if(page==='inspection'){ buildInspectionStatusOptions(); buildInspectionConditionFields(); buildMediaFields(); syncInspectionServerTime(); }
+  if(page==='inspection'){ buildInspectionStatusOptions(); buildInspectionConditionFields(); buildMediaFields(); if(state.inspectionLockedAssetCode){const a=state.assets.find(x=>String(x.code||'').toUpperCase()===String(state.inspectionLockedAssetCode).toUpperCase());if(a){lockInspectionAsset(a);onInspectionAssetChange();}} populateDriverSelect(); applyLoggedInDriverToInspection(); syncInspectionServerTime(); }
   if(page==='moService'){ if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(role)){toast('MO Pengajuan Service tidak dapat diakses akun ini.','error');return;} populateMOAssetFilter(); loadMOServiceRequests(); }
   if(page==='reports'){ renderInspections(); }
   if(page==='service'){ if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(role)){toast('Catatan Service tidak dapat diakses akun ini.','error');return;} populateServiceAssetFilter(); renderServices(); }
@@ -4517,10 +4517,7 @@ function onInspectionAssetChange(){
     return;
   }
 
-  const asset=
-    state.assets.find(
-      x=>x.code===code
-    );
+  const asset=state.assets.find(x=>String(x.code||'').trim().toUpperCase()===String(code||'').trim().toUpperCase());
 
   document.getElementById(
     'inspectionVehicle'
@@ -4561,10 +4558,10 @@ function populateDriverSelect(){
   const role=String(state.user?.role || '').toUpperCase();
   if(role==='DRIVER'){
     const id=driverIdOf(state.user);const driver=state.drivers.find(d=>driverIdOf(d).toUpperCase()===id.toUpperCase());
-    select.innerHTML=driver?`<option value="${escapeHtml(driverIdOf(driver))}">${escapeHtml(driverIdOf(driver))} — ${escapeHtml(driverNameOf(driver))}</option>`:'<option value="">Driver login tidak ditemukan</option>';
-    select.value=id;select.disabled=true;return;
+    select.innerHTML=driver?`<option value="${escapeHtml(driverIdOf(driver))}">${escapeHtml(driverNameOf(driver))}</option>`:'<option value="">Driver login tidak ditemukan</option>';
+    select.value=id;select.disabled=true;select.classList.add('inspection-locked-field');return;
   }
-  select.disabled=false;const current=select.value;const active=state.drivers.filter(driverIsActive);
+  select.classList.remove('inspection-locked-field');select.disabled=false;const current=select.value;const active=state.drivers.filter(driverIsActive);
   select.innerHTML='<option value="">Pilih driver</option>'+active.map(driver=>{const id=driverIdOf(driver);return `<option value="${escapeHtml(id)}">${escapeHtml(id)} — ${escapeHtml(driverNameOf(driver)||id)}</option>`;}).join('');
   if(current)select.value=current;
 }
@@ -4573,7 +4570,7 @@ function applyLoggedInDriverToInspection(){
   if(String(state.user?.role || '').toUpperCase()!=='DRIVER')return;
   const select=document.getElementById('inspectionDriver');if(!select)return;
   const id=driverIdOf(state.user);const driver=state.drivers.find(d=>driverIdOf(d).toUpperCase()===id.toUpperCase());
-  if(driver){select.value=driverIdOf(driver);select.disabled=true;}
+  if(driver){select.innerHTML=`<option value="${escapeHtml(driverIdOf(driver))}">${escapeHtml(driverNameOf(driver))}</option>`;select.value=driverIdOf(driver);select.disabled=true;select.classList.add('inspection-locked-field');}
 }
 
 
@@ -4594,8 +4591,119 @@ const INSPECTION_CHECKS_FRONTEND = [
 ];
 function isPowerSteeringVehicle(asset){const text=[asset?.name,asset?.model,asset?.modelTipe,asset?.merek].filter(Boolean).join(' ').toLowerCase();return /l300|power\s*steering/.test(text);}
 function inspectionStatusOptions(selected=''){const opts=['','Baik','Kurang Baik','Perlu Pengecekan','Perlu Service'];return opts.map(x=>`<option value="${escapeHtml(x)}" ${x===selected?'selected':''}>${x?escapeHtml(x):'Pilih'}</option>`).join('');}
-function buildInspectionStatusOptions(selected){const role=String(state.user?.role||'DRIVER').toUpperCase();const el=document.getElementById('statusPemeriksaan');const hint=document.getElementById('statusPemeriksaanHint');if(!el)return;const opts=role==='DRIVER'?['Selesai']:['Service','Sudah service','Selesai service','Selesai'];const hasExplicit=selected!==undefined&&selected!==null&&String(selected)!=='';const current=hasExplicit?String(selected):(role==='DRIVER'?'Selesai':'Service');el.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}" ${x===current?'selected':''}>${escapeHtml(x)}</option>`).join('');if(!opts.includes(el.value))el.value=opts[0];if(hint)hint.textContent=role==='DRIVER'?'Setelah memilih Selesai dan menyimpan, pemeriksaan Driver langsung terkunci.':'Admin/Super Admin dapat melanjutkan status sampai Selesai. Setelah Selesai, data pemeriksaan dikunci.';}
-function buildInspectionConditionFields(){const box=document.getElementById('inspectionConditionFields');if(!box)return;const code=document.getElementById('inspectionAsset')?.value||'';const asset=state.assets.find(a=>String(a.code)===String(code));const visible=INSPECTION_CHECKS_FRONTEND.filter(x=>!x.powerSteeringOnly||isPowerSteeringVehicle(asset));box.innerHTML=visible.map(x=>`<div class="photo-media-item" data-photo-key="${escapeHtml(x.key)}"><div class="media-title">${escapeHtml(x.label)}</div><input type="file" id="photo_${escapeHtml(x.key)}" accept="image/*" capture="environment" style="display:none" onchange="previewInspectionPhotos('${escapeJs(x.key)}')"><button type="button" class="capture-btn" onclick="openInspectionCamera('${escapeJs(x.key)}')">📷 Ambil Foto</button><div class="media-validation-note">Foto wajib sesuai item dan diambil langsung dari kamera aplikasi.</div><div id="photoPreview_${escapeHtml(x.key)}" class="photo-preview-grid"></div><input id="${escapeHtml(x.key)}_catatan" type="text" placeholder="Catatan MO (opsional)"></div>`).join('');}
+function buildInspectionStatusOptions(selected){const role=String(state.user?.role||'DRIVER').toUpperCase();const el=document.getElementById('statusPemeriksaan');const hint=document.getElementById('statusPemeriksaanHint');if(!el)return;const current=selected!==undefined&&selected!==null&&String(selected)!==''?String(selected):(role==='DRIVER'?'Selesai':'Service');if(role==='DRIVER'){el.innerHTML='<option value="Selesai">Selesai</option>';el.value='Selesai';el.disabled=true;el.classList.add('driver-complete-status');if(hint)hint.textContent='✓ Pemeriksaan lengkap — status otomatis Selesai dan terkunci.';}else{el.disabled=false;el.classList.remove('driver-complete-status');const opts=['Service','Sudah service','Selesai service','Selesai'];el.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}" ${x===current?'selected':''}>${escapeHtml(x)}</option>`).join('');if(!opts.includes(el.value))el.value=opts[0];if(hint)hint.textContent='Admin/Super Admin dapat melanjutkan status pemeriksaan.';}}
+function buildMediaFields(){
+  const box=document.getElementById('videoFields');
+  if(!box)return;
+  const key='videoPemeriksaan';
+  box.innerHTML=`<div class="photo-media-item" data-video-key="${key}">
+    <div class="media-title">🎥 Video Pemeriksaan Lengkap</div>
+    <input type="file" id="video_${key}" accept="video/*" capture="environment" style="display:none" onchange="state.inspectionVideoCaptured=false;previewInspectionVideo('${key}')">
+    <button type="button" class="capture-btn" onclick="openInspectionVideoCamera()">🎥 Buka Kamera & Rekam Video</button>
+    <div class="media-validation-note">Wajib direkam langsung dari kamera aplikasi: body/lecet, kaca, semua ban, ban serep, semua lampu menyala, klakson dan interior.</div>
+    <div id="videoPreview_${key}" class="photo-preview-grid"></div>
+    <input id="${key}_catatan" type="text" placeholder="Catatan MO (opsional)">
+  </div>`;
+}
+function previewInspectionVideo(key){
+  const input=document.getElementById('video_'+key),box=document.getElementById('videoPreview_'+key);
+  if(!input||!box)return;box.innerHTML='';
+  const file=input.files?.[0];if(!file)return;
+  state.inspectionVideoCaptured=false;
+  const url=URL.createObjectURL(file);
+  const v=document.createElement('video');v.controls=true;v.playsInline=true;v.muted=true;v.src=url;v.style.width='100%';v.style.borderRadius='12px';
+  box.appendChild(v);
+}
+
+async function openInspectionCamera(key){
+  if(String(state.user?.role||'').toUpperCase()==='DRIVER'&&state.dailyInspectionMode){toast('Pemeriksaan sudah dikunci dan tidak dapat diperbarui.','error');return;}
+  if(!navigator.mediaDevices?.getUserMedia){toast('Kamera tidak tersedia. Pastikan Aset Aqiqah Plus dibuka melalui HTTPS dan izin kamera diberikan.','error');return;}
+  inspectionCameraKey=key;
+  const modal=document.getElementById('inspectionCameraModal'),video=document.getElementById('inspectionCameraVideo'),title=document.getElementById('inspectionCameraTitle'),status=document.getElementById('inspectionCameraStatus');
+  const item=PHOTO_MAP_FRONTEND[key]||key;
+  if(title)title.textContent='Ambil Foto: '+item;
+  if(status)status.textContent='Arahkan kamera tepat ke '+item+'. Foto galeri tidak digunakan.';
+  try{
+    inspectionCameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+    video.srcObject=inspectionCameraStream;
+    modal?.classList.add('show');
+    await video.play().catch(()=>{});
+  }catch(e){
+    if(inspectionCameraStream){inspectionCameraStream.getTracks().forEach(t=>t.stop());inspectionCameraStream=null;}
+    toast('Kamera tidak dapat dibuka. Tekan ikon kunci kamera pada browser lalu pilih Izinkan, kemudian coba lagi.','error');
+  }
+}
+function closeInspectionCamera(){
+  const modal=document.getElementById('inspectionCameraModal');
+  if(inspectionCameraStream){inspectionCameraStream.getTracks().forEach(t=>t.stop());inspectionCameraStream=null;}
+  const video=document.getElementById('inspectionCameraVideo');if(video)video.srcObject=null;
+  modal?.classList.remove('show');inspectionCameraKey='';
+}
+async function captureInspectionCameraPhoto(){
+  const key=inspectionCameraKey,video=document.getElementById('inspectionCameraVideo');
+  if(!key||!video?.videoWidth){toast('Kamera belum siap. Tunggu gambar kamera muncul.','error');return;}
+  try{
+    const canvas=document.getElementById('inspectionCameraCanvas');
+    const w=Math.min(video.videoWidth,1280),h=Math.round(w*video.videoHeight/video.videoWidth);canvas.width=w;canvas.height=h;
+    canvas.getContext('2d',{willReadFrequently:true}).drawImage(video,0,0,w,h);
+    const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',.82));if(!blob)throw new Error('Foto gagal diambil.');
+    const file=new File([blob],'camera_'+key+'_'+Date.now()+'.jpg',{type:'image/jpeg',lastModified:Date.now()});
+    const input=document.getElementById('photo_'+key);if(!input)throw new Error('Kolom foto tidak ditemukan.');
+    const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;
+    state.cameraCapturedPhotos[key]=true;
+    previewInspectionPhotos(key);
+    await validatePhotoObject(file,key);
+    toast('Foto '+(PHOTO_MAP_FRONTEND[key]||key)+' berhasil diambil.','success');
+    closeInspectionCamera();
+  }catch(e){state.cameraCapturedPhotos[key]=false;toast(e.message||'Foto ditolak.','error');}
+}
+async function openInspectionVideoCamera(){
+  if(String(state.user?.role||'').toUpperCase()==='DRIVER'&&state.dailyInspectionMode){toast('Pemeriksaan sudah dikunci dan tidak dapat diperbarui.','error');return;}
+  if(!navigator.mediaDevices?.getUserMedia){toast('Kamera tidak tersedia. Pastikan situs dibuka melalui HTTPS dan izin kamera diberikan.','error');return;}
+  try{
+    if(inspectionVideoStream){inspectionVideoStream.getTracks().forEach(t=>t.stop());inspectionVideoStream=null;}
+    inspectionVideoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:true});
+    const video=document.getElementById('inspectionVideoRecorder');video.srcObject=inspectionVideoStream;
+    document.getElementById('inspectionVideoModal')?.classList.add('show');
+    await video.play().catch(()=>{});
+    const st=document.getElementById('inspectionVideoStatus');if(st)st.textContent='Rekam body/lecet, kaca, semua ban, ban serep, semua lampu menyala, klakson dan interior.';
+  }catch(e){if(inspectionVideoStream){inspectionVideoStream.getTracks().forEach(t=>t.stop());inspectionVideoStream=null;}toast('Kamera video tidak dapat dibuka. Izinkan Kamera dan Mikrofon untuk situs ini.','error');}
+}
+function closeInspectionVideoCamera(){
+  if(inspectionVideoRecording)stopInspectionVideoRecording();
+  const modal=document.getElementById('inspectionVideoModal');modal?.classList.remove('show');
+  if(inspectionVideoStream){inspectionVideoStream.getTracks().forEach(t=>t.stop());inspectionVideoStream=null;}
+  const video=document.getElementById('inspectionVideoRecorder');if(video)video.srcObject=null;
+}
+function toggleInspectionVideoRecording(){
+  if(inspectionVideoRecording){stopInspectionVideoRecording();return;}
+  if(!inspectionVideoStream){toast('Kamera video belum aktif.','error');return;}
+  inspectionVideoChunks=[];
+  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';
+  try{inspectionVideoRecorder=new MediaRecorder(inspectionVideoStream,{mimeType:mime,videoBitsPerSecond:1500000});}catch(_){inspectionVideoRecorder=new MediaRecorder(inspectionVideoStream);}
+  inspectionVideoRecorder.ondataavailable=e=>{if(e.data&&e.data.size)inspectionVideoChunks.push(e.data);};
+  inspectionVideoRecorder.onstop=async()=>{
+    try{
+      const blob=new Blob(inspectionVideoChunks,{type:inspectionVideoRecorder?.mimeType||'video/webm'});
+      const file=new File([blob],'video_pemeriksaan_'+Date.now()+'.webm',{type:blob.type||'video/webm',lastModified:Date.now()});
+      const input=document.getElementById('video_videoPemeriksaan');if(!input)throw new Error('Kolom video tidak ditemukan.');
+      const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;
+      state.inspectionVideoCaptured=true;
+      previewInspectionVideo('videoPemeriksaan');
+      const st=document.getElementById('inspectionVideoStatus');if(st)st.textContent='✓ Video berhasil direkam dari kamera. Periksa pratinjau sebelum menyimpan.';
+      const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏺ Rekam Ulang';
+    }catch(e){state.inspectionVideoCaptured=false;toast(e.message||'Video gagal dibuat.','error');}
+  };
+  inspectionVideoRecorder.start(500);inspectionVideoRecording=true;
+  const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏹ Stop Rekam';
+}
+function stopInspectionVideoRecording(){
+  if(inspectionVideoRecorder&&inspectionVideoRecording){try{inspectionVideoRecorder.stop();}catch(_){}}
+  inspectionVideoRecording=false;
+  const btn=document.getElementById('inspectionVideoRecordBtn');if(btn)btn.textContent='⏺ Mulai Rekam';
+}
+
+function buildInspectionConditionFields(){const box=document.getElementById('inspectionConditionFields');if(!box)return;const code=document.getElementById('inspectionAsset')?.value||'';const asset=state.assets.find(a=>String(a.code)===String(code));const visible=INSPECTION_CHECKS_FRONTEND.filter(x=>!x.powerSteeringOnly||isPowerSteeringVehicle(asset));box.innerHTML=visible.map(x=>`<div class="photo-media-item" data-photo-key="${escapeHtml(x.key)}"><div class="media-title">${escapeHtml(x.label)}</div><input type="file" id="photo_${escapeHtml(x.key)}" accept="image/*" capture="environment" style="display:none" onchange="state.cameraCapturedPhotos['${escapeJs(x.key)}']=false;previewInspectionPhotos('${escapeJs(x.key)}')"><button type="button" class="capture-btn" onclick="openInspectionCamera('${escapeJs(x.key)}')">📷 Ambil Foto</button><div class="media-validation-note">Foto wajib sesuai item dan diambil langsung dari kamera aplikasi.</div><div id="photoPreview_${escapeHtml(x.key)}" class="photo-preview-grid"></div><input id="${escapeHtml(x.key)}_catatan" type="text" placeholder="Catatan MO (opsional)"></div>`).join('');}
 function photoStatusOptions(selected='Baik'){return '';}
 function previewInspectionPhotos(key){const input=document.getElementById('photo_'+key),box=document.getElementById('photoPreview_'+key);if(!input||!box)return;box.innerHTML='';Array.from(input.files||[]).forEach((file,index)=>{const card=document.createElement('div');card.className='photo-preview-card';card.innerHTML=`<img id="photoThumb_${escapeHtml(key)}_${index}" alt="Pratinjau foto"><div class="photo-meta"><span style="font-size:11px;color:#607d8b">Foto kamera ✓</span></div>`;box.appendChild(card);const img=card.querySelector('img'),reader=new FileReader();reader.onload=e=>{img.src=e.target.result;};reader.readAsDataURL(file);});}
 function collectPhotoMeta(key,index){const kmEl=document.getElementById(key+'_catatan');return {status:'Baik',catatan:kmEl?.value||'',kmValue:kmEl?.value||''};}
@@ -4680,7 +4788,14 @@ async function loadDailyInspectionForAsset(code){
 }
 
 function currentDateTimeLocal_(){const d=new Date();const pad=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());}
-async function syncInspectionServerTime(){const t=document.getElementById('inspectionTime'),d=document.getElementById('inspectionTimeDisplay');if(!t)return;const local=currentDateTimeLocal_();t.value=local;if(d)d.value='Memuat waktu server...';try{const r=await apiGet('servertime');if(r&&r.datetimeLocal){state.serverTime=r;t.value=r.datetimeLocal;if(d)d.value=r.display||r.datetimeLocal;return;}}catch(_){}if(d){const now=new Date();d.value=now.toLocaleString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});} }
+async function syncInspectionServerTime(){
+  const t=document.getElementById('inspectionTime'),d=document.getElementById('inspectionTimeDisplay');if(!t)return;
+  // Tampilkan segera agar form tidak menunggu server. Format 24 jam.
+  const local=currentDateTimeLocal_();t.value=local;
+  const now=new Date();if(d)d.value=now.toLocaleString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  // Server tetap menjadi sumber kebenaran saat penyimpanan. Jika respons cepat tersedia, tampilkan.
+  apiGet('servertime').then(r=>{if(r&&r.datetimeLocal){state.serverTime=r;t.value=r.datetimeLocal;if(d)d.value=r.display||r.datetimeLocal;}}).catch(()=>{});
+}
 
 function toDateTimeLocal(value){
   if(!value)return getCurrentDateTimeLocal();
@@ -4828,9 +4943,7 @@ async function saveInspectionForm(event){
       .getElementById('inspectionAsset')
       .value;
 
-    let driverId=document
-      .getElementById('inspectionDriver')
-      .value;
+    let driverId=document.getElementById('inspectionDriver').value;
 
     if(String(state.user?.role || '').toUpperCase()==='DRIVER'){
       driverId=driverIdOf(state.user);
@@ -5018,7 +5131,8 @@ async function saveInspectionForm(event){
           'inspectionNotes'
         ).value,
 
-      media:media
+      media:media,
+      videoDeferred:true
 
     };
 
@@ -6312,10 +6426,10 @@ async function saveServiceForm(e){e.preventDefault();try{const role=String(state
 
 function populateMOAssetFilter(){const s=document.getElementById('moFilterAsset');if(!s)return;const old=s.value;s.innerHTML='<option value="">Semua Mobil</option>'+(state.assets||[]).map(a=>`<option value="${escapeHtml(a.code)}">${escapeHtml(a.code)} — ${escapeHtml(a.name||a.code)}</option>`).join('');if(old)s.value=old;}
 async function loadMOServiceRequests(){try{const role=String(state.user?.role||'').toUpperCase();const result=await apiGet('motickets',{role,driverId:role==='DRIVER'?driverIdOf(state.user):''});state.moServiceRequests=result||[];renderMOServiceRequests();}catch(e){toast('Gagal memuat pengajuan service: '+e.message,'error');}}
-function renderMOServiceRequests(){const b=document.getElementById('moServiceBody');if(!b)return;const role=String(state.user?.role||'').toUpperCase(),isAdmin=['ADMIN','SUPER_ADMIN'].includes(role),code=document.getElementById('moFilterAsset')?.value||'',st=isAdmin?(document.getElementById('moFilterStatus')?.value||''):'',q=(document.getElementById('moSearch')?.value||'').toLowerCase();const rows=(state.moServiceRequests||[]).filter(r=>(!code||String(r['Kode Aset']||'')===code)&&(!st||String(r['Status Pengajuan']||'')===st)&&[r['Nama Driver'],r['Kode Aset'],r['Nama Kendaraan'],r['Keluhan/Kerusakan'],r['Jenis Service'],r['Status Pengajuan']].join(' ').toLowerCase().includes(q));b.innerHTML='';rows.slice().reverse().forEach(r=>{const canEdit=isAdmin,status=String(r['Status Pengajuan']||'Diajukan');const statusOptions=['Diajukan','Ditinjau','Disetujui','Ditolak','Dijadwalkan','Dalam Service','Selesai'].map(x=>`<option ${x===status?'selected':''}>${x}</option>`).join('');const media=[r['Foto Kerusakan'],r['Foto Barang'],r['Nota/Bukti Service']].filter(Boolean).join(' ');const mediaLink=media?'<a href="'+escapeHtml(String(media).split(' ')[0])+'" target="_blank" rel="noopener">Buka</a>':'-';const tr=document.createElement('tr');tr.innerHTML=`<td>${escapeHtml(formatDate(r['Tanggal Pengajuan']||r['Timestamp']))}</td><td>${escapeHtml(r['Nama Driver']||'-')}</td><td>${escapeHtml(r['Kode Aset']||'')}<br>${escapeHtml(r['Nama Kendaraan']||'')}<br>${escapeHtml(r['Nomor Polisi']||'')}</td><td>${escapeHtml(r['KM']||'')}</td><td>${escapeHtml(r['Jenis Service']||'')}</td><td>${escapeHtml(r['Prioritas']||'')}</td><td>${escapeHtml(r['Keluhan/Kerusakan']||'')}</td><td>${formatRupiah(r['Estimasi Biaya'])}</td><td>${canEdit?`<select id="mo_status_${escapeJs(r['Pengajuan ID'])}">${statusOptions}</select>`:statusBadge(status)}</td><td>${mediaLink}</td><td>${canEdit?`<button class="secondary-btn" onclick="saveMOStatus('${escapeJs(r['Pengajuan ID'])}')">Simpan Status</button>`:'-'}</td>`;b.appendChild(tr);});const sf=document.getElementById('moFilterStatus');if(sf)sf.style.display=isAdmin?'':'none';const af=document.getElementById('moFilterAsset');if(af)af.style.display=isAdmin?'':'none';}
-function openMOServiceForm(){const role=String(state.user?.role||'').toUpperCase();if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(role)){toast('Akun ini tidak dapat membuat pengajuan service.','error');return;}const locked=state.inspectionLockedAssetCode||state.user?.qrAssetCode||state.pendingAssetCode||'';if(role==='DRIVER'&&!locked){toast('Driver harus masuk melalui QR kendaraan terlebih dahulu.','error');return;}openModal('MO Pengajuan Service Mobil',`<form id="moServiceForm"><div class="form-grid"><div class="form-group"><label>Mobil</label>${locked?`<input id="moAsset" value="${escapeHtml(locked)}" readonly><small>Kendaraan terkunci dari QR yang discan.</small>`:`<select id="moAsset" required><option value="">Pilih mobil</option>${state.assets.map(a=>`<option value="${escapeHtml(a.code)}">${escapeHtml(a.code)} — ${escapeHtml(a.name||a.code)} — ${escapeHtml(a.plate||'')}</option>`).join('')}</select>`}</div><div class="form-group"><label>KM *</label><input id="moKM" type="number" step="0.1" required></div><div class="form-group"><label>Jenis Service *</label><input id="moType" required placeholder="Mesin, Ban, Rem, Kelistrikan..."></div><div class="form-group"><label>Prioritas</label><select id="moPriority"><option>Normal</option><option>Segera</option><option>Darurat</option></select></div><div class="form-group"><label>Estimasi Biaya</label><input id="moEstimate" type="number" step="1"></div><div class="form-group full-width"><label>Keluhan / Kerusakan *</label><textarea id="moComplaint" required></textarea></div><div class="form-group full-width"><label>Permintaan / Tindakan yang Diharapkan</label><textarea id="moAction"></textarea></div><div class="form-group full-width"><label>Barang / Part</label><textarea id="moParts"></textarea></div><div class="form-group full-width"><label>📷 Foto Kerusakan</label><input id="moPhotos" type="file" accept="image/*" multiple><small>Boleh kamera atau foto yang tersimpan.</small></div><div class="form-group full-width"><label>📦 Foto Barang / Part MO</label><input id="moBarangPhotos" type="file" accept="image/*" multiple><small>Boleh foto barang langsung atau foto dari chat WhatsApp Teknisi / SA bengkel.</small></div><div class="form-group full-width"><label>🧾 Nota / Bukti Service</label><input id="moReceipts" type="file" accept="image/*,application/pdf" multiple></div><div class="form-group full-width"><label>Catatan MO</label><textarea id="moNotes"></textarea></div></div><div class="form-actions"><button type="button" class="secondary-btn" onclick="closeModal()">Batal</button><button class="primary-btn" style="width:auto">💾 Ajukan Service</button></div></form>`);document.getElementById('moServiceForm').addEventListener('submit',saveMOServiceForm);}
+function renderMOServiceRequests(){const b=document.getElementById('moServiceBody');if(!b)return;const role=String(state.user?.role||'').toUpperCase(),isAdmin=['ADMIN','SUPER_ADMIN'].includes(role),code=document.getElementById('moFilterAsset')?.value||'',st=isAdmin?(document.getElementById('moFilterStatus')?.value||''):'',q=(document.getElementById('moSearch')?.value||'').toLowerCase();const rows=(state.moServiceRequests||[]).filter(r=>(!code||String(r['Kode Aset']||'')===code)&&(!st||String(r['Status Pengajuan']||'')===st)&&[r['Nama Driver'],r['Kode Aset'],r['Nama Kendaraan'],r['Keluhan/Kerusakan'],r['Jenis Service'],r['Status Pengajuan']].join(' ').toLowerCase().includes(q));b.innerHTML='';rows.slice().reverse().forEach(r=>{const canEdit=isAdmin,status=String(r['Status Pengajuan']||'Diajukan');const statusOptions=['Diajukan','Approve','Tolak','Sedang Pengerjaan','Kroescek Pengerjaan','Selesai'].map(x=>`<option ${x===status?'selected':''}>${x}</option>`).join('');const media=[r['Foto Kerusakan'],r['Foto Barang'],r['Nota/Bukti Service']].filter(Boolean).join(' ');const mediaLink=media?'<a href="'+escapeHtml(String(media).split(' ')[0])+'" target="_blank" rel="noopener">Buka</a>':'-';const tr=document.createElement('tr');tr.innerHTML=`<td>${escapeHtml(formatDate(r['Tanggal Pengajuan']||r['Timestamp']))}</td><td>${escapeHtml(r['Nama Driver']||'-')}</td><td>${escapeHtml(r['Kode Aset']||'')}<br>${escapeHtml(r['Nama Kendaraan']||'')}<br>${escapeHtml(r['Nomor Polisi']||'')}</td><td>${escapeHtml(r['KM']||'')}</td><td>${escapeHtml(r['Jenis Service']||'')}</td><td>${escapeHtml(r['Prioritas']||'')}</td><td>${escapeHtml(r['Keluhan/Kerusakan']||'')}</td><td>${formatRupiah(r['Estimasi Biaya'])}</td><td>${canEdit?`<select id="mo_status_${escapeJs(r['Pengajuan ID'])}">${statusOptions}</select>`:statusBadge(status)}<div style="font-size:11px;color:#607d8b;margin-top:4px">${r['Waktu Mulai Pengerjaan']?`Mulai: ${escapeHtml(formatDate(r['Waktu Mulai Pengerjaan']))}`:''}${r['Waktu Selesai']?`<br>Selesai: ${escapeHtml(formatDate(r['Waktu Selesai']))}`:''}</div></td><td>${mediaLink}</td><td>${canEdit?`<input id="mo_receipt_${escapeJs(r['Pengajuan ID'])}" type="file" accept="image/*,application/pdf" capture="environment" style="max-width:180px"><button class="secondary-btn" onclick="saveMOStatus('${escapeJs(r['Pengajuan ID'])}')">Simpan Status</button>`:'-'}</td>`;b.appendChild(tr);});const sf=document.getElementById('moFilterStatus');if(sf)sf.style.display=isAdmin?'':'none';const af=document.getElementById('moFilterAsset');if(af)af.style.display=isAdmin?'':'none';}
+function openMOServiceForm(){const role=String(state.user?.role||'').toUpperCase();if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(role)){toast('Akun ini tidak dapat membuat pengajuan service.','error');return;}const locked=state.inspectionLockedAssetCode||state.user?.qrAssetCode||state.pendingAssetCode||'';if(role==='DRIVER'&&!locked){toast('Driver harus masuk melalui QR kendaraan terlebih dahulu.','error');return;}openModal('MO Pengajuan Service Mobil',`<form id="moServiceForm"><div class="form-grid"><div class="form-group"><label>Mobil</label>${locked?`<input id="moAsset" value="${escapeHtml(locked)}" readonly><small>Kendaraan terkunci dari QR yang discan.</small>`:`<select id="moAsset" required><option value="">Pilih mobil</option>${state.assets.map(a=>`<option value="${escapeHtml(a.code)}">${escapeHtml(a.code)} — ${escapeHtml(a.name||a.code)} — ${escapeHtml(a.plate||'')}</option>`).join('')}</select>`}</div><div class="form-group"><label>KM *</label><input id="moKM" type="number" step="0.1" required></div><div class="form-group"><label>Jenis Service *</label><input id="moType" required placeholder="Mesin, Ban, Rem, Kelistrikan..."></div><div class="form-group"><label>Prioritas</label><select id="moPriority"><option>Normal</option><option>Segera</option><option>Darurat</option></select></div><div class="form-group"><label>Estimasi Biaya</label><input id="moEstimate" type="number" step="1"></div><div class="form-group full-width"><label>Keluhan / Kerusakan *</label><textarea id="moComplaint" required></textarea></div><div class="form-group full-width"><label>Permintaan / Tindakan yang Diharapkan</label><textarea id="moAction"></textarea></div><div class="form-group full-width"><label>Barang / Part</label><textarea id="moParts"></textarea></div><div class="form-group full-width"><label>📷 Foto Kerusakan</label><input id="moPhotos" type="file" accept="image/*" multiple><small>Boleh kamera atau foto yang tersimpan.</small></div><div class="form-group full-width"><label>📦 Foto Barang / Part MO</label><input id="moBarangPhotos" type="file" accept="image/*" multiple><small>Boleh foto barang langsung atau foto dari chat WhatsApp Teknisi / SA bengkel.</small></div><div class="form-group full-width"><label>🧾 Nota / Bukti Service (opsional saat pengajuan)</label><input id="moReceipts" type="file" accept="image/*,application/pdf" multiple></div><div class="form-group full-width"><label>Catatan MO</label><textarea id="moNotes"></textarea></div></div><div class="form-actions"><button type="button" class="secondary-btn" onclick="closeModal()">Batal</button><button class="primary-btn" style="width:auto">💾 Ajukan Service</button></div></form>`);document.getElementById('moServiceForm').addEventListener('submit',saveMOServiceForm);}
 async function saveMOServiceForm(e){e.preventDefault();try{const role=String(state.user?.role||'').toUpperCase();const code=document.getElementById('moAsset').value;const locked=state.inspectionLockedAssetCode||state.user?.qrAssetCode||state.pendingAssetCode||'';if(!code)throw new Error('Kode aset wajib diisi.');if(role==='DRIVER'&&code!==locked)throw new Error('Mobil MO harus sama dengan kendaraan dari QR yang discan.');const readImages=async(id)=>{const out=[];for(const f of Array.from(document.getElementById(id)?.files||[])){if(f.size>8*1024*1024)throw new Error('Foto maksimal 8 MB per foto.');out.push(await fileToMedia(f,false));}return out;};const photos=await readImages('moPhotos'),barangPhotos=await readImages('moBarangPhotos'),receipts=[];for(const f of Array.from(document.getElementById('moReceipts')?.files||[])){if(f.size>8*1024*1024)throw new Error('Nota maksimal 8 MB per file.');receipts.push(await fileToMedia(f,false));}const result=await apiPost({action:'saveMOServiceRequest',role,driverId:driverIdOf(state.user),namaDriver:driverNameOf(state.user),userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin,kodeAset:code,qrAssetCode:locked||code,km:document.getElementById('moKM').value,jenisService:document.getElementById('moType').value,prioritas:document.getElementById('moPriority').value,estimasiBiaya:document.getElementById('moEstimate').value,keluhan:document.getElementById('moComplaint').value,permintaan:document.getElementById('moAction').value,barangPart:document.getElementById('moParts').value,catatanMO:document.getElementById('moNotes').value,photos,barangPhotos,receipts});toast(result.message,'success');closeModal();await loadMOServiceRequests();}catch(err){toast(err.message||'Gagal membuat pengajuan service.','error');}}
-async function saveMOStatus(id){try{const status=document.getElementById('mo_status_'+CSS.escape(id))?.value;if(!status)return;const r=await apiPost({action:'updateMOServiceStatus',pengajuanId:id,status,userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin,role:state.user.role});toast(r.message,'success');await loadMOServiceRequests();}catch(e){toast(e.message,'error');}}
+async function saveMOStatus(id){try{const status=document.getElementById('mo_status_'+CSS.escape(id))?.value;if(!status)return;const file=document.getElementById('mo_receipt_'+CSS.escape(id))?.files?.[0];const receipts=[];if(file){if(file.size>8*1024*1024)throw new Error('Nota maksimal 8 MB.');receipts.push(await fileToMedia(file,false));}if(status==='Selesai'&&!file){const row=(state.moServiceRequests||[]).find(x=>String(x['Pengajuan ID'])===String(id));if(!row||!row['Nota/Bukti Service'])throw new Error('Untuk status Selesai, Foto Nota/Bukti Service wajib dilampirkan.');}const r=await apiPost({action:'updateMOServiceStatus',pengajuanId:id,status,receipts,userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin,role:state.user.role});toast(r.message,'success');await loadMOServiceRequests();}catch(e){toast(e.message,'error');}}
 
 function renderInspections(){
 
