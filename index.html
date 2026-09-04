@@ -4604,6 +4604,38 @@ const INSPECTION_CHECKS_FRONTEND = [
 function isPowerSteeringVehicle(asset){const text=[asset?.name,asset?.model,asset?.modelTipe,asset?.merek].filter(Boolean).join(' ').toLowerCase();return /l300|power\s*steering/.test(text);}
 function inspectionStatusOptions(selected=''){const opts=['','Baik','Kurang Baik','Perlu Pengecekan','Perlu Service'];return opts.map(x=>`<option value="${escapeHtml(x)}" ${x===selected?'selected':''}>${x?escapeHtml(x):'Pilih'}</option>`).join('');}
 function buildInspectionStatusOptions(selected){const role=String(state.user?.role||'DRIVER').toUpperCase();const el=document.getElementById('statusPemeriksaan');const hint=document.getElementById('statusPemeriksaanHint');if(!el)return;const current=selected!==undefined&&selected!==null&&String(selected)!==''?String(selected):(role==='DRIVER'?'Selesai':'Service');if(role==='DRIVER'){el.innerHTML='<option value="Selesai">Selesai</option>';el.value='Selesai';el.disabled=true;el.classList.add('driver-complete-status');if(hint)hint.textContent='✓ Pemeriksaan lengkap — status otomatis Selesai dan terkunci.';}else{el.disabled=false;el.classList.remove('driver-complete-status');const opts=['Service','Sudah service','Selesai service','Selesai'];el.innerHTML=opts.map(x=>`<option value="${escapeHtml(x)}" ${x===current?'selected':''}>${escapeHtml(x)}</option>`).join('');if(!opts.includes(el.value))el.value=opts[0];if(hint)hint.textContent='Admin/Super Admin dapat melanjutkan status pemeriksaan.';}}
+/* =========================================================
+   PHOTO MAP — required by camera/photo validation and save flow
+   FIX: previously missing, causing "PHOTO_MAP_FRONTEND is not defined"
+========================================================= */
+const PHOTO_MAP_FRONTEND = {
+  stikOliMesin:'Foto Stik Oli Mesin',
+  stikOliPowerSteering:'Foto Stik Oli Power Steering',
+  taliKipasVbelt:'Foto Tali Kipas / V-Belt',
+  aki:'Foto Aki',
+  radiator:'Foto Radiator',
+  reservoirRadiator:'Foto Reservoir Radiator',
+  reservoirAirWiper:'Foto Reservoir Air Wiper',
+  minyakRem:'Foto Minyak Rem',
+  kunciRodaDongkrak:'Foto Kunci & Dongkrak',
+  body:'Foto Body Mobil',
+  interiorBox:'Foto Interior Box',
+  sisiDalamBak:'Foto Sisi Dalam Bak',
+  banKiriDepan:'Foto Ban Kiri Depan',
+  banKiriBelakang:'Foto Ban Kiri Belakang',
+  banKananDepan:'Foto Ban Kanan Depan',
+  banKananBelakang:'Foto Ban Kanan Belakang',
+  banSerep:'Foto Ban Serep',
+  kmStart:'Foto KM Start',
+  kmSebelumIsiBensin:'Foto KM Sebelum Isi Bensin',
+  kmSesudahIsiBensin:'Foto KM Sesudah Isi Bensin',
+  kmFinishAkhir:'Foto KM Finish Akhir'
+};
+
+const VIDEO_MAP_FRONTEND = {
+  videoPemeriksaan:'Video Pemeriksaan Lengkap'
+};
+
 function buildMediaFields(){
   const box=document.getElementById('videoFields');
   if(!box)return;
@@ -4670,8 +4702,18 @@ async function captureInspectionCameraPhoto(){
   }catch(e){state.cameraCapturedPhotos[key]=false;toast(e.message||'Foto ditolak.','error');}
 }
 async function openInspectionVideoCamera(){
-  if(String(state.user?.role||'').toUpperCase()==='DRIVER'&&state.dailyInspectionMode){toast('Pemeriksaan sudah dikunci dan tidak dapat diperbarui.','error');return;}
-  if(!navigator.mediaDevices?.getUserMedia){toast('Kamera tidak tersedia. Pastikan situs dibuka melalui HTTPS dan izin kamera diberikan.','error');return;}
+  if(String(state.user?.role||'').toUpperCase()==='DRIVER'&&state.dailyInspectionMode){
+    toast('Pemeriksaan driver yang sama hari ini sudah Selesai dan terkunci. Driver berikutnya dapat membuat sesi serah-terima baru.','error');
+    return;
+  }
+  if(!navigator.mediaDevices?.getUserMedia){
+    toast('Kamera tidak tersedia. Pastikan situs dibuka melalui HTTPS dan izin kamera diberikan.','error');
+    return;
+  }
+  if(typeof MediaRecorder==='undefined'){
+    toast('Perekam video tidak didukung browser ini. Gunakan Chrome/Android terbaru.','error');
+    return;
+  }
   try{
     if(inspectionVideoStream){inspectionVideoStream.getTracks().forEach(t=>t.stop());inspectionVideoStream=null;}
     inspectionVideoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:true});
