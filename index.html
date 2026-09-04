@@ -3122,7 +3122,7 @@ async function loginDriverAutomatic(driver,liveDescriptor,localDistance,liveness
     state.loginGPS=gps;
     const result=await apiPost({action:'driverLogin',driverId:driverIdOf(driver),namaDriver:driverNameOf(driver),qrAssetCode:state.pendingAssetCode,qrLatitude:qrGps.latitude,qrLongitude:qrGps.longitude,qrGpsAccuracy:qrGps.accuracy,loginDistanceToVehicle:distanceToVehicle,data:state.loginPhoto.driverLogin,mimeType:'image/jpeg',faceDescriptor:Array.from(liveDescriptor),faceDistance:localDistance,livenessPassed:true,livenessEvent:(livenessEvent==='SMILE'?'SMILE':'BLINK'),latitude:gps.latitude,longitude:gps.longitude,gpsAccuracy:gps.accuracy});
     state.user={...result.driver,id:driverIdOf(result.driver),driverId:driverIdOf(result.driver),name:driverNameOf(result.driver),namaDriver:driverNameOf(result.driver),role:'DRIVER',loginPhoto:result.loginPhoto,loginGPS:gps,qrAssetCode:state.pendingAssetCode,qrLockGPS:qrGps};
-    stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();await enterApplication();startDriverRouteTracking();toast('Login Driver berhasil.','success');
+    stopAutoFaceLogin();stopCamera('driverLogin');clearLoginFieldsImmediately();enterApplication().catch(()=>{});startDriverRouteTracking();toast('Login Driver berhasil.','success');
   }catch(error){const v=document.getElementById('driverLoginVideo');if(v)v.play().catch(()=>{});setFaceUI(error.message||'Login gagal.',false,'driver');setLoginStatus(error.message||'Login gagal.',true,'driver');showLoginRefresh('driver');}
   finally{state.loginBusy=false;}
 }
@@ -3791,7 +3791,19 @@ async function renderDriverRoutes(){
 }
 async function generateRouteMapsToSheet(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Hanya Admin atau Super Admin yang dapat membuat peta rute di Spreadsheet.','error');return;}
-  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});toast(result.message||'Peta rute berhasil dibuat.','success');}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
+  const payload={action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin};
+  try{
+    toast('Membuat peta rute ke Spreadsheet...','info');
+    let result;
+    try{ result=await apiPost(payload); }
+    catch(firstErr){
+      // Fallback GET untuk deployment lama/mixed method. Code.gs FIX4 juga
+      // mengenali action generateRouteMaps melalui doGet.
+      if(!/tidak dikenali|unrecognized|not found/i.test(String(firstErr?.message||''))) throw firstErr;
+      result=await apiGet('generateRouteMaps',payload);
+    }
+    toast(result.message||'Peta rute berhasil dibuat.','success');
+  }catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
 }
 function focusDriverRouteDay(index){
   const g=(state.routeDayGroups||[])[index];if(!g||!state.routeMap)return;
