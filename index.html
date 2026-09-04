@@ -2679,9 +2679,9 @@ function normalizeStatus(value){return String(value ?? '').replace(/\u00a0/g,' '
 function isDriverActive(value){return ['aktif','active','1','true','ya'].includes(normalizeStatus(value));}
 
 const FACE_MODEL_URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-const FACE_MATCH_THRESHOLD=0.60;
+const FACE_MATCH_THRESHOLD=0.65;
 const FAST_FACE_INPUT_SIZE=128;
-const FAST_FACE_SCORE=0.35;
+const FAST_FACE_SCORE=0.25;
 const FAST_FACE_INTERVAL=70;
 
 async function ensureFaceModels(){
@@ -2915,7 +2915,7 @@ async function getFastFaceResult(video,role){
   await ensureFaceModels();
   const result=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions({inputSize:FAST_FACE_INPUT_SIZE,scoreThreshold:FAST_FACE_SCORE}))
     .withFaceLandmarks().withFaceDescriptor();
-  if(!result) throw new Error('Wajah tidak ditemukan.');
+  if(!result) throw new Error('Wajah belum terbaca. Posisikan wajah di dalam garis putih dan pastikan pencahayaan cukup.');
   const eyes=extractEyePoints(result.landmarks);
   let ear=0;
   if(eyes) ear=(eyeAspectRatio(eyes.left)+eyeAspectRatio(eyes.right))/2;
