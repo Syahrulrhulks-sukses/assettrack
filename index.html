@@ -1285,6 +1285,14 @@ tr:hover td{
 #driverRouteMap{width:100%;height:calc(100vh - 250px);min-height:430px;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;background:#eef2f7;}
 .route-map-note{padding:10px 12px;border-radius:10px;background:#f5f7fa;color:#607d8b;font-size:12px;margin-bottom:12px;}
 .route-map-status{font-size:13px;color:#607d8b;margin-top:10px;}
+.route-map-legend{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px;}
+.route-legend-item{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid #e5e7eb;border-radius:9px;background:#fff;font-size:12px;color:#334155;}
+.route-legend-dot{width:11px;height:11px;border-radius:50%;display:inline-block;}
+.route-day-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:12px;}
+.route-day-card{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#fff;cursor:pointer;}
+.route-day-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.08);}
+.route-day-card strong{display:block;margin-bottom:4px;}
+.route-day-card small{color:#64748b;}
 @media(max-width:750px){#driverRouteMap{height:65vh;min-height:360px;}}
 </style>
 </head>
@@ -2104,9 +2112,11 @@ tr:hover td{
           <input id="routeFilterDate" type="date" onchange="loadDriverRoutes()" style="max-width:180px">
           <button class="secondary-btn" onclick="loadDriverRoutes()">🔄 Tampilkan Rute</button>
         </div>
-        <div class="route-map-note">🗺️ Garis pada peta berasal dari titik GPS perjalanan Driver yang tersimpan. Bukan rute rekomendasi.</div>
+        <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis peta mengikuti <b>perkiraan jalan yang dilewati</b> berdasarkan titik GPS, bukan garis lurus antar titik GPS.</div>
+        <div id="driverRouteLegend" class="route-map-legend"></div>
         <div id="driverRouteMap"></div>
-        <div id="driverRouteStatus" class="route-map-status">Pilih Driver/mobil/tanggal untuk menampilkan rute.</div>
+        <div id="driverRouteStatus" class="route-map-status">Pilih Driver dan tanggal untuk melihat rute per hari.</div>
+        <div id="driverRouteDays" class="route-day-list"></div>
       </div>
     </div>
 
@@ -3622,32 +3632,108 @@ function initDriverRouteMap(){
   setTimeout(()=>state.routeMap&&state.routeMap.invalidateSize(),100);
 }
 
+const ROUTE_COLORS=['#1565c0','#d81b60','#2e7d32','#ef6c00','#6a1b9a','#00838f','#c62828','#5d4037','#283593','#ad1457'];
+function routeDayKey(x){
+  const t=new Date(x['Timestamp']);
+  if(isNaN(t.getTime()))return String(x['Timestamp']||'').slice(0,10);
+  return new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit'}).format(t);
+}
+function routeGroupKey(x){return [String(x['Driver ID']||''),routeDayKey(x),String(x['Route Session ID']||'')].join('|');}
+function routeDistanceKm(points){
+  let km=0;
+  for(let i=1;i<points.length;i++){
+    const a=points[i-1],b=points[i],R=6371,rad=Math.PI/180;
+    const dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad;
+    const q=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;
+    km+=2*R*Math.asin(Math.min(1,Math.sqrt(q)));
+  }
+  return km;
+}
+function simplifyRoutePoints(points,maxPoints=70){
+  if(points.length<=maxPoints)return points;
+  const out=[];
+  const step=(points.length-1)/(maxPoints-1);
+  for(let i=0;i<maxPoints;i++)out.push(points[Math.round(i*step)]);
+  return out;
+}
+async function getRoadFollowingRoute(points){
+  const clean=simplifyRoutePoints(points,70);
+  if(clean.length<2)return clean;
+  const coords=clean.map(p=>`${p[1]},${p[0]}`).join(';');
+  const url='https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=full&geometries=geojson&steps=false&continue_straight=false';
+  const res=await fetch(url,{method:'GET',cache:'no-store'});
+  if(!res.ok)throw new Error('Layanan peta jalan tidak merespons ('+res.status+').');
+  const data=await res.json();
+  if(data.code!=='Ok'||!data.routes||!data.routes[0]||!data.routes[0].geometry)throw new Error('Jalur jalan tidak ditemukan untuk titik GPS ini.');
+  return data.routes[0].geometry.coordinates.map(p=>[Number(p[1]),Number(p[0])]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));
+}
+function renderRouteLegend(groups){
+  const el=document.getElementById('driverRouteLegend');if(!el)return;
+  const seen=new Map();groups.forEach(g=>{const key=String(g.driverId||g.driverName||'');if(!seen.has(key))seen.set(key,{name:g.driverName||'-',color:g.color});});
+  el.innerHTML=[...seen.values()].map(x=>`<span class="route-legend-item"><i class="route-legend-dot" style="background:${x.color}"></i>${escapeHtml(x.name)}</span>`).join('');
+}
+
 async function loadDriverRoutes(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role))return;
   initDriverRouteMap();
-  const status=document.getElementById('driverRouteStatus');if(status)status.textContent='Memuat rute...';
+  const status=document.getElementById('driverRouteStatus');if(status)status.textContent='Memuat data rute...';
   try{
     const result=await apiGet('routes',{role:role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||''});
-    state.routes=result.routes||[];renderDriverRoutes();
+    state.routes=result.routes||[];await renderDriverRoutes();
   }catch(e){if(status)status.textContent='Rute gagal dimuat: '+e.message;}
 }
 
-function renderDriverRoutes(){
+async function renderDriverRoutes(){
   initDriverRouteMap();
   if(!state.routeMap)return;
   state.routeLayer.clearLayers();
   const rows=state.routes||[];
-  if(!rows.length){document.getElementById('driverRouteStatus').textContent='Tidak ada data rute pada filter yang dipilih.';state.routeMap.setView([-6.9,109.1],12);return;}
-  const points=rows.map(x=>[Number(x.Latitude),Number(x.Longitude)]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));
-  if(!points.length){document.getElementById('driverRouteStatus').textContent='Data GPS rute tidak valid.';return;}
-  const line=L.polyline(points,{weight:5,smoothFactor:1});state.routeLayer.addLayer(line);
-  state.routeLayer.addLayer(L.marker(points[0]).bindPopup('Titik awal rute'));
-  state.routeLayer.addLayer(L.marker(points[points.length-1]).bindPopup('Titik akhir rute'));
-  state.routeMap.fitBounds(line.getBounds(),{padding:[25,25]});
-  const drivers=[...new Set(rows.map(x=>x['Nama Driver']).filter(Boolean))].join(', ');
-  const cars=[...new Set(rows.map(x=>x['Nama Kendaraan']).filter(Boolean))].join(', ');
+  const legend=document.getElementById('driverRouteLegend');if(legend)legend.innerHTML='';
+  const daysEl=document.getElementById('driverRouteDays');if(daysEl)daysEl.innerHTML='';
+  if(!rows.length){
+    document.getElementById('driverRouteStatus').textContent='Tidak ada data rute pada filter yang dipilih.';
+    state.routeMap.setView([-6.9,109.1],12);return;
+  }
+  const grouped={};
+  rows.forEach(x=>{const key=routeGroupKey(x);(grouped[key]||(grouped[key]=[])).push(x);});
+  const driverColors={};let nextDriverColor=0;
+  const groups=Object.values(grouped).sort((a,b)=>new Date(a[0]['Timestamp'])-new Date(b[0]['Timestamp'])).map(items=>{
+    const driverId=String(items[0]['Driver ID']||items[0]['Nama Driver']||'');
+    if(!driverColors[driverId])driverColors[driverId]=ROUTE_COLORS[nextDriverColor++%ROUTE_COLORS.length];
+    return {rows:items,driverId:items[0]['Driver ID']||'',driverName:items[0]['Nama Driver']||'-',day:routeDayKey(items[0]),session:items[0]['Route Session ID']||'',asset:items[0]['Nama Kendaraan']||'-',plate:items[0]['Nomor Polisi']||'-',color:driverColors[driverId]};
+  });
+  renderRouteLegend(groups);
+  const bounds=[];let rendered=0;let failed=0;
+  const maxRoadGroups=12;
+  for(const g of groups.slice(0,maxRoadGroups)){
+    const points=g.rows.map(x=>[Number(x.Latitude),Number(x.Longitude)]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));
+    if(points.length<2){failed++;continue;}
+    try{
+      const roadPoints=await getRoadFollowingRoute(points);
+      const line=L.polyline(roadPoints,{color:g.color,weight:5,opacity:.88,smoothFactor:.5});
+      line.bindPopup(`<b>${escapeHtml(g.driverName)}</b><br>${escapeHtml(g.day)}<br>${escapeHtml(g.asset)} (${escapeHtml(g.plate)})<br>Perkiraan jalan dari ${points.length} titik GPS`);
+      state.routeLayer.addLayer(line);
+      const start=L.circleMarker(points[0],{radius:7,color:g.color,fillColor:'#fff',fillOpacity:1,weight:3}).bindPopup(`<b>Mulai</b><br>${escapeHtml(g.driverName)}<br>${escapeHtml(g.day)}`);
+      const finish=L.circleMarker(points[points.length-1],{radius:7,color:g.color,fillColor:g.color,fillOpacity:1,weight:2}).bindPopup(`<b>Akhir</b><br>${escapeHtml(g.driverName)}<br>${escapeHtml(g.day)}`);
+      state.routeLayer.addLayer(start);state.routeLayer.addLayer(finish);
+      roadPoints.forEach(p=>bounds.push(p));rendered++;
+      g.roadKm=routeDistanceKm(roadPoints);
+    }catch(err){failed++;console.warn('Route jalan gagal:',g.driverName,g.day,err);}
+  }
+  if(daysEl){
+    daysEl.innerHTML=groups.map((g,i)=>`<div class="route-day-card" onclick="focusDriverRouteDay(${i})"><strong>${escapeHtml(g.driverName)} • ${escapeHtml(g.day)}</strong><small>${escapeHtml(g.asset)} (${escapeHtml(g.plate)}) • ${g.rows.length} titik GPS${g.roadKm?` • ±${g.roadKm.toFixed(1)} km jalan`:''}</small></div>`).join('');
+    state.routeDayGroups=groups;
+  }
+  if(bounds.length){state.routeMap.fitBounds(L.latLngBounds(bounds),{padding:[25,25]});}
+  else state.routeMap.setView([-6.9,109.1],12);
   const status=document.getElementById('driverRouteStatus');
-  if(status)status.textContent=`Rute tampil: ${drivers||'-'} • ${cars||'-'} • ${points.length} titik GPS`;
+  if(status)status.textContent=`Tampil ${rendered} sesi rute • ${[...new Set(groups.map(g=>g.driverName))].length} Driver • ${[...new Set(groups.map(g=>g.day))].length} hari${failed?' • '+failed+' sesi belum dapat dicocokkan ke jalan':''}.`;
+  if(groups.length>maxRoadGroups && status)status.textContent+=` Maksimal ${maxRoadGroups} sesi dipetakan sekaligus; pilih Driver/tanggal untuk tampilan lebih detail.`;
+}
+function focusDriverRouteDay(index){
+  const g=(state.routeDayGroups||[])[index];if(!g||!state.routeMap)return;
+  const points=g.rows.map(x=>[Number(x.Latitude),Number(x.Longitude)]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));
+  if(points.length)state.routeMap.fitBounds(L.latLngBounds(points),{padding:[35,35]});
 }
 
 /* =========================================================
