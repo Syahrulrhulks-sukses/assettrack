@@ -2485,9 +2485,13 @@ async function apiGet(action,params={}){
   try{
     data = JSON.parse(text);
   }catch(e){
-    throw new Error(
-      'Server tidak mengembalikan JSON: '+text.substring(0,300)
-    );
+    const looksLikeHtml=/^\s*<(!doctype|html|head|body)/i.test(text);
+    if(looksLikeHtml){
+      throw new Error(
+        'API Aset Aqiqah Plus mengembalikan halaman HTML, bukan JSON. Pastikan Web App Apps Script sudah di-Deploy sebagai Web App, Execute as: Saya (pemilik), Who has access: Anyone, dan gunakan URL /exec terbaru.'
+      );
+    }
+    throw new Error('Server tidak mengembalikan JSON. Periksa URL Web App /exec.');
   }
 
   if(data && data.success === false){
@@ -2562,9 +2566,13 @@ async function apiPost(data){
   try{
     result = JSON.parse(text);
   }catch(e){
-    throw new Error(
-      'Server tidak mengembalikan JSON: '+text.substring(0,300)
-    );
+    const looksLikeHtml=/^\s*<(!doctype|html|head|body)/i.test(text);
+    if(looksLikeHtml){
+      throw new Error(
+        'API Aset Aqiqah Plus mengembalikan halaman HTML, bukan JSON. Pastikan Web App Apps Script sudah di-Deploy sebagai Web App, Execute as: Saya (pemilik), Who has access: Anyone, dan gunakan URL /exec terbaru.'
+      );
+    }
+    throw new Error('Server tidak mengembalikan JSON. Periksa URL Web App /exec.');
   }
 
   if(result && result.success === false){
@@ -2629,7 +2637,32 @@ function toggleAdminIdentity(fieldId,button){
   if(button)button.textContent=visible?'👁️':'🙈';
 }
 
+function applyLoginModeLock(){
+  const driverTab=document.getElementById('driverTab');
+  const adminTab=document.getElementById('adminTab');
+  if(!driverTab || !adminTab)return;
+
+  // Jika QR kendaraan sudah dibuka, halaman dikunci ke mode Driver.
+  // Admin/Super Admin tidak boleh dipilih dari alur QR Driver.
+  const driverMode=!!String(state.pendingAssetCode||'').trim();
+  adminTab.style.display=driverMode?'none':'';
+  driverTab.style.display='';
+  adminTab.disabled=driverMode;
+
+  if(driverMode){
+    driverTab.classList.add('active');
+    adminTab.classList.remove('active');
+    document.getElementById('driverLoginPanel')?.classList.remove('hidden');
+    document.getElementById('adminLoginPanel')?.classList.add('hidden');
+  }
+}
+
 function switchLogin(type){
+  if(type==='admin' && String(state.pendingAssetCode||'').trim()){
+    applyLoginModeLock();
+    setFaceUI('QR kendaraan aktif. Login dikunci untuk Driver.',true,'driver');
+    return;
+  }
   stopAutoFaceLogin();
   stopAutoAdminFaceLogin();
   stopCamera('driverLogin');
@@ -2666,6 +2699,7 @@ function switchLogin(type){
     driverPanel.classList.add('hidden'); adminPanel.classList.remove('hidden');
     startAutoAdminFaceLogin();
   }
+  applyLoginModeLock();
 }
 
 async function startCamera(type,silent=false){
@@ -3566,6 +3600,7 @@ function resetToLogin(showToast=true){
   document.getElementById('adminTab')?.classList.remove('active');
   document.getElementById('driverLoginPanel')?.classList.remove('hidden');
   document.getElementById('adminLoginPanel')?.classList.add('hidden');
+  applyLoginModeLock();
 
   Promise.all([apiGet('drivers'),apiGet('admins')]).then(([driverResult,adminResult])=>{
     state.drivers=driverResult.drivers || [];
@@ -7143,6 +7178,7 @@ document.addEventListener(
     document.getElementById('adminTab')?.classList.remove('active');
     document.getElementById('driverLoginPanel')?.classList.remove('hidden');
     document.getElementById('adminLoginPanel')?.classList.add('hidden');
+    applyLoginModeLock();
 
     buildInspectionOptions();
     buildInspectionDetailFields();
