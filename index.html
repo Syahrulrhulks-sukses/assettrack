@@ -2940,6 +2940,60 @@ async function captureLiveFrame(type){
   return canvas.toDataURL('image/jpeg',0.68);
 }
 
+
+/* =========================================================
+   FACE DESCRIPTOR DARI FOTO PENDAFTARAN
+   Dipakai oleh pendaftaran Driver dan pendaftaran foto wajah Admin.
+   Perbaikan: fungsi sebelumnya hilang sehingga muncul:
+   "getFaceDescriptorFromDataUrl is not defined".
+========================================================= */
+async function getFaceDescriptorFromDataUrl(dataUrl){
+  if(!dataUrl || typeof dataUrl!=='string'){
+    throw new Error('Foto wajah belum tersedia.');
+  }
+
+  await ensureFaceModels();
+
+  const img = await new Promise((resolve,reject)=>{
+    const image = new Image();
+    image.onload = ()=>resolve(image);
+    image.onerror = ()=>reject(new Error('Foto wajah tidak dapat dibaca.'));
+    image.src = dataUrl;
+  });
+
+  const result = await faceapi
+    .detectSingleFace(
+      img,
+      new faceapi.TinyFaceDetectorOptions({
+        inputSize: FAST_FACE_INPUT_SIZE,
+        scoreThreshold: FAST_FACE_SCORE
+      })
+    )
+    .withFaceLandmarks()
+    .withFaceDescriptor();
+
+  if(!result){
+    throw new Error(
+      'Wajah tidak terdeteksi pada foto. Pastikan hanya satu wajah, wajah menghadap kamera, dan pencahayaan cukup.'
+    );
+  }
+
+  const box = result.detection.box;
+  const imageArea = Math.max(1, img.naturalWidth * img.naturalHeight);
+  const faceArea = Math.max(0, box.width * box.height);
+
+  if(faceArea / imageArea < 0.04){
+    throw new Error('Wajah terlalu kecil. Dekatkan wajah ke kamera lalu ambil ulang.');
+  }
+
+  const descriptor = Array.from(result.descriptor || []);
+  if(descriptor.length !== 128 || descriptor.some(v=>!Number.isFinite(Number(v)))){
+    throw new Error('Data verifikasi wajah tidak valid. Ambil ulang selfie.');
+  }
+
+  return descriptor;
+}
+
 async function getFastFaceResult(video,role){
   // Satu pipeline untuk landmark + descriptor + liveness. Versi lama melakukan
   // tiga inferensi terpisah sehingga lambat.
@@ -5953,10 +6007,24 @@ function openDriverSelfRegistration(){
   document
     .getElementById('driverSelfRegistrationForm')
     .addEventListener('submit',saveDriverSelfRegistration);
+
+  // Kamera pendaftaran aktif otomatis; tombol manual tetap tersedia
+  // sebagai fallback jika browser menunda izin kamera.
+  setTimeout(()=>{
+    startDriverFaceCamera().catch(()=>{});
+  },120);
 }
 
 async function saveDriverSelfRegistration(event){
   event.preventDefault();
+
+  const submitBtn = event.target?.querySelector('button[type="submit"]');
+  if(submitBtn?.disabled) return;
+  if(submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.dataset.originalText = submitBtn.textContent;
+    submitBtn.textContent = '⏳ Menyimpan...';
+  }
 
   try{
     const driverId=document.getElementById('driverSelfId').value.trim();
@@ -6250,6 +6318,11 @@ async function saveDriverFace(id){
     await refreshAll();
 
   }catch(error){
+
+    if(submitBtn){
+      submitBtn.disabled = false;
+      submitBtn.textContent = submitBtn.dataset.originalText || '✅ Daftar & Aktifkan Driver';
+    }
 
     toast(
       error.message,
