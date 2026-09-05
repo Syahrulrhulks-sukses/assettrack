@@ -3765,7 +3765,9 @@ async function renderDriverRoutes(){
 }
 async function generateRouteMapsToSheet(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Hanya Admin atau Super Admin yang dapat membuat peta rute di Spreadsheet.','error');return;}
-  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});toast(result.message||'Peta rute berhasil dibuat.','success');}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
+  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});toast(result.message||'Peta rute berhasil dibuat.','success');
+    // Segarkan tampilan data peta setelah proses Spreadsheet selesai.
+    try{await apiGet('routemaps');}catch(_){ }}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
 }
 function focusDriverRouteDay(index){
   const g=(state.routeDayGroups||[])[index];if(!g||!state.routeMap)return;
@@ -5640,6 +5642,15 @@ function openDriverForm(id=''){
 
     <form id="driverForm">
 
+      ${!id ? `<div class="form-group">
+        <label>Lengkapi Driver yang Sudah Ada</label>
+        <select id="driverExistingSelect">
+          <option value="">— Pilih Driver dari Data Driver —</option>
+          ${(state.drivers||[]).filter(x=>x.id||x.name).map(x=>`<option value="${escapeHtml(x.id||'')}" data-name="${escapeHtml(x.name||'')}" data-email="${escapeHtml(x.email||'')}" data-phone="${escapeHtml(x.phone||'')}">${escapeHtml((x.id||'')+' — '+(x.name||''))}</option>`).join('')}
+        </select>
+        <small style="display:block;margin-top:6px;color:#68737d">Jika Driver ID dan Nama sudah ada, pilih di sini. Data akan otomatis masuk dan tinggal dilengkapi.</small>
+      </div>` : ''}
+
       <input
         type="hidden"
         id="driverFormId"
@@ -5741,6 +5752,22 @@ function openDriverForm(id=''){
       saveDriverForm
     );
 
+  const existingSelect=document.getElementById('driverExistingSelect');
+  if(existingSelect){
+    existingSelect.addEventListener('change',function(){
+      const opt=this.options[this.selectedIndex];
+      const idEl=document.getElementById('driverFormDriverId');
+      const nameEl=document.getElementById('driverFormName');
+      const emailEl=document.getElementById('driverFormEmail');
+      const phoneEl=document.getElementById('driverFormPhone');
+      if(!this.value)return;
+      if(idEl){idEl.value=this.value;idEl.readOnly=true;}
+      if(nameEl){nameEl.value=opt.dataset.name||'';nameEl.readOnly=true;}
+      if(emailEl&&!emailEl.value)emailEl.value=opt.dataset.email||'';
+      if(phoneEl&&!phoneEl.value)phoneEl.value=opt.dataset.phone||'';
+    });
+  }
+
 }
 
 
@@ -5819,7 +5846,7 @@ async function saveDriverForm(event){
 
       result=await apiPost({
 
-        action:'registerDriver',
+        action:'saveDriver',
 
         driverId:driverId,
 
