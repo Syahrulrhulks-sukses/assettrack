@@ -1377,7 +1377,7 @@ tr:hover td{
       </div>
 
       <div class="login-step-label face-step-label"><span class="step-icon">▣</span><span>2. Posisikan wajah Anda di dalam bingkai</span></div>
-      <div class="login-help">Kamera aktif otomatis. Setelah wajah diam, gambar terkunci dan diverifikasi.</div>
+      <div class="login-help">Kamera aktif otomatis setelah Nama dikenali dan PIN 6 digit selesai ditulis. Setelah wajah terdeteksi, langsung diverifikasi.</div>
       <div class="face-login-box" id="adminFaceBox">
         <video id="adminLoginVideo" autoplay playsinline muted></video>
         <canvas id="adminLoginCanvas" class="hidden"></canvas>
@@ -2120,7 +2120,7 @@ tr:hover td{
           </select>
           <span id="routePlaybackInfo" class="route-playback-info">Pilih sesi rute lalu tekan Play.</span>
         </div>
-        <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis mengikuti <b>perkiraan jaringan jalan</b> dari titik GPS, bukan garis lurus. Tombol <b>Buat Peta ke Spreadsheet</b> membuat sheet visual <b>Peta Rute Driver</b>.</div>
+        <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis mengikuti <b>perkiraan jaringan jalan</b> dari titik GPS, bukan garis lurus. Tombol <b>Buat Peta ke Spreadsheet</b> membuat sheet visual <b>peta</b>.</div>
         <div id="driverRouteLegend" class="route-map-legend"></div>
         <div id="driverRouteMap"></div>
         <div id="driverRouteStatus" class="route-map-status">Pilih Driver dan tanggal untuk melihat rute per hari.</div>
@@ -2916,6 +2916,15 @@ async function resolveAdminNameAfterComplete(){
     }catch(_){ }
   }
   if(!exact){
+    // Super Admin bawaan tetap dikenali di frontend walaupun baris ADM-001
+    // belum ada di Data Admin. Backend akan memvalidasi PIN dan wajahnya.
+    const SUPER_ADMIN_NAME='Syahrul';
+    const SUPER_ADMIN_ID='ADM-001';
+    if(normalizeLoginName(name)===normalizeLoginName(SUPER_ADMIN_NAME)){
+      exact={id:SUPER_ADMIN_ID,adminId:SUPER_ADMIN_ID,name:SUPER_ADMIN_NAME,namaAdmin:SUPER_ADMIN_NAME,role:'SUPER_ADMIN',status:'Aktif'};
+    }
+  }
+  if(!exact){
     setFaceUI('Nama Admin belum ditemukan.',false,'admin');
     stopCamera('adminLogin');
     stopAutoAdminFaceLogin();
@@ -2924,12 +2933,21 @@ async function resolveAdminNameAfterComplete(){
   autoAdminCandidate=exact;
   if(idEl) idEl.value=String(exact.id||exact.adminId||'').trim();
   if(badge){badge.textContent='ID otomatis: '+String(exact.id||exact.adminId||'');badge.classList.add('show');}
-  setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
-  startAutoAdminFaceLogin().catch(()=>{});
+  const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
+  if(/^\d{6}$/.test(pin)) startAutoAdminFaceLogin().catch(()=>{});
+  else setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
 }
 function onAdminPinInput(){
   const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
-  if(autoAdminCandidate && /^\d{6}$/.test(pin)) setFaceUI('PIN siap. Posisikan wajah...',false,'admin');
+  if(autoAdminCandidate && /^\d{6}$/.test(pin)){
+    setFaceUI('PIN lengkap. Kamera diaktifkan...',false,'admin');
+    // Kamera dinyalakan tepat saat PIN 6 digit selesai ditulis.
+    startAutoAdminFaceLogin().catch(()=>{});
+  }else if(autoAdminCandidate){
+    stopAutoAdminFaceLogin();
+    stopCamera('adminLogin');
+    setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
+  }
 }
 
 async function detectStableFace(video,role){
@@ -3978,7 +3996,9 @@ function changeDriverRoutePlaybackSpeed(){
 
 async function generateRouteMapsToSheet(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Hanya Admin atau Super Admin yang dapat membuat peta rute di Spreadsheet.','error');return;}
-  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});toast(result.message||'Peta rute berhasil dibuat.','success');
+  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});
+    toast(result.message||'Peta rute berhasil dibuat.','success');
+    if(result.failed) toast('Perhatian: '+result.failed+' sesi gagal. '+((result.errors||[]).slice(0,2).join(' | ')),'error');
     // Segarkan tampilan data peta setelah proses Spreadsheet selesai.
     try{await apiGet('routemaps');}catch(_){ }}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
 }
@@ -4281,7 +4301,7 @@ function renderAssets(){
 
         <button
           class="secondary-btn asset-edit-btn"
-          onclick="openAssetForm('${escapeJs(asset.id)}')">
+          onclick="openAssetForm('${escapeJs(asset.id)}','${escapeJs(asset.code)}')">
           Edit
         </button>
 
@@ -4302,16 +4322,19 @@ function renderAssets(){
 }
 
 
-function openAssetForm(id=''){
+function openAssetForm(id='',codeHint=''){
   if(!['ADMIN','SUPER_ADMIN'].includes(String(state.user?.role||'').toUpperCase())){toast('Hanya Admin atau Super Admin yang dapat mengedit kendaraan.','error');return;}
 
-  const asset=
-    state.assets.find(
-      x=>String(x.id)===String(id)
-    ) || {};
+  // Data lama bisa belum memiliki kolom ID. Karena itu Edit mencari
+  // berdasarkan ID terlebih dahulu, lalu fallback ke Kode Aset.
+  const wantedId=String(id||'').trim();
+  const wantedCode=String(codeHint||'').trim().toUpperCase();
+  const asset=state.assets.find(x=>wantedId && String(x.id||'')===wantedId)
+    || state.assets.find(x=>wantedCode && String(x.code||'').trim().toUpperCase()===wantedCode)
+    || {};
 
   openModal(
-    id
+    (asset && (asset.id || asset.code))
       ? 'Edit Aset'
       : 'Tambah Aset',
 
@@ -4323,6 +4346,11 @@ function openAssetForm(id=''){
         type="hidden"
         id="assetId"
         value="${escapeHtml(asset.id || '')}">
+
+      <input
+        type="hidden"
+        id="assetOriginalCode"
+        value="${escapeHtml(asset.code || '')}">
 
       <div class="form-grid">
 
@@ -4471,6 +4499,8 @@ async function saveAsset(event){
       action:'saveAsset',
 
       id:id,
+
+      originalCode:document.getElementById('assetOriginalCode')?.value.trim() || '',
 
       code:document
         .getElementById('assetCode')
