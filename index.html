@@ -1294,6 +1294,13 @@ tr:hover td{
 .route-day-card strong{display:block;margin-bottom:4px;}
 .route-day-card small{color:#64748b;}
 .mo-status-select{min-width:150px;}
+.route-playback-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;}
+.route-playback-controls button{width:auto !important;}
+.route-speed-select{width:auto;min-width:70px;height:38px;padding:0 10px;border:1px solid #d7dee7;border-radius:9px;background:#fff;font-weight:600;color:#334155;}
+.route-playback-marker{filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));}
+.route-day-card.route-selected{border-color:#1565c0;box-shadow:0 0 0 2px rgba(21,101,192,.12);}
+.route-playback-info{font-size:12px;color:#64748b;margin-top:7px;}
+
 @media(max-width:750px){#driverRouteMap{height:65vh;min-height:360px;}}
 
 /* === FINAL FIX 2026-09-05: status Selesai + camera controls === */
@@ -2102,6 +2109,17 @@ tr:hover td{
           <input id="routeFilterDate" type="date" onchange="loadDriverRoutes()" style="max-width:180px">
           <button class="secondary-btn" onclick="loadDriverRoutes()">🔄 Tampilkan Rute</button><button class="primary-btn" style="width:auto" onclick="generateRouteMapsToSheet()">📍 Buat Peta ke Spreadsheet</button>
         </div>
+        <div class="route-playback-controls">
+          <button class="primary-btn route-play-btn" onclick="playDriverRoute()">▶ Play</button>
+          <button class="secondary-btn" onclick="stopDriverRoutePlayback()">■ Stop</button>
+          <button class="secondary-btn" onclick="resetDriverRoutePlayback()">⏮ Reset</button>
+          <select id="routePlaySpeed" class="route-speed-select" onchange="changeDriverRoutePlaybackSpeed()" title="Kecepatan playback">
+            <option value="1">1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select>
+          <span id="routePlaybackInfo" class="route-playback-info">Pilih sesi rute lalu tekan Play.</span>
+        </div>
         <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis mengikuti <b>perkiraan jaringan jalan</b> dari titik GPS, bukan garis lurus. Tombol <b>Buat Peta ke Spreadsheet</b> membuat sheet visual <b>Peta Rute Driver</b>.</div>
         <div id="driverRouteLegend" class="route-map-legend"></div>
         <div id="driverRouteMap"></div>
@@ -2412,6 +2430,8 @@ const state = {
   routeMap:null,
   routeLayer:null,
   routeDayGroups:[],
+  selectedRouteGroupIndex:-1,
+  routePlayback:{playing:false,animationId:null,groupIndex:-1,progress:0,distanceMeters:0,totalMeters:0,lastFrameTime:0,speed:1,marker:null,trail:null,cumulativeMeters:[]},
   moServiceRequests:[],
   serverTime:null,
   cameraCapturedPhotos:{},
@@ -3773,12 +3793,17 @@ async function loadDriverRoutes(){
 async function renderDriverRoutes(){
   initDriverRouteMap();
   if(!state.routeMap)return;
+  stopDriverRoutePlayback();
+  clearRoutePlaybackMarker();
+  state.selectedRouteGroupIndex=-1;
   state.routeLayer.clearLayers();
   const rows=state.routes||[];
   const legend=document.getElementById('driverRouteLegend');if(legend)legend.innerHTML='';
   const daysEl=document.getElementById('driverRouteDays');if(daysEl)daysEl.innerHTML='';
+  setRoutePlaybackInfo('Pilih sesi rute lalu tekan Play.');
   if(!rows.length){
     document.getElementById('driverRouteStatus').textContent='Tidak ada data rute pada filter yang dipilih.';
+    state.routeDayGroups=[];
     state.routeMap.setView([-6.9,109.1],12);return;
   }
   const grouped={};
@@ -3787,7 +3812,7 @@ async function renderDriverRoutes(){
   const groups=Object.values(grouped).sort((a,b)=>new Date(a[0]['Timestamp'])-new Date(b[0]['Timestamp'])).map(items=>{
     const driverId=String(items[0]['Driver ID']||items[0]['Nama Driver']||'');
     if(!driverColors[driverId])driverColors[driverId]=ROUTE_COLORS[nextDriverColor++%ROUTE_COLORS.length];
-    return {rows:items,driverId:items[0]['Driver ID']||'',driverName:items[0]['Nama Driver']||'-',day:routeDayKey(items[0]),session:items[0]['Route Session ID']||'',asset:items[0]['Nama Kendaraan']||'-',plate:items[0]['Nomor Polisi']||'-',color:driverColors[driverId]};
+    return {rows:items,driverId:items[0]['Driver ID']||'',driverName:items[0]['Nama Driver']||'-',day:routeDayKey(items[0]),session:items[0]['Route Session ID']||'',asset:items[0]['Nama Kendaraan']||'-',plate:items[0]['Nomor Polisi']||'-',color:driverColors[driverId],roadPoints:[]};
   });
   renderRouteLegend(groups);
   const bounds=[];let rendered=0;let failed=0;
@@ -3797,6 +3822,7 @@ async function renderDriverRoutes(){
     if(points.length<2){failed++;continue;}
     try{
       const roadPoints=await getRoadFollowingRoute(points);
+      g.roadPoints=roadPoints;
       const line=L.polyline(roadPoints,{color:g.color,weight:5,opacity:.88,smoothFactor:.5});
       line.bindPopup(`<b>${escapeHtml(g.driverName)}</b><br>${escapeHtml(g.day)}<br>${escapeHtml(g.asset)} (${escapeHtml(g.plate)})<br>Perkiraan jalan dari ${points.length} titik GPS`);
       state.routeLayer.addLayer(line);
@@ -3805,10 +3831,11 @@ async function renderDriverRoutes(){
       state.routeLayer.addLayer(start);state.routeLayer.addLayer(finish);
       roadPoints.forEach(p=>bounds.push(p));rendered++;
       g.roadKm=routeDistanceKm(roadPoints);
+      g.totalMeters=buildRouteCumulativeMeters(g.roadPoints);
     }catch(err){failed++;console.warn('Route jalan gagal:',g.driverName,g.day,err);}
   }
   if(daysEl){
-    daysEl.innerHTML=groups.map((g,i)=>`<div class="route-day-card" onclick="focusDriverRouteDay(${i})"><strong>${escapeHtml(g.driverName)} • ${escapeHtml(g.day)}</strong><small>${escapeHtml(g.asset)} (${escapeHtml(g.plate)}) • ${g.rows.length} titik GPS${g.roadKm?` • ±${g.roadKm.toFixed(1)} km jalan`:''}</small></div>`).join('');
+    daysEl.innerHTML=groups.map((g,i)=>`<div class="route-day-card" id="routeDayCard_${i}" onclick="focusDriverRouteDay(${i})"><strong>${escapeHtml(g.driverName)} • ${escapeHtml(g.day)}</strong><small>${escapeHtml(g.asset)} (${escapeHtml(g.plate)}) • ${g.rows.length} titik GPS${g.roadKm?` • ±${g.roadKm.toFixed(1)} km jalan`:''}</small></div>`).join('');
     state.routeDayGroups=groups;
   }
   if(bounds.length){state.routeMap.fitBounds(L.latLngBounds(bounds),{padding:[25,25]});}
@@ -3817,6 +3844,138 @@ async function renderDriverRoutes(){
   if(status)status.textContent=`Tampil ${rendered} sesi rute • ${[...new Set(groups.map(g=>g.driverName))].length} Driver • ${[...new Set(groups.map(g=>g.day))].length} hari${failed?' • '+failed+' sesi belum dapat dicocokkan ke jalan':''}.`;
   if(groups.length>maxRoadGroups && status)status.textContent+=` Maksimal ${maxRoadGroups} sesi dipetakan sekaligus; pilih Driver/tanggal untuk tampilan lebih detail.`;
 }
+
+function buildRouteCumulativeMeters(points){
+  const cumulative=[0];
+  for(let i=1;i<points.length;i++)cumulative.push(cumulative[i-1]+distanceMeters(points[i-1],points[i]));
+  return cumulative;
+}
+
+function setRoutePlaybackInfo(text){
+  const el=document.getElementById('routePlaybackInfo');if(el)el.textContent=text||'';
+}
+
+function getRoutePlaybackGroup(){
+  const groups=state.routeDayGroups||[];
+  if(!groups.length)return null;
+  let index=state.selectedRouteGroupIndex;
+  if(!Number.isInteger(index)||index<0||index>=groups.length){
+    index=0;state.selectedRouteGroupIndex=0;
+  }
+  return {group:groups[index],index:index};
+}
+
+function clearRoutePlaybackMarker(){
+  if(state.routePlayback?.marker&&state.routeMap){try{state.routeMap.removeLayer(state.routePlayback.marker);}catch(_){} }
+  if(state.routePlayback?.trail&&state.routeMap){try{state.routeMap.removeLayer(state.routePlayback.trail);}catch(_){} }
+  if(state.routePlayback){state.routePlayback.marker=null;state.routePlayback.trail=null;}
+}
+
+function stopDriverRoutePlayback(){
+  const p=state.routePlayback;if(!p)return;
+  p.playing=false;
+  if(p.animationId!==null){cancelAnimationFrame(p.animationId);p.animationId=null;}
+  setRoutePlaybackInfo(p.groupIndex>=0?'Playback dihentikan.':'Pilih sesi rute lalu tekan Play.');
+}
+
+function createRoutePlaybackMarker(g,position){
+  clearRoutePlaybackMarker();
+  const icon=L.divIcon({className:'route-playback-marker',html:`<div style="width:30px;height:30px;border-radius:50%;background:${g.color};border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-size:15px;">🚗</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+  state.routePlayback.marker=L.marker(position,{icon:icon,zIndexOffset:1000}).addTo(state.routeMap);
+  state.routePlayback.marker.bindPopup(`<b>${escapeHtml(g.driverName)}</b><br>${escapeHtml(g.day)}<br>${escapeHtml(g.asset)} (${escapeHtml(g.plate)})`);
+  state.routePlayback.trail=L.polyline([position],{color:g.color,weight:7,opacity:.25}).addTo(state.routeMap);
+}
+
+function interpolateLatLng(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}
+
+function distanceMeters(a,b){
+  const R=6371000,rad=Math.PI/180;
+  const dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad;
+  const q=Math.sin(dLat/2)**2+Math.cos(a[0]*rad)*Math.cos(b[0]*rad)*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(q)));
+}
+
+function routePositionAtDistance(points,cumulativeMeters,distance){
+  if(!points.length)return null;
+  if(points.length===1)return {position:points[0],index:0,t:0};
+  const total=cumulativeMeters[cumulativeMeters.length-1]||0;
+  const d=Math.max(0,Math.min(Number(distance)||0,total));
+  let lo=0,hi=cumulativeMeters.length-1;
+  while(lo<hi){const mid=Math.floor((lo+hi)/2);if(cumulativeMeters[mid]<d)lo=mid+1;else hi=mid;}
+  const index=Math.max(0,lo-1);
+  const a=points[index],b=points[Math.min(index+1,points.length-1)];
+  const seg=(cumulativeMeters[Math.min(index+1,cumulativeMeters.length-1)]-cumulativeMeters[index]);
+  const t=seg>0?(d-cumulativeMeters[index])/seg:0;
+  return {position:interpolateLatLng(a,b,Math.max(0,Math.min(1,t))),index:index,t:Math.max(0,Math.min(1,t))};
+}
+
+function updateRoutePlaybackMarker(position,g,points,index,t){
+  const marker=state.routePlayback.marker;if(!marker)return;
+  marker.setLatLng(position);
+  const trail=state.routePlayback.trail;
+  if(trail){
+    const trailPoints=points.slice(0,Math.min(index+1,points.length));
+    if(index<points.length-1)trailPoints.push(position);
+    trail.setLatLngs(trailPoints);
+  }
+}
+
+function playDriverRoute(){
+  const selected=getRoutePlaybackGroup();
+  if(!selected){toast('Belum ada rute untuk diputar.','error');return;}
+  const g=selected.group,points=g.roadPoints||[];
+  if(points.length<2){toast('Sesi rute ini belum memiliki jalur jalan yang dapat diputar.','error');return;}
+  const p=state.routePlayback;
+  if(p.playing)return;
+  stopDriverRoutePlayback();
+  const cumulative=g.totalMeters&&g.roadPoints===points?buildRouteCumulativeMeters(points):(g._cumulativeMeters||buildRouteCumulativeMeters(points));
+  g._cumulativeMeters=cumulative;
+  const total=cumulative[cumulative.length-1]||0;
+  if(total<=0){toast('Panjang rute tidak cukup untuk playback.','error');return;}
+  p.playing=true;p.groupIndex=selected.index;p.totalMeters=total;p.cumulativeMeters=cumulative;
+  p.speed=Number(document.getElementById('routePlaySpeed')?.value||1);if(!Number.isFinite(p.speed)||p.speed<=0)p.speed=1;
+  if(p.distanceMeters>=total-0.5)p.distanceMeters=0;
+  const initial=routePositionAtDistance(points,cumulative,p.distanceMeters);
+  createRoutePlaybackMarker(g,initial.position);
+  state.routeMap.panTo(initial.position,{animate:true,duration:.25});
+  p.lastFrameTime=performance.now();
+  setRoutePlaybackInfo(`Memutar ${g.driverName} • ${g.day} • 0.0 / ${(total/1000).toFixed(1)} km`);
+  const animate=(now)=>{
+    if(!p.playing)return;
+    const dt=Math.max(0,Math.min(100,now-p.lastFrameTime));p.lastFrameTime=now;
+    const metersPerSecond=45000/3600*p.speed;
+    p.distanceMeters=Math.min(total,p.distanceMeters+(dt/1000)*metersPerSecond);
+    const statePos=routePositionAtDistance(points,cumulative,p.distanceMeters);
+    updateRoutePlaybackMarker(statePos.position,g,points,statePos.index,statePos.t);
+    setRoutePlaybackInfo(`Memutar ${g.driverName} • ${g.day} • ${(p.distanceMeters/1000).toFixed(1)} / ${(total/1000).toFixed(1)} km • ${p.speed}×`);
+    if(p.distanceMeters>=total){
+      p.playing=false;p.animationId=null;
+      setRoutePlaybackInfo(`Selesai • ${g.driverName} • ${(total/1000).toFixed(1)} km`);
+      return;
+    }
+    p.animationId=requestAnimationFrame(animate);
+  };
+  p.animationId=requestAnimationFrame(animate);
+}
+
+function resetDriverRoutePlayback(){
+  stopDriverRoutePlayback();
+  clearRoutePlaybackMarker();
+  const selected=getRoutePlaybackGroup();if(!selected)return;
+  const g=selected.group,points=g.roadPoints||[];if(points.length<2){toast('Sesi ini belum memiliki jalur jalan.','error');return;}
+  const cumulative=buildRouteCumulativeMeters(points);g._cumulativeMeters=cumulative;
+  const p=state.routePlayback;p.groupIndex=selected.index;p.distanceMeters=0;p.progress=0;p.totalMeters=cumulative[cumulative.length-1]||0;p.cumulativeMeters=cumulative;
+  createRoutePlaybackMarker(g,points[0]);
+  state.routeMap.panTo(points[0],{animate:true,duration:.4});
+  setRoutePlaybackInfo(`Reset • ${g.driverName} • ${g.day} • 0.0 / ${(p.totalMeters/1000).toFixed(1)} km`);
+}
+
+function changeDriverRoutePlaybackSpeed(){
+  const value=Number(document.getElementById('routePlaySpeed')?.value||1);
+  state.routePlayback.speed=Number.isFinite(value)&&value>0?value:1;
+  if(state.routePlayback.playing)setRoutePlaybackInfo(`Kecepatan playback ${state.routePlayback.speed}×`);
+}
+
 async function generateRouteMapsToSheet(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Hanya Admin atau Super Admin yang dapat membuat peta rute di Spreadsheet.','error');return;}
   try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});toast(result.message||'Peta rute berhasil dibuat.','success');
@@ -3825,8 +3984,17 @@ async function generateRouteMapsToSheet(){
 }
 function focusDriverRouteDay(index){
   const g=(state.routeDayGroups||[])[index];if(!g||!state.routeMap)return;
-  const points=g.rows.map(x=>[Number(x.Latitude),Number(x.Longitude)]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));
-  if(points.length)state.routeMap.fitBounds(L.latLngBounds(points),{padding:[35,35]});
+  stopDriverRoutePlayback();clearRoutePlaybackMarker();
+  state.selectedRouteGroupIndex=index;
+  document.querySelectorAll('.route-day-card.route-selected').forEach(el=>el.classList.remove('route-selected'));
+  const card=document.getElementById('routeDayCard_'+index);if(card)card.classList.add('route-selected');
+  const points=(g.roadPoints&&g.roadPoints.length?g.roadPoints:g.rows.map(x=>[Number(x.Latitude),Number(x.Longitude)]).filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1])));
+  if(points.length){state.routeMap.fitBounds(L.latLngBounds(points),{padding:[35,35]});}
+  if(g.roadPoints&&g.roadPoints.length){
+    state.routePlayback.distanceMeters=0;
+    state.routePlayback.groupIndex=index;
+    setRoutePlaybackInfo(`Dipilih • ${g.driverName} • ${g.day} • Tekan Play untuk mulai.`);
+  }else setRoutePlaybackInfo('Sesi ini belum memiliki jalur jalan yang dapat diputar.');
 }
 
 /* =========================================================
