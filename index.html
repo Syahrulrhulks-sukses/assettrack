@@ -1377,7 +1377,7 @@ tr:hover td{
       </div>
 
       <div class="login-step-label face-step-label"><span class="step-icon">▣</span><span>2. Posisikan wajah Anda di dalam bingkai</span></div>
-      <div class="login-help">Kamera aktif otomatis. Setelah wajah diam, gambar terkunci dan diverifikasi.</div>
+      <div class="login-help">Kamera aktif otomatis setelah Nama dikenali dan PIN 6 digit selesai ditulis. Setelah wajah terdeteksi, langsung diverifikasi.</div>
       <div class="face-login-box" id="adminFaceBox">
         <video id="adminLoginVideo" autoplay playsinline muted></video>
         <canvas id="adminLoginCanvas" class="hidden"></canvas>
@@ -2120,7 +2120,7 @@ tr:hover td{
           </select>
           <span id="routePlaybackInfo" class="route-playback-info">Pilih sesi rute lalu tekan Play.</span>
         </div>
-        <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis mengikuti <b>perkiraan jaringan jalan</b> dari titik GPS, bukan garis lurus. Tombol <b>Buat Peta ke Spreadsheet</b> membuat sheet visual <b>Peta Rute Driver</b>.</div>
+        <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis mengikuti <b>perkiraan jaringan jalan</b> dari titik GPS, bukan garis lurus. Tombol <b>Buat Peta ke Spreadsheet</b> membuat sheet visual <b>peta</b>.</div>
         <div id="driverRouteLegend" class="route-map-legend"></div>
         <div id="driverRouteMap"></div>
         <div id="driverRouteStatus" class="route-map-status">Pilih Driver dan tanggal untuk melihat rute per hari.</div>
@@ -2916,6 +2916,15 @@ async function resolveAdminNameAfterComplete(){
     }catch(_){ }
   }
   if(!exact){
+    // Super Admin bawaan tetap dikenali di frontend walaupun baris ADM-001
+    // belum ada di Data Admin. Backend akan memvalidasi PIN dan wajahnya.
+    const SUPER_ADMIN_NAME='Syahrul';
+    const SUPER_ADMIN_ID='ADM-001';
+    if(normalizeLoginName(name)===normalizeLoginName(SUPER_ADMIN_NAME)){
+      exact={id:SUPER_ADMIN_ID,adminId:SUPER_ADMIN_ID,name:SUPER_ADMIN_NAME,namaAdmin:SUPER_ADMIN_NAME,role:'SUPER_ADMIN',status:'Aktif'};
+    }
+  }
+  if(!exact){
     setFaceUI('Nama Admin belum ditemukan.',false,'admin');
     stopCamera('adminLogin');
     stopAutoAdminFaceLogin();
@@ -2924,12 +2933,21 @@ async function resolveAdminNameAfterComplete(){
   autoAdminCandidate=exact;
   if(idEl) idEl.value=String(exact.id||exact.adminId||'').trim();
   if(badge){badge.textContent='ID otomatis: '+String(exact.id||exact.adminId||'');badge.classList.add('show');}
-  setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
-  startAutoAdminFaceLogin().catch(()=>{});
+  const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
+  if(/^\d{6}$/.test(pin)) startAutoAdminFaceLogin().catch(()=>{});
+  else setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
 }
 function onAdminPinInput(){
   const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
-  if(autoAdminCandidate && /^\d{6}$/.test(pin)) setFaceUI('PIN siap. Posisikan wajah...',false,'admin');
+  if(autoAdminCandidate && /^\d{6}$/.test(pin)){
+    setFaceUI('PIN lengkap. Kamera diaktifkan...',false,'admin');
+    // Kamera dinyalakan tepat saat PIN 6 digit selesai ditulis.
+    startAutoAdminFaceLogin().catch(()=>{});
+  }else if(autoAdminCandidate){
+    stopAutoAdminFaceLogin();
+    stopCamera('adminLogin');
+    setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
+  }
 }
 
 async function detectStableFace(video,role){
@@ -3978,7 +3996,9 @@ function changeDriverRoutePlaybackSpeed(){
 
 async function generateRouteMapsToSheet(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Hanya Admin atau Super Admin yang dapat membuat peta rute di Spreadsheet.','error');return;}
-  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});toast(result.message||'Peta rute berhasil dibuat.','success');
+  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});
+    toast(result.message||'Peta rute berhasil dibuat.','success');
+    if(result.failed) toast('Perhatian: '+result.failed+' sesi gagal. '+((result.errors||[]).slice(0,2).join(' | ')),'error');
     // Segarkan tampilan data peta setelah proses Spreadsheet selesai.
     try{await apiGet('routemaps');}catch(_){ }}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
 }
@@ -4128,20 +4148,25 @@ function applyBootstrapData(bootstrap){
 function bootstrapCacheKey(role){return 'AQP_BOOTSTRAP_V2_'+String(role||'').toUpperCase();}
 function readBootstrapCache(role){try{const x=JSON.parse(localStorage.getItem(bootstrapCacheKey(role))||'null');return x&&x.data?x.data:null;}catch(_){return null;}}
 function writeBootstrapCache(role,data){try{localStorage.setItem(bootstrapCacheKey(role),JSON.stringify({time:Date.now(),data:data}));}catch(_){}}
-async function refreshAll(){
+function invalidateBootstrapCache(role){try{if(role) localStorage.removeItem(bootstrapCacheKey(role)); else ['ADMIN','SUPER_ADMIN','DRIVER'].forEach(r=>localStorage.removeItem(bootstrapCacheKey(r)));}catch(_){}}
+async function refreshAll(force=false){
   if(!state.user||!state.user.role)return;
   const role=String(state.user.role).toUpperCase();
-  const cached=readBootstrapCache(role);
+  if(force)invalidateBootstrapCache(role);
+  const cached=force?null:readBootstrapCache(role);
   if(cached){applyBootstrapData(cached); const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Data siap.';}
-  else {const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Menyiapkan data...';}
-  apiGet('bootstrap',{role:role}).then(bootstrap=>{
+  else {const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Menyiapkan data terbaru...';}
+  try{
+    const bootstrap=await apiGet('bootstrap',{role:role});
     writeBootstrapCache(role,bootstrap);
     if(state.user&&String(state.user.role).toUpperCase()===role)applyBootstrapData(bootstrap);
-    const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Aset Aqiqah Plus siap digunakan.';
-  }).catch(error=>{
+    const st=document.getElementById('systemStatus'); if(st)st.innerHTML='<span class="badge green">ONLINE</span> Data tersinkron.';
+    return bootstrap;
+  }catch(error){
     const st=document.getElementById('systemStatus'); if(st&&!cached)st.innerHTML='<span class="badge red">ERROR</span> '+escapeHtml(error.message);
     console.warn('Refresh background gagal:',error.message);
-  });
+    throw error;
+  }
 }
 
 /* =========================================================
@@ -4281,7 +4306,7 @@ function renderAssets(){
 
         <button
           class="secondary-btn asset-edit-btn"
-          onclick="openAssetForm('${escapeJs(asset.id)}')">
+          onclick="openAssetForm('${escapeJs(asset.id)}','${escapeJs(asset.code)}')">
           Edit
         </button>
 
@@ -4302,16 +4327,19 @@ function renderAssets(){
 }
 
 
-function openAssetForm(id=''){
+function openAssetForm(id='',codeHint=''){
   if(!['ADMIN','SUPER_ADMIN'].includes(String(state.user?.role||'').toUpperCase())){toast('Hanya Admin atau Super Admin yang dapat mengedit kendaraan.','error');return;}
 
-  const asset=
-    state.assets.find(
-      x=>String(x.id)===String(id)
-    ) || {};
+  // Data lama bisa belum memiliki kolom ID. Karena itu Edit mencari
+  // berdasarkan ID terlebih dahulu, lalu fallback ke Kode Aset.
+  const wantedId=String(id||'').trim();
+  const wantedCode=String(codeHint||'').trim().toUpperCase();
+  const asset=state.assets.find(x=>wantedId && String(x.id||'')===wantedId)
+    || state.assets.find(x=>wantedCode && String(x.code||'').trim().toUpperCase()===wantedCode)
+    || {};
 
   openModal(
-    id
+    (asset && (asset.id || asset.code))
       ? 'Edit Aset'
       : 'Tambah Aset',
 
@@ -4323,6 +4351,11 @@ function openAssetForm(id=''){
         type="hidden"
         id="assetId"
         value="${escapeHtml(asset.id || '')}">
+
+      <input
+        type="hidden"
+        id="assetOriginalCode"
+        value="${escapeHtml(asset.code || '')}">
 
       <div class="form-grid">
 
@@ -4472,6 +4505,8 @@ async function saveAsset(event){
 
       id:id,
 
+      originalCode:document.getElementById('assetOriginalCode')?.value.trim() || '',
+
       code:document
         .getElementById('assetCode')
         .value.trim(),
@@ -4537,7 +4572,7 @@ async function saveAsset(event){
       'success'
     );
 
-    await refreshAll();
+    await refreshAll(true);
 
   }catch(error){
 
@@ -4583,7 +4618,7 @@ async function deleteAsset(id,code){
       'success'
     );
 
-    await refreshAll();
+    await refreshAll(true);
 
   }catch(error){
 
@@ -5241,7 +5276,7 @@ async function saveInspectionForm(event){
       }
       const result=await apiPost({action:'updateDailyKM',inspectionId:state.dailyInspectionId,kodeAset:code,driverId:driverIdOf(state.user),namaDriver:driverNameOf(state.user),role:'DRIVER',qrAssetCode:state.inspectionLockedAssetCode||state.user?.qrAssetCode||code,kmBeforeFuel:beforeFuel,kmAfterFuel:afterFuel,kmFinishAkhir:finish,kmOilChange:oil,media:kmMedia});
       toast(result.message,'success');
-      await refreshAll();
+      await refreshAll(true);
       if(result.inspection) applyDailyInspectionToForm(result.inspection);
       return;
     }
@@ -5490,7 +5525,7 @@ async function saveInspectionForm(event){
 
     resetInspectionForm();
 
-    await refreshAll();
+    await refreshAll(true);
 
     showPage('reports');
 
@@ -6101,7 +6136,7 @@ async function saveDriverForm(event){
       'success'
     );
 
-    await refreshAll();
+    await refreshAll(true);
 
   }catch(error){
 
@@ -6483,7 +6518,7 @@ async function saveDriverFace(id){
       'success'
     );
 
-    await refreshAll();
+    await refreshAll(true);
 
   }catch(error){
 
@@ -6693,7 +6728,7 @@ async function approveCorrection(id){
       'success'
     );
 
-    await refreshAll();
+    await refreshAll(true);
 
   }catch(error){
 
@@ -6750,7 +6785,7 @@ async function rejectCorrection(id){
       'success'
     );
 
-    await refreshAll();
+    await refreshAll(true);
 
   }catch(error){
 
@@ -6774,7 +6809,7 @@ function renderServices(){const b=document.getElementById('serviceBody');if(!b)r
 function openServiceForm(){if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(String(state.user?.role||'').toUpperCase())){toast('Akun ini tidak dapat mencatat service.','error');return;}openModal('Catat Service',`<form id="serviceForm"><div class="form-grid"><div class="form-group"><label>Kode Aset *</label><select id="serviceAsset" required><option value="">Pilih mobil</option>${state.assets.map(a=>`<option value="${escapeHtml(a.code)}">${escapeHtml(a.code)} — ${escapeHtml(a.name||a.code)} — ${escapeHtml(a.plate||'')}</option>`).join('')}</select></div><div class="form-group"><label>KM Service</label><input id="serviceKM" type="number" step="0.1"></div><div class="form-group"><label>Jenis Service</label><input id="serviceType" placeholder="Mesin, Ban, Rem, Kelistrikan, dll"></div><div class="form-group"><label>Status</label><select id="serviceStatus"><option>Dilaporkan</option><option>Diproses</option><option>Selesai</option></select></div><div class="form-group full-width"><label>Keluhan / Kerusakan</label><textarea id="serviceComplaint"></textarea></div><div class="form-group full-width"><label>Tindakan Service</label><textarea id="serviceAction"></textarea></div><div class="form-group full-width"><label>Barang Diganti</label><textarea id="serviceItems" placeholder="Satu barang per baris: Nama Barang | Jumlah | Harga Satuan
 Contoh: Oli Mesin | 4 | 65000
 Filter Oli | 1 | 45000"></textarea></div><div class="form-group full-width"><label>📷 Foto Barang yang Diganti</label><input id="servicePhotos" type="file" accept="image/*" multiple capture="environment"><small style="display:block;color:#607d8b;margin-top:6px">Foto barang/part yang diganti. Bisa ambil langsung dari kamera.</small></div><div class="form-group full-width"><label>🧾 Foto Nota Service</label><input id="serviceReceipts" type="file" accept="image/*,application/pdf" multiple capture="environment"><small style="display:block;color:#607d8b;margin-top:6px">Foto nota/bukti service. Akan disimpan ke folder Foto Service dan ditautkan ke sheet.</small></div><div class="form-group full-width"><label>Catatan Service</label><textarea id="serviceNotes"></textarea></div></div><div class="form-actions"><button type="button" class="secondary-btn" onclick="closeModal()">Batal</button><button class="primary-btn" style="width:auto">💾 Simpan Service</button></div></form>`);document.getElementById('serviceForm').addEventListener('submit',saveServiceForm);}
-async function saveServiceForm(e){e.preventDefault();try{const role=String(state.user?.role||'').toUpperCase();if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(role))throw new Error('Akun ini tidak dapat mencatat service.');const code=document.getElementById('serviceAsset').value;if(!code)throw new Error('Kode aset wajib dipilih.');const photos=[],input=document.getElementById('servicePhotos');for(const file of Array.from(input?.files||[])){if(file.size>8*1024*1024)throw new Error('Foto barang maksimal 8 MB per foto.');photos.push(await fileToMedia(file,false));}const receipts=[],receiptInput=document.getElementById('serviceReceipts');for(const file of Array.from(receiptInput?.files||[])){if(file.size>8*1024*1024)throw new Error('Foto nota service maksimal 8 MB per file.');receipts.push(await fileToMedia(file,false));}const result=await apiPost({action:'saveService',kodeAset:code,kmService:document.getElementById('serviceKM').value,jenisService:document.getElementById('serviceType').value,keluhan:document.getElementById('serviceComplaint').value,tindakanService:document.getElementById('serviceAction').value,barangDiganti:document.getElementById('serviceItems').value,catatanService:document.getElementById('serviceNotes').value,status:document.getElementById('serviceStatus').value,photos,receipts,userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin,role:state.user.role});toast(result.message||'Catatan service tersimpan.','success');closeModal();await refreshAll();}catch(err){toast(err.message||'Gagal menyimpan service.','error');}}
+async function saveServiceForm(e){e.preventDefault();try{const role=String(state.user?.role||'').toUpperCase();if(!['DRIVER','ADMIN','SUPER_ADMIN'].includes(role))throw new Error('Akun ini tidak dapat mencatat service.');const code=document.getElementById('serviceAsset').value;if(!code)throw new Error('Kode aset wajib dipilih.');const photos=[],input=document.getElementById('servicePhotos');for(const file of Array.from(input?.files||[])){if(file.size>8*1024*1024)throw new Error('Foto barang maksimal 8 MB per foto.');photos.push(await fileToMedia(file,false));}const receipts=[],receiptInput=document.getElementById('serviceReceipts');for(const file of Array.from(receiptInput?.files||[])){if(file.size>8*1024*1024)throw new Error('Foto nota service maksimal 8 MB per file.');receipts.push(await fileToMedia(file,false));}const result=await apiPost({action:'saveService',kodeAset:code,kmService:document.getElementById('serviceKM').value,jenisService:document.getElementById('serviceType').value,keluhan:document.getElementById('serviceComplaint').value,tindakanService:document.getElementById('serviceAction').value,barangDiganti:document.getElementById('serviceItems').value,catatanService:document.getElementById('serviceNotes').value,status:document.getElementById('serviceStatus').value,photos,receipts,userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin,role:state.user.role});toast(result.message||'Catatan service tersimpan.','success');closeModal();await refreshAll(true);}catch(err){toast(err.message||'Gagal menyimpan service.','error');}}
 
 function populateMOAssetFilter(){const s=document.getElementById('moFilterAsset');if(!s)return;const old=s.value;s.innerHTML='<option value="">Semua Mobil</option>'+(state.assets||[]).map(a=>`<option value="${escapeHtml(a.code)}">${escapeHtml(a.code)} — ${escapeHtml(a.name||a.code)}</option>`).join('');if(old)s.value=old;}
 async function loadMOServiceRequests(){try{const role=String(state.user?.role||'').toUpperCase();const result=await apiGet('motickets',{role,driverId:role==='DRIVER'?driverIdOf(state.user):''});state.moServiceRequests=result||[];renderMOServiceRequests();}catch(e){toast('Gagal memuat pengajuan service: '+e.message,'error');}}
@@ -7286,7 +7321,7 @@ async function saveAdminForm(event){
       'success'
     );
 
-    await refreshAll();
+    await refreshAll(true);
 
   }catch(error){
 
