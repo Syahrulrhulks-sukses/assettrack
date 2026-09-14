@@ -2622,10 +2622,8 @@ function restoreAdminLoginIdentity(){
   const savedId=localStorage.getItem('assettrack_admin_id') || '';
   const savedName=localStorage.getItem('assettrack_admin_name') || '';
 
-  // Nama boleh dipulihkan, tetapi ID TIDAK dipaksakan dari localStorage.
-  // ID selalu diambil ulang dari Data Admin berdasarkan nama.
+  if(savedId && !id.value) id.value=savedId;
   if(savedName && !name.value) name.value=savedName;
-  if(id) id.value='';
 }
 
 function toggleAdminIdentity(fieldId,button){
@@ -2909,30 +2907,32 @@ async function resolveAdminNameAfterComplete(){
   const idEl=document.getElementById('loginAdminId'),badge=document.getElementById('autoAdminId');
   if(!name)return;
   const wanted=normalizeLoginName(name);
-
-  // LOGIN SELALU membaca Data Admin TERBARU dari Spreadsheet.
-  // Jangan memakai state/cache lama karena ID dan nama bisa berubah di database.
-  let exact=null;
-  try{
-    const latest=await apiGet('admins');
-    state.admins=(latest.admins||[]).map(a=>({...a}));
-    exact=state.admins.find(a=>isDriverActive(a.status) && normalizeLoginName(a.name||a.namaAdmin)===wanted);
-  }catch(err){
-    // Fallback hanya ke data yang sudah ada; jangan membuat ID baru di browser.
-    exact=(state.admins||[]).find(a=>isDriverActive(a.status) && normalizeLoginName(a.name||a.namaAdmin)===wanted) || null;
+  let exact=(state.admins||[]).find(a=>isDriverActive(a.status) && normalizeLoginName(a.name||a.namaAdmin)===wanted);
+  if(!exact && !(state.admins||[]).length){
+    try{
+      const latest=await apiGet('admins');
+      state.admins=(latest.admins||[]).map(a=>{const x={...a};delete x.faceDescriptor;return x;});
+      exact=state.admins.find(a=>isDriverActive(a.status) && normalizeLoginName(a.name||a.namaAdmin)===wanted);
+    }catch(_){ }
   }
-
   if(!exact){
-    setFaceUI('Nama Admin tidak ditemukan di Data Admin. Periksa penulisan nama.',false,'admin');
+    // Super Admin bawaan tetap dikenali di frontend walaupun baris ADM-001
+    // belum ada di Data Admin. Backend akan memvalidasi PIN dan wajahnya.
+    const SUPER_ADMIN_NAME='Syahrul';
+    const SUPER_ADMIN_ID='ADM-001';
+    if(normalizeLoginName(name)===normalizeLoginName(SUPER_ADMIN_NAME)){
+      exact={id:SUPER_ADMIN_ID,adminId:SUPER_ADMIN_ID,name:SUPER_ADMIN_NAME,namaAdmin:SUPER_ADMIN_NAME,role:'SUPER_ADMIN',status:'Aktif'};
+    }
+  }
+  if(!exact){
+    setFaceUI('Nama Admin belum ditemukan.',false,'admin');
     stopCamera('adminLogin');
     stopAutoAdminFaceLogin();
     return;
   }
-
   autoAdminCandidate=exact;
-  // ID asli dari Spreadsheet hanya untuk referensi internal; TIDAK pernah digenerate/diubah.
   if(idEl) idEl.value=String(exact.id||exact.adminId||'').trim();
-  if(badge){badge.textContent='ID terdaftar: '+String(exact.id||exact.adminId||'');badge.classList.add('show');}
+  if(badge){badge.textContent='ID otomatis: '+String(exact.id||exact.adminId||'');badge.classList.add('show');}
   const pin=(document.getElementById('loginAdminPin')?.value||'').trim();
   if(/^\d{6}$/.test(pin)) startAutoAdminFaceLogin().catch(()=>{});
   else setFaceUI('Nama dikenali. Masukkan PIN...',false,'admin');
