@@ -2864,7 +2864,7 @@ async function initializeDriverLoginIdentity(){
   let exact=state.drivers.find(d=>driverIsActive(d) && normalizeLoginName(driverNameOf(d))===wanted);
   if(!exact && !(state.drivers||[]).length){
     try{
-      const latest=await apiGet('drivers');
+      const latest=await apiGet('drivers',{_sync:Date.now()});
       state.drivers=latest.drivers || [];
       exact=state.drivers.find(d=>driverIsActive(d) && normalizeLoginName(driverNameOf(d))===wanted);
     }catch(_){}
@@ -3368,7 +3368,7 @@ async function loginDriver(){
 
     // Pastikan data terbaru bila Driver baru saja selesai mendaftar.
     if(!selectedDriver){
-      const latest=await apiGet('drivers');
+      const latest=await apiGet('drivers',{_sync:Date.now()});
       state.drivers=latest.drivers || [];
       selectedDriver=state.drivers.find(
         d=>driverIdOf(d).toUpperCase()===driverId.toUpperCase()
@@ -4306,7 +4306,7 @@ function renderAssets(){
 
         <button
           class="secondary-btn asset-edit-btn"
-          onclick="openAssetForm('${escapeJs(asset.id)}','${escapeJs(asset.code)}')">
+          onclick="openAssetForm('','${escapeJs(asset.code)}')">
           Edit
         </button>
 
@@ -4327,15 +4327,23 @@ function renderAssets(){
 }
 
 
-function openAssetForm(id='',codeHint=''){
+async function openAssetForm(id='',codeHint=''){
   if(!['ADMIN','SUPER_ADMIN'].includes(String(state.user?.role||'').toUpperCase())){toast('Hanya Admin atau Super Admin yang dapat mengedit kendaraan.','error');return;}
 
-  // Data lama bisa belum memiliki kolom ID. Karena itu Edit mencari
-  // berdasarkan ID terlebih dahulu, lalu fallback ke Kode Aset.
+  // Saat Edit, ambil ulang Data Aset langsung dari Spreadsheet. Ini mencegah
+  // data/cache lama membuat tombol AST2-06 membuka AST2-01. Kode Aset yang
+  // diklik menjadi identitas utama; ID hanya sebagai fallback kompatibilitas.
   const wantedId=String(id||'').trim();
   const wantedCode=String(codeHint||'').trim().toUpperCase();
-  const asset=state.assets.find(x=>wantedId && String(x.id||'')===wantedId)
-    || state.assets.find(x=>wantedCode && String(x.code||'').trim().toUpperCase()===wantedCode)
+  let latestAssets=state.assets||[];
+  try{
+    const latest=await apiGet('assets',{_sync:Date.now()});
+    if(Array.isArray(latest.assets)){ latestAssets=latest.assets; state.assets=latestAssets; }
+  }catch(err){
+    console.warn('Gagal mengambil Data Aset terbaru saat Edit:',err.message);
+  }
+  const asset=latestAssets.find(x=>wantedCode && String(x.code||'').trim().toUpperCase()===wantedCode)
+    || latestAssets.find(x=>wantedId && String(x.id||'')===wantedId)
     || {};
 
   openModal(
@@ -4565,14 +4573,14 @@ async function saveAsset(event){
 
     const result=await apiPost(data);
 
+    // Pastikan tampilan Web membaca ulang baris yang baru saja diubah dari Spreadsheet.
+    await refreshAll(true);
     closeModal();
 
     toast(
-      result.message,
+      result.message+' Data Spreadsheet sudah disinkronkan.',
       'success'
     );
-
-    await refreshAll(true);
 
   }catch(error){
 
@@ -6262,7 +6270,7 @@ async function saveDriverSelfRegistration(event){
     closeModal();
 
     // Muat ulang daftar driver supaya data pendaftaran langsung tersedia.
-    const latest=await apiGet('drivers');
+    const latest=await apiGet('drivers',{_sync:Date.now()});
     state.drivers=latest.drivers || [];
 
     const registeredId=result.driverId || result.driver?.id || '';
