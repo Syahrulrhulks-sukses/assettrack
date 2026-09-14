@@ -263,6 +263,8 @@ textarea{
 .camera-buttons button{
   flex:1;
 }
+.torch-btn{width:auto!important;min-width:150px;margin-top:8px;}
+.torch-btn.on{background:#ffb300!important;color:#111!important;border-color:#ffb300!important;}
 
 .photo-preview{
   width:100%;
@@ -1357,6 +1359,7 @@ tr:hover td{
         <div id="driverFaceStatus" class="face-status">Menunggu nama...</div>
         <div id="driverFaceCheck" class="face-check hidden">✓</div>
       </div>
+      <button type="button" id="driverTorchBtn" class="secondary-btn torch-btn" onclick="toggleLoginTorch('driver')">💡 Nyalakan Lampu</button>
       <div id="loginStatus" class="login-status"></div>
       <button type="button" id="driverLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('driver')">📸 Ambil Ulang Foto / Refresh Kamera</button>
       <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
@@ -1386,6 +1389,7 @@ tr:hover td{
         <div id="adminFaceStatus" class="face-status">Menunggu nama...</div>
         <div id="adminFaceCheck" class="face-check hidden">✓</div>
       </div>
+      <button type="button" id="adminTorchBtn" class="secondary-btn torch-btn" onclick="toggleLoginTorch('admin')">💡 Nyalakan Lampu</button>
       <div id="adminLoginStatus" class="login-status"></div>
       <button type="button" id="adminLoginRefreshBtn" class="login-refresh-btn hidden" onclick="refreshLoginCamera('admin')">📸 Ambil Ulang Foto / Refresh Kamera</button>
       <div class="login-footer">Sistem Manajemen Aset Terintegrasi</div>
@@ -2321,6 +2325,7 @@ tr:hover td{
         <canvas id="inspectionCameraCanvas" style="display:none"></canvas>
         <div id="inspectionCameraStatus" class="login-status">Arahkan kamera ke objek.</div>
       </div>
+      <button type="button" id="inspectionTorchBtn" class="secondary-btn torch-btn" onclick="toggleInspectionTorch()">💡 Nyalakan Lampu</button>
       <div class="form-actions">
         <button type="button" class="secondary-btn" onclick="closeInspectionCamera()">Batal</button>
         <button type="button" id="inspectionTakePhotoBtn" class="primary-btn" style="width:auto" onclick="captureInspectionCameraPhoto()">📷 Ambil Foto</button>
@@ -2340,6 +2345,7 @@ tr:hover td{
         <video id="inspectionVideoRecorder" autoplay playsinline muted></video>
         <div id="inspectionVideoStatus" class="login-status">Rekam satu video yang mencakup body/lecet, kaca, semua ban, ban serep, semua lampu, klakson, dan interior.</div>
       </div>
+      <button type="button" id="inspectionVideoTorchBtn" class="secondary-btn torch-btn" onclick="toggleInspectionVideoTorch()">💡 Nyalakan Lampu</button>
       <div class="form-actions">
         <button type="button" class="secondary-btn" onclick="closeInspectionVideoCamera()">Batal</button>
         <button type="button" id="inspectionVideoPauseBtn" class="secondary-btn" style="width:auto" onclick="pauseResumeInspectionVideo()" disabled>⏸ Pause</button>
@@ -2719,7 +2725,28 @@ async function startCamera(type,silent=false){
 function stopCamera(type){
   const stream=state.camera[type];
   if(stream){stream.getTracks().forEach(track=>track.stop());state.camera[type]=null;}
+  if(type==='adminLogin')resetTorchButton('adminTorchBtn');
+  if(type==='driverLogin')resetTorchButton('driverTorchBtn');
 }
+
+async function setTorchOnStream(stream,button){
+  const track=stream?.getVideoTracks?.()[0];
+  if(!track){toast('Kamera belum aktif.','error');return false;}
+  const caps=track.getCapabilities ? track.getCapabilities() : {};
+  if(!caps.torch){toast('Lampu/flash tidak didukung kamera atau browser perangkat ini.','error');return false;}
+  const currently=!!track.__aqpTorch;
+  try{
+    await track.applyConstraints({advanced:[{torch:!currently}]});
+    track.__aqpTorch=!currently;
+    if(button){button.classList.toggle('on',!currently);button.textContent=!currently?'💡 Matikan Lampu':'💡 Nyalakan Lampu';}
+    return true;
+  }catch(e){toast('Lampu kamera tidak dapat diubah pada perangkat ini.','error');return false;}
+}
+async function toggleLoginTorch(role){
+  const p=role==='admin'?'admin':'driver';
+  await setTorchOnStream(state.camera[p+'Login'],document.getElementById(p+'TorchBtn'));
+}
+function resetTorchButton(id){const b=document.getElementById(id);if(b){b.classList.remove('on');b.textContent='💡 Nyalakan Lampu';}}
 
 function capturePhoto(type){
   // Dipertahankan sebagai kompatibilitas; login otomatis tidak memakai tombol ini.
@@ -3997,7 +4024,7 @@ function changeDriverRoutePlaybackSpeed(){
 async function generateRouteMapsToSheet(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Hanya Admin atau Super Admin yang dapat membuat peta rute di Spreadsheet.','error');return;}
   try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});
-    toast(result.message||'Peta rute berhasil dibuat.','success');
+    toast((result.message||'Peta rute berhasil dibuat.')+(result.spreadsheetUrl?' Sheet: '+result.sheetName:'') ,'success');
     if(result.failed) toast('Perhatian: '+result.failed+' sesi gagal. '+((result.errors||[]).slice(0,2).join(' | ')),'error');
     // Segarkan tampilan data peta setelah proses Spreadsheet selesai.
     try{await apiGet('routemaps');}catch(_){ }}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
@@ -4336,13 +4363,19 @@ async function openAssetForm(id='',codeHint=''){
   const wantedId=String(id||'').trim();
   const wantedCode=String(codeHint||'').trim().toUpperCase();
   let latestAssets=state.assets||[];
+  let exactAsset=null;
   try{
+    if(wantedCode){
+      const exact=await apiGet('assetbycode',{kode:wantedCode,_sync:Date.now()});
+      exactAsset=exact.asset||null;
+    }
     const latest=await apiGet('assets',{_sync:Date.now()});
     if(Array.isArray(latest.assets)){ latestAssets=latest.assets; state.assets=latestAssets; }
   }catch(err){
     console.warn('Gagal mengambil Data Aset terbaru saat Edit:',err.message);
   }
-  const asset=latestAssets.find(x=>wantedCode && String(x.code||'').trim().toUpperCase()===wantedCode)
+  const asset=exactAsset
+    || latestAssets.find(x=>wantedCode && String(x.code||'').trim().toUpperCase()===wantedCode)
     || latestAssets.find(x=>wantedId && String(x.id||'')===wantedId)
     || {};
 
@@ -4955,12 +4988,15 @@ async function openInspectionCamera(key){
   try{
     if(inspectionCameraStream)inspectionCameraStream.getTracks().forEach(t=>t.stop());
     inspectionCameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
-    video.srcObject=inspectionCameraStream; modal?.classList.add('show'); await video.play().catch(()=>{});
+    video.srcObject=inspectionCameraStream; resetTorchButton('inspectionTorchBtn'); modal?.classList.add('show'); await video.play().catch(()=>{});
   }catch(e){closeInspectionCamera();toast('Kamera tidak dapat dibuka. Izinkan akses Kamera untuk Aset Aqiqah Plus.','error');}
 }
+async function toggleInspectionTorch(){await setTorchOnStream(inspectionCameraStream,document.getElementById('inspectionTorchBtn'));}
+async function toggleInspectionVideoTorch(){await setTorchOnStream(inspectionVideoStream,document.getElementById('inspectionVideoTorchBtn'));}
 function closeInspectionCamera(){
   const modal=document.getElementById('inspectionCameraModal');
   if(inspectionCameraStream){inspectionCameraStream.getTracks().forEach(t=>t.stop());inspectionCameraStream=null;}
+  resetTorchButton('inspectionTorchBtn');
   const video=document.getElementById('inspectionCameraVideo');if(video)video.srcObject=null;
   modal?.classList.remove('show');inspectionCameraKey='';
 }
@@ -4995,7 +5031,7 @@ async function openInspectionVideoCamera(){
   try{
     if(inspectionVideoStream)inspectionVideoStream.getTracks().forEach(t=>t.stop());
     inspectionVideoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:true});
-    const video=document.getElementById('inspectionVideoRecorder');video.srcObject=inspectionVideoStream;document.getElementById('inspectionVideoModal')?.classList.add('show');await video.play().catch(()=>{});
+    const video=document.getElementById('inspectionVideoRecorder');video.srcObject=inspectionVideoStream;resetTorchButton('inspectionVideoTorchBtn');document.getElementById('inspectionVideoModal')?.classList.add('show');await video.play().catch(()=>{});
     const st=document.getElementById('inspectionVideoStatus');if(st)st.textContent='Siap merekam: body/lecet, kaca, semua ban, ban serep, semua lampu, klakson, interior.';
   }catch(e){closeInspectionVideoCamera();toast('Kamera video tidak dapat dibuka. Izinkan Kamera dan Mikrofon.','error');}
 }
@@ -5003,6 +5039,7 @@ function closeInspectionVideoCamera(){
   if(inspectionVideoRecording)stopInspectionVideoRecording();
   const modal=document.getElementById('inspectionVideoModal');modal?.classList.remove('show');
   if(inspectionVideoStream){inspectionVideoStream.getTracks().forEach(t=>t.stop());inspectionVideoStream=null;}
+  resetTorchButton('inspectionVideoTorchBtn');
   const video=document.getElementById('inspectionVideoRecorder');if(video)video.srcObject=null;
   inspectionVideoPaused=false;updateVideoControlButtons();
 }
