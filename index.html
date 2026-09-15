@@ -2124,7 +2124,7 @@ tr:hover td{
           </select>
           <span id="routePlaybackInfo" class="route-playback-info">Pilih sesi rute lalu tekan Play.</span>
         </div>
-        <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis mengikuti <b>perkiraan jaringan jalan</b> dari titik GPS, bukan garis lurus. Tombol <b>Buat Peta ke Spreadsheet</b> membuat/memperbarui sheet visual <b>peta</b>.</div>
+        <div class="route-map-note">🗺️ Rute dipisahkan berdasarkan <b>Driver + Hari + Sesi</b>. Garis mengikuti <b>perkiraan jaringan jalan</b> dari titik GPS, bukan garis lurus. Tombol <b>Buat Peta ke Spreadsheet</b> mengisi sheet <b>Gambar Peta Maps</b> lengkap dengan data rute dan gambar peta.</div>
         <div id="driverRouteLegend" class="route-map-legend"></div>
         <div id="driverRouteMap"></div>
         <div id="driverRouteStatus" class="route-map-status">Pilih Driver dan tanggal untuk melihat rute per hari.</div>
@@ -2405,10 +2405,6 @@ tr:hover td{
 
 const API_URL =
 'https://script.google.com/macros/s/AKfycby29V9fghZIGV0P1ic3MVwb7811hF9MhRUNqf7Z5p7fZJgJ3LyJ-AIsZRhi-IaRnB96GA/exec';
-
-// KONTRAK API PETA RUTE — harus sama dengan Code.gs.
-// Backend juga menerima generateGeoMaps sebagai alias kompatibilitas HTML lama/cache.
-const ROUTE_MAP_GENERATE_ACTION = 'generateRouteMaps';
 
 const state = {
 
@@ -4027,11 +4023,11 @@ function changeDriverRoutePlaybackSpeed(){
 
 async function generateRouteMapsToSheet(){
   const role=String(state.user?.role||'').toUpperCase();if(!['ADMIN','SUPER_ADMIN'].includes(role)){toast('Hanya Admin atau Super Admin yang dapat membuat peta rute di Spreadsheet.','error');return;}
-  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:ROUTE_MAP_GENERATE_ACTION,role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});
+  try{toast('Membuat peta rute ke Spreadsheet...','info');const result=await apiPost({action:'generateRouteMaps',role,driverId:document.getElementById('routeFilterDriver')?.value||'',kodeAset:document.getElementById('routeFilterAsset')?.value||'',date:document.getElementById('routeFilterDate')?.value||'',userId:state.user.id||state.user.adminId,userName:state.user.name||state.user.namaAdmin});
     toast((result.message||'Peta rute berhasil dibuat.')+(result.spreadsheetUrl?' Sheet: '+result.sheetName:'') ,'success');
     if(result.failed) toast('Perhatian: '+result.failed+' sesi gagal. '+((result.errors||[]).slice(0,2).join(' | ')),'error');
     // Segarkan tampilan data peta setelah proses Spreadsheet selesai.
-    try{await apiGet('routemaps');}catch(_){ }}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message+' | Pastikan Code.gs final sudah di-deploy ke Web App /exec.','error');}
+    try{await apiGet('routemaps');}catch(_){ }}catch(e){toast('Peta Spreadsheet gagal dibuat: '+e.message,'error');}
 }
 function focusDriverRouteDay(index){
   const g=(state.routeDayGroups||[])[index];if(!g||!state.routeMap)return;
